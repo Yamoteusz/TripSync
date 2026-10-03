@@ -1,0 +1,11 @@
+.gradle/
+.idea/
+local.properties
+**/build/
+.DS_Store
+tmp/
+__pycache__/
+*.pyc
+backend/*.db*
+backend/*.sqlite*
+.env
