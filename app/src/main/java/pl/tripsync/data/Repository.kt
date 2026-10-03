@@ -122,6 +122,7 @@ class Repository(val db: TripDatabase, private val prefs: Preferences, private v
     }
     suspend fun deleteTrip(id: String) = gate.withLock {
         val trip = dao.record(id) ?: return@withLock
+        dao.records().filter { it.tripId == id }.forEach { reminder(it.copy(deleted=true)) }
         db.withTransaction {
             if (trip.version == 0 || session.value?.demo == true) {
                 dao.deleteTripConflicts(id); dao.deleteTripOperations(id); dao.deleteTripRecords(id)

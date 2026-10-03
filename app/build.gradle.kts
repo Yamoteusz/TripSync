@@ -3,6 +3,9 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
 }
+providers.gradleProperty("tripsyncBuildRoot").orNull?.let {
+    layout.buildDirectory.set(file("$it/app"))
+}
 android {
     namespace = "pl.tripsync"
     compileSdk = 36

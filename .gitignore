@@ -9,3 +9,7 @@ __pycache__/
 backend/*.db*
 backend/*.sqlite*
 .env
+output/apk/
+output/*.zip
+output/*.bundle
+output/checksums.sha256
