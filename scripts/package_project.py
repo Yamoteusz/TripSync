@@ -11,7 +11,7 @@ for artifact in [apk, pdf, root / 'docs/test-results.json']:
     if not artifact.is_file():
         raise RuntimeError(f'Brak wymaganego pliku: {artifact}')
 bundle = output / 'TripSync-history.bundle'
-subprocess.run(['git', 'bundle', 'create', str(bundle), '--all'], cwd=root, check=True)
+subprocess.run(['git', 'bundle', 'create', str(bundle), 'main', 'HEAD'], cwd=root, check=True)
 subprocess.run(['git', 'bundle', 'verify', str(bundle)], cwd=root, check=True)
 tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=root).decode().split('\0')
 package = output / 'TripSync_projekt.zip'
