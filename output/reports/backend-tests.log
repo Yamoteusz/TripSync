@@ -1,0 +1,19 @@
+test_access_control_is_enforced_on_server (test_server.BackendTests.test_access_control_is_enforced_on_server) ... ok
+test_conflict_detected_and_can_be_resolved (test_server.BackendTests.test_conflict_detected_and_can_be_resolved) ... ok
+test_database_persists_after_reopen (test_server.BackendTests.test_database_persists_after_reopen) ... ok
+test_deleted_record_is_tombstone_and_cannot_be_resurrected (test_server.BackendTests.test_deleted_record_is_tombstone_and_cannot_be_resurrected) ... ok
+test_expense_validation_currency_and_removed_members (test_server.BackendTests.test_expense_validation_currency_and_removed_members) ... ok
+test_http_auth_sync_and_error_contract (test_server.BackendTests.test_http_auth_sync_and_error_contract) ... ok
+test_idempotent_retry_does_not_duplicate_or_increment_version (test_server.BackendTests.test_idempotent_retry_does_not_duplicate_or_increment_version) ... ok
+test_invalid_event_and_date_range_change (test_server.BackendTests.test_invalid_event_and_date_range_change) ... ok
+test_invalid_login_and_duplicate_email (test_server.BackendTests.test_invalid_login_and_duplicate_email) ... ok
+test_invite_join_rotation_and_owner_role (test_server.BackendTests.test_invite_join_rotation_and_owner_role) ... ok
+test_member_removal_revokes_access_and_clears_assignee (test_server.BackendTests.test_member_removal_revokes_access_and_clears_assignee) ... ok
+test_password_is_hashed_and_session_can_be_revoked (test_server.BackendTests.test_password_is_hashed_and_session_can_be_revoked) ... ok
+test_trip_delete_revokes_invitation_and_visibility (test_server.BackendTests.test_trip_delete_revokes_invitation_and_visibility) ... ok
+test_votes_are_unique_and_can_be_toggled (test_server.BackendTests.test_votes_are_unique_and_can_be_toggled) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 4.390s
+
+OK

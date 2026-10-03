@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuites tests="11" failures="0" errors="0" skipped="0" time="13.521" timestamp="2026-10-03T22:44:40" hostname="localhost">
+  <testsuite name="pl.tripsync.SyncIntegrationTest" tests="4" failures="0" errors="0" skipped="0" time="1.339" timestamp="2026-10-03T22:44:40" hostname="localhost">
+    <properties>
+      <property name="device" value="Medium_Phone(AVD) - 10" />
+      <property name="flavor" value="" />
+      <property name="project" value=":app" />
+    </properties>
+    <testcase name="choosingServerVersionDiscardsLocalConflict" classname="pl.tripsync.SyncIntegrationTest" time="0.375" />
+    <testcase name="revokedAccessPurgesLocalTrip" classname="pl.tripsync.SyncIntegrationTest" time="0.227" />
+    <testcase name="voteCanBeToggledOverNetwork" classname="pl.tripsync.SyncIntegrationTest" time="0.293" />
+    <testcase name="offlineQueueConflictResolutionAndDeletion" classname="pl.tripsync.SyncIntegrationTest" time="0.444" />
+  </testsuite>
+  <testsuite name="pl.tripsync.TripSyncUiTest" tests="7" failures="0" errors="0" skipped="0" time="11.052" timestamp="2026-10-03T22:44:40" hostname="localhost">
+    <properties>
+      <property name="device" value="Medium_Phone(AVD) - 10" />
+      <property name="flavor" value="" />
+      <property name="project" value=":app" />
+    </properties>
+    <testcase name="persistedDataSurvivesActivityRestart" classname="pl.tripsync.TripSyncUiTest" time="1.32" />
+    <testcase name="editingUnequalExpensePreservesShares" classname="pl.tripsync.TripSyncUiTest" time="1.438" />
+    <testcase name="expenseCrudChangesBalances" classname="pl.tripsync.TripSyncUiTest" time="1.877" />
+    <testcase name="votingCanBeAddedRemovedAndAddedAgain" classname="pl.tripsync.TripSyncUiTest" time="1.268" />
+    <testcase name="blankFormShowsValidationError" classname="pl.tripsync.TripSyncUiTest" time="1.137" />
+    <testcase name="mainScreensAndRealScreenshots" classname="pl.tripsync.TripSyncUiTest" time="2.65" />
+    <testcase name="draftSurvivesActivityRecreation" classname="pl.tripsync.TripSyncUiTest" time="1.362" />
+  </testsuite>
+</testsuites>

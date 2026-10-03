@@ -1,0 +1,12 @@
+/Users/brajan.s/Documents/ChatGPT/Android/app/build.gradle.kts:39: Warning: A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.9.0 is available: 2.9.4 [GradleDependency]
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.0")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "GradleDependency":
+   This detector looks for usages of libraries where the version you are using
+   is not the current stable release. Using older versions is fine, and there
+   are cases where you deliberately want to stick with an older version.
+   However, you may simply not be aware that a more recent version is
+   available, and that is what this lint check helps find.
+
+0 errors, 1 warning
