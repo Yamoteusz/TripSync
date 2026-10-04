@@ -37,6 +37,11 @@ import pl.tripsync.ui.screens.settings.SettingsScreen
 import pl.tripsync.ui.screens.editor.EditorScreen
 import pl.tripsync.ui.screens.members.MembersScreen
 import pl.tripsync.ui.screens.conflicts.ConflictsScreen
+import pl.tripsync.ui.screens.budget.BudgetScreen
+import pl.tripsync.ui.screens.money.SettlementScreen
+import pl.tripsync.ui.screens.activity.ActivityScreen
+import pl.tripsync.ui.screens.places.PlacesScreen
+import pl.tripsync.ui.screens.places.PlaceEditorScreen
 
 @Composable
 fun TripSyncRoot(vm: TripViewModel, inviteCode: String?) {
@@ -86,6 +91,11 @@ fun TripSyncRoot(vm: TripViewModel, inviteCode: String?) {
                             EditorScreen(vm,state,nav,e.arguments!!.getString("tripId")!!,e.arguments!!.getString("kind")!!,e.arguments!!.getString("recordId")!!) { if(Build.VERSION.SDK_INT>=33) notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS) }
                         }
                         composable("members/{tripId}") { e -> MembersScreen(vm,state,e.arguments!!.getString("tripId")!!) }
+                        composable("budget/{tripId}") { e -> BudgetScreen(vm,state,nav,e.arguments!!.getString("tripId")!!) }
+                        composable("settlement/{tripId}/{recordId}") { e -> SettlementScreen(vm,state,nav,e.arguments!!.getString("tripId")!!,e.arguments!!.getString("recordId")!!) }
+                        composable("activity/{tripId}") { e -> ActivityScreen(vm,state,e.arguments!!.getString("tripId")!!) }
+                        composable("places/{tripId}") { e -> PlacesScreen(vm,state,nav,e.arguments!!.getString("tripId")!!) }
+                        composable("place/{tripId}/{recordId}") { e -> PlaceEditorScreen(vm,state,nav,e.arguments!!.getString("tripId")!!,e.arguments!!.getString("recordId")!!) }
                         composable("conflicts") { ConflictsScreen(vm,state) }
                     }
                 }

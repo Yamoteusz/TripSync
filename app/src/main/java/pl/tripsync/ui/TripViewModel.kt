@@ -13,6 +13,35 @@ data class AppState(val session: Session? = null, val records: List<RecordEntity
 
 class TripViewModel(val graph: AppGraph) : ViewModel() {
     val repo = graph.repository
+    private val travel = TravelRepository(graph.context)
+    val locations = MutableStateFlow<List<GeoResult>>(emptyList())
+    val geoMessage = MutableStateFlow<String?>(null)
+    val weather = MutableStateFlow(WeatherState())
+    private var weatherJob: kotlinx.coroutines.Job? = null
+    fun searchLocations(query: String) = action {
+        locations.value = emptyList()
+        geoMessage.value = null
+        try {
+            locations.value = travel.search(query)
+            if (locations.value.isEmpty()) geoMessage.value = "Nie znaleziono miejscowości. Spróbuj krótszej nazwy."
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            geoMessage.value = "Wyszukiwanie niedostępne. Sprawdź internet lub dodaj współrzędne ręcznie."
+        }
+    }
+    fun loadWeather(lat: Double, lon: Double) {
+        weatherJob?.cancel()
+        weatherJob = viewModelScope.launch {
+            weather.value = WeatherState(loading = true)
+            val cached = travel.cached(lat,lon)
+            weather.value = WeatherState(cached, loading = true)
+            try { weather.value = WeatherState(travel.forecast(lat,lon)) }
+            catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                weather.value = WeatherState(cached, message = if(cached == null) "Nie udało się pobrać prognozy. Sprawdź połączenie i spróbuj ponownie." else "Brak połączenia z API. Wyświetlamy ostatnią zapisaną prognozę; sprawdź jej daty.")
+            }
+        }
+    }
     val state = combine(repo.session, repo.records, repo.operations, repo.conflicts, repo.sync) { s,r,p,c,status -> AppState(s,r,p,c,status,true) }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppState())
     val dark = graph.prefs.dark.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
     val url = graph.prefs.url.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")

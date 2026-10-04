@@ -72,4 +72,25 @@ class SyncIntegrationTest {
         assertFalse(second.dao.record(voteId)!!.deleted)
         assertNull(second.dao.conflict(voteId))
     }
+    @Test fun budgetsPaymentsPlacesAndAuditSynchronizeBetweenAccounts() = runBlocking {
+        val a=first.session.value!!.user.id
+        val b=second.session.value!!.user.id
+        first.save(trip,"budget",BudgetData(100000,mapOf("food" to 20000)),"budget:$trip")
+        first.save(trip,"expense",ExpenseData("Hotel",20000,a,mapOf(a to 10000L,b to 10000L),category="accommodation"))
+        first.save(trip,"place",PlaceData("Morskie Oko",49.1978,20.0700))
+        assertTrue(first.sync());assertTrue(second.sync())
+        assertEquals(100000L,second.decode(second.dao.record("budget:$trip")!!,BudgetData::class.java).limit)
+        val id=second.save(trip,"settlement",SettlementData(b,a,10000))
+        assertTrue(second.sync());assertTrue(first.sync())
+        val rows=first.dao.records().filter {!it.deleted}
+        val expenses=rows.filter {it.kind=="expense"}.map {first.decode(it,ExpenseData::class.java)}
+        val payments=rows.filter {it.kind=="settlement"}.map {first.decode(it,SettlementData::class.java)}
+        assertTrue(Money.settle(expenses,payments).isEmpty())
+        assertTrue(rows.any {it.kind=="place"})
+        assertTrue(rows.any {it.kind=="activity" && first.decode(it,ActivityData::class.java).actorId==b})
+        first.save(trip,"settlement",SettlementData(b,a,10000),id,true)
+        assertTrue(first.sync());assertNotNull(first.dao.conflict(id))
+        first.resolve(id,false)
+    }
+
 }

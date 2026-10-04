@@ -69,7 +69,7 @@ fun TripScreen(vm: TripViewModel,state: AppState,nav: NavHostController,tripId: 
                     }
                 }
                 Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(12.dp)) {
-                    Stat("Budżet",Money.format(expenses.sumOf {vm.decode(it,ExpenseData::class.java).amount},t.currency),Modifier.weight(1f))
+                    Stat("Wydatki",Money.format(expenses.sumOf {vm.decode(it,ExpenseData::class.java).amount},t.currency),Modifier.weight(1f))
                     Stat("Zadania", "${tasks.count {vm.decode(it,TaskData::class.java).done}} / ${tasks.size}",Modifier.weight(1f))
                 }
                 Panel {
@@ -78,6 +78,8 @@ fun TripScreen(vm: TripViewModel,state: AppState,nav: NavHostController,tripId: 
                     if(next!=null) {val e=vm.decode(next,EventData::class.java);Text(e.title);Text("${e.date} · ${e.time} · ${e.place}",style=MaterialTheme.typography.bodySmall)} else Text("Dodaj pierwszy punkt lub odpocznij - plan wykonany.")
                     TextButton(onClick={nav.navigate("trip/$tripId/plan") {popUpTo("trips")}}) {Text("Zobacz harmonogram")}
                 }
+                OutlinedButton(onClick={nav.navigate("places/$tripId")},Modifier.fillMaxWidth()) {Text("Mapa miejsc i pogoda")}
+                OutlinedButton(onClick={nav.navigate("activity/$tripId")},Modifier.fillMaxWidth()) {Text("Historia zmian")}
                 OutlinedButton(onClick={nav.navigate("members/$tripId")},Modifier.fillMaxWidth()) {Icon(Icons.Default.Group,null);Spacer(Modifier.width(8.dp));Text("Uczestnicy i zaproszenia")}
                 OutlinedButton(onClick={share(context,buildString {append("${t.title}\n${t.destination}\n${t.startDate} - ${t.endDate}\n"); events.forEach {val e=vm.decode(it,EventData::class.java);append("\n${e.date} ${e.time} · ${e.title} · ${e.place}")}})},Modifier.fillMaxWidth()) {Text("Udostępnij plan")}
                 if(owner) {OutlinedButton(onClick={editor("trip",tripId)},Modifier.fillMaxWidth()) {Text("Edytuj wyjazd")}; TextButton(onClick={deleting=true},Modifier.fillMaxWidth()) {Text("Usuń wyjazd",color=MaterialTheme.colorScheme.error)}}
@@ -85,7 +87,7 @@ fun TripScreen(vm: TripViewModel,state: AppState,nav: NavHostController,tripId: 
             "plan" -> PlanContent(vm,tripId,events,editor)
             "tasks" -> TasksContent(vm,tripId,tasks,name,editor)
             "ideas" -> IdeasContent(vm,state,nav,tripId,rows,editor)
-            "money" -> MoneyContent(vm,expenses,t,name,editor)
+            "money" -> MoneyContent(vm,state,nav,tripId,expenses,t,name,editor)
         }
     }
     if(deleting) AlertDialog(onDismissRequest={deleting=false},title={Text("Usunąć cały wyjazd?")},text={Text("Plan, zadania i wydatki zostaną usunięte dla wszystkich uczestników po synchronizacji.")},confirmButton={TextButton(onClick={vm.action {vm.repo.deleteTrip(tripId);deleting=false;nav.navigate("trips") {popUpTo("trips"){inclusive=true}}}}) {Text("Usuń",color=MaterialTheme.colorScheme.error)}},dismissButton={TextButton(onClick={deleting=false}) {Text("Anuluj")}})

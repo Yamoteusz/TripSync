@@ -82,7 +82,12 @@ class Repository(val db: TripDatabase, private val prefs: Preferences, private v
             val proposal = "demo-proposal"
             dao.put(RecordEntity(proposal, trip, "proposal", gson.toJson(ProposalData("Wjazd na Kasprowy Wierch", "Kuźnice", "Opcja na ostatni dzień, jeśli pogoda dopisze.")), 1))
             dao.put(RecordEntity("$proposal:demo-bartek", trip, "vote", gson.toJson(VoteData(proposal, "demo-bartek")), 1))
-            listOf(ExpenseData("Nocleg dla trzech osób", 72000, "demo-anna", Money.equalSplit(72000, members.map { it.userId }), day.toString()), ExpenseData("Bilety kolejowe", 18000, "demo-bartek", Money.equalSplit(18000, members.map { it.userId }), day.toString())).forEach { dao.put(RecordEntity(UUID.randomUUID().toString(), trip, "expense", gson.toJson(it), 1)) }
+            listOf(ExpenseData("Nocleg dla trzech osób", 72000, "demo-anna", Money.equalSplit(72000, members.map { it.userId }), day.toString(), "accommodation"), ExpenseData("Bilety kolejowe", 18000, "demo-bartek", Money.equalSplit(18000, members.map { it.userId }), day.toString(), "transport")).forEach { dao.put(RecordEntity(UUID.randomUUID().toString(), trip, "expense", gson.toJson(it), 1)) }
+        }
+        db.withTransaction {
+            dao.put(RecordEntity("budget:$trip", trip, "budget", gson.toJson(BudgetData(180000, mapOf("accommodation" to 90000, "transport" to 30000, "food" to 30000))), 1))
+            dao.put(RecordEntity("demo-place", trip, "place", gson.toJson(PlaceData("Morskie Oko", 49.1978, 20.0700, "Punkt na mapie wspólnego wyjazdu")), 1))
+            dao.put(RecordEntity("demo-history", trip, "activity", gson.toJson(ActivityData("demo-anna", "Anna", "create", "trip", "Weekend w Tatrach", System.currentTimeMillis())), 1))
         }
         _sync.value = "Tryb demo · dane zapisane na urządzeniu"
     }
@@ -99,6 +104,11 @@ class Repository(val db: TripDatabase, private val prefs: Preferences, private v
         val op = dao.operation(id)
         val json = gson.toJson(payload)
         val demo = session.value?.demo == true
+        if (demo && kind != "activity") {
+            val title = runCatching { gson.fromJson(json, JsonObject::class.java).get("title")?.asString }.getOrNull() ?: kind
+            val actor = session.value!!.user
+            dao.put(RecordEntity(UUID.randomUUID().toString(), tripId, "activity", gson.toJson(ActivityData(actor.id, actor.name, if (deleted) "delete" else if (previous == null) "create" else "update", kind, title, System.currentTimeMillis())), 1))
+        }
         if (deleted && previous?.version == 0 && op != null) {
             dao.deleteRecord(id); dao.deleteOperation(id)
         } else {

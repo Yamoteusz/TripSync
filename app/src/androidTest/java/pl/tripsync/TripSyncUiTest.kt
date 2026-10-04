@@ -99,4 +99,59 @@ class TripSyncUiTest {
         compose.onNodeWithText("Weekend w Tatrach").assertIsDisplayed()
         runBlocking {check(graph.db.dao().records().count {it.kind=="expense"}==2)}
     }
+    @Test fun budgetScreenUpdatesLimits() {
+        openTrip();compose.onNodeWithText("Koszty",useUnmergedTree=true).performClick()
+        compose.onNodeWithText("Zobacz lub zmień budżet").performScrollTo().performClick()
+        screenshot("08-budzet")
+        compose.onNode(hasSetTextAction() and hasText("Łączny budżet")).performTextClearance()
+        compose.onNode(hasSetTextAction() and hasText("Łączny budżet")).performTextInput("2500")
+        compose.onNodeWithText("Zapisz budżet").performScrollTo().performClick()
+        compose.waitUntil(10000) {compose.onAllNodesWithText("Wspólne koszty").fetchSemanticsNodes().isNotEmpty()}
+        val data=runBlocking {graph.repository.decode(graph.db.dao().record("budget:demo-tatry")!!,pl.tripsync.domain.BudgetData::class.java)}
+        org.junit.Assert.assertEquals(250000L,data.limit)
+        org.junit.Assert.assertEquals(90000L,data.categoryLimits["accommodation"])
+    }
+    @Test fun repaymentFormChangesBalancesAndCanBeDeleted() {
+        openTrip();compose.onNodeWithText("Koszty",useUnmergedTree=true).performClick()
+        compose.onNode(hasText("Zapisz spłatę") and hasClickAction()).performScrollTo().performClick()
+        compose.onNodeWithText("Wybierz").performClick()
+        compose.onNodeWithText("Bartek").performClick()
+        compose.onNode(hasSetTextAction() and hasText("Kwota (PLN)")).performTextInput("50")
+        screenshot("09-splata")
+        compose.onNode(hasText("Zapisz spłatę") and hasClickAction()).performScrollTo().performClick()
+        compose.waitUntil(10000) {runBlocking {graph.db.dao().records().any {it.kind=="settlement"}}}
+        val payment=runBlocking {graph.db.dao().records().first {it.kind=="settlement"}}
+        val data=graph.repository.decode(payment,pl.tripsync.domain.SettlementData::class.java)
+        org.junit.Assert.assertEquals(5000L,data.amount)
+        org.junit.Assert.assertEquals("demo-anna",data.from)
+        compose.onNodeWithText("Edytuj spłatę").performScrollTo().performClick()
+        compose.onNodeWithText("Usuń spłatę").performScrollTo().performClick()
+        compose.onNodeWithText("Usuń").performClick()
+        compose.waitUntil(10000) {runBlocking {graph.db.dao().record(payment.id)?.deleted==true}}
+    }
+    @Test fun placeFormAndHistoryArePersisted() {
+        openTrip();compose.onNodeWithText("Mapa miejsc i pogoda").performScrollTo().performClick()
+        val mapHeight=java.util.concurrent.atomic.AtomicInteger(0)
+        fun webView(view:android.view.View):android.webkit.WebView? {
+            if(view is android.webkit.WebView) return view
+            if(view is android.view.ViewGroup) for(i in 0 until view.childCount) webView(view.getChildAt(i))?.let {return it}
+            return null
+        }
+        compose.waitUntil(10000) {
+            compose.activity.runOnUiThread {webView(compose.activity.window.decorView)?.evaluateJavascript("document.getElementById('map') ? document.getElementById('map').clientHeight : 0") {value -> mapHeight.set(value.toIntOrNull() ?: 0)}}
+            mapHeight.get() >= 320
+        }
+        screenshot("10-mapa")
+        compose.onNodeWithText("Dodaj miejsce ręcznie").performScrollTo().performClick()
+        compose.onNode(hasSetTextAction() and hasText("Nazwa miejsca")).performTextInput("Punkt testowy")
+        compose.onNode(hasSetTextAction() and hasText("Szerokość geograficzna")).performTextInput("49.30")
+        compose.onNode(hasSetTextAction() and hasText("Długość geograficzna")).performTextInput("19.95")
+        compose.onNodeWithText("Zapisz miejsce").performScrollTo().performClick()
+        compose.waitUntil(10000) {runBlocking {graph.db.dao().records().any {it.kind=="place" && it.json.contains("Punkt testowy")}}}
+        compose.onNodeWithContentDescription("Wstecz").performClick()
+        compose.onNodeWithText("Historia zmian").performScrollTo().performClick()
+        compose.onNodeWithText("Miejsce · Punkt testowy").assertIsDisplayed()
+        screenshot("11-historia")
+    }
+
 }

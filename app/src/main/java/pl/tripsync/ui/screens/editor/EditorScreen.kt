@@ -35,6 +35,7 @@ fun EditorScreen(vm: TripViewModel,state: AppState,nav: NavHostController,tripId
     val tripRecord=state.records.find {it.id==tripId && it.kind=="trip"}
     val trip=tripRecord?.let {vm.decode(it,TripData::class.java)} ?: TripData()
     val members=state.records.filter {it.tripId==tripId && it.kind=="member"}.map {vm.decode(it,MemberData::class.java)}
+    val savedPlaces=state.records.filter {it.tripId==tripId && it.kind=="place"}.map {vm.decode(it,PlaceData::class.java)}
     val oldTrip=if(kind=="trip" && existing!=null) vm.decode(existing,TripData::class.java) else TripData()
     val oldEvent=if(kind=="event" && existing!=null) vm.decode(existing,EventData::class.java) else EventData(date=trip.startDate,rank=state.records.count {it.tripId==tripId && it.kind=="event"})
     val oldTask=if(kind=="task" && existing!=null) vm.decode(existing,TaskData::class.java) else TaskData(date=trip.startDate)
@@ -52,6 +53,7 @@ fun EditorScreen(vm: TripViewModel,state: AppState,nav: NavHostController,tripId
     var assignee by rememberSaveable(recordId,kind) {mutableStateOf(oldTask.assignee)}
     var reminder by rememberSaveable(recordId,kind) {mutableStateOf(if(kind=="task") oldTask.reminder else oldEvent.reminder)}
     var amount by rememberSaveable(recordId,kind) {mutableStateOf(if(oldExpense.amount>0) java.math.BigDecimal.valueOf(oldExpense.amount,2).toPlainString() else "")}
+    var expenseCategory by rememberSaveable(recordId,kind) {mutableStateOf(oldExpense.category ?: "other")}
     var payer by rememberSaveable(recordId,kind) {mutableStateOf(oldExpense.payer)}
     var selected by rememberSaveable(recordId,kind) {mutableStateOf(if(oldExpense.shares.isNotEmpty()) oldExpense.shares.keys.toList() else members.map {it.userId})}
     var custom by rememberSaveable(recordId,kind) {mutableStateOf(oldExpense.amount > 0 && oldExpense.shares.isNotEmpty() && oldExpense.shares != Money.equalSplit(oldExpense.amount,oldExpense.shares.keys.toList()))}
@@ -74,6 +76,7 @@ fun EditorScreen(vm: TripViewModel,state: AppState,nav: NavHostController,tripId
                 "event","convert" -> {
                     Field("Data (RRRR-MM-DD)",date,{date=it})
                     Field("Godzina (GG:MM)",time,{time=it})
+                    if(savedPlaces.isNotEmpty()) Choice("Miejsca ze wspólnej mapy",place,savedPlaces.map {it.title to it.title}) {place=it}
                     Field("Miejsce",place,{place=it})
                     Field("Opis",description,{description=it},multiline=true)
                     Row(verticalAlignment=Alignment.CenterVertically) {Text("Przypomnij o tej godzinie",Modifier.weight(1f));Switch(reminder,onCheckedChange={reminder=it})}
@@ -85,8 +88,9 @@ fun EditorScreen(vm: TripViewModel,state: AppState,nav: NavHostController,tripId
                     Row(verticalAlignment=Alignment.CenterVertically) {Text("Przypomnienie",Modifier.weight(1f));Switch(reminder,onCheckedChange={reminder=it})}
                     if(reminder) {Field("Data (RRRR-MM-DD)",date,{date=it});Field("Godzina (GG:MM)",time,{time=it})}
                 }
-                "proposal" -> {Field("Miejsce",place,{place=it});Field("Opis",description,{description=it},multiline=true)}
+                "proposal" -> {if(savedPlaces.isNotEmpty()) Choice("Miejsca ze wspólnej mapy",place,savedPlaces.map {it.title to it.title}) {place=it};Field("Miejsce",place,{place=it});Field("Opis",description,{description=it},multiline=true)}
                 "expense" -> {
+                    Choice("Kategoria wydatku",expenseCategory,Categories.options) {expenseCategory=it}
                     Field("Kwota (${trip.currency})",amount,{amount=it},keyboard=KeyboardType.Decimal)
                     Field("Data (RRRR-MM-DD)",date,{date=it})
                     Choice("Kto zapłacił?",payer,members.map {it.userId to it.name}) {payer=it}
@@ -109,7 +113,7 @@ fun EditorScreen(vm: TripViewModel,state: AppState,nav: NavHostController,tripId
                             require(vm.owner(tripId)) {"Tylko organizator może zmienić wyjazd."}
                             val es=vm.records(tripId,"event").map {vm.decode(it,EventData::class.java)}
                             require(es.all {Validation.date(it.date) in Validation.date(date)..Validation.date(endDate)}) {"Nowe daty muszą obejmować punkty planu."}
-                            require(currency==trip.currency || vm.records(tripId,"expense").isEmpty()) {"Nie można zmienić waluty po dodaniu wydatków."}
+                            require(currency==trip.currency || vm.records(tripId,"expense").isEmpty() && vm.records(tripId,"settlement").isEmpty() && vm.records(tripId,"budget").isEmpty()) {"Nie można zmienić waluty po dodaniu wydatków."}
                             vm.repo.save(tripId,"trip",value,recordId);nav.popBackStack()
                         }
                     }
@@ -138,7 +142,7 @@ fun EditorScreen(vm: TripViewModel,state: AppState,nav: NavHostController,tripId
                         require(selected.isNotEmpty() && selected.all {id -> members.any {it.userId==id}}) {"Wybierz uczestników kosztu."}
                         val split=if(custom) selected.associateWith {id -> val input=sharesText[members.indexOfFirst {it.userId==id}].trim().replace(',','.');if(input in listOf("0","0.0","0.00")) 0L else Money.parse(input)} else Money.equalSplit(value,selected)
                         require(split.values.sum()==value) {"Suma udziałów musi być równa kwocie wydatku."}
-                        val expense=ExpenseData(title.trim(),value,payer,split,date)
+                        val expense=ExpenseData(title.trim(),value,payer,split,date,expenseCategory)
                         if(existing==null) vm.repo.save(tripId,"expense",expense) else vm.repo.save(tripId,"expense",expense,recordId)
                         nav.popBackStack()
                     }
