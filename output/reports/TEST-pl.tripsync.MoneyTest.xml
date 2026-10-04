@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="pl.tripsync.MoneyTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-03T22:44:22.484Z" hostname="MacBook-Air-Brajan.local" time="0.085">
+<testsuite name="pl.tripsync.MoneyTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-04T07:47:43.754Z" hostname="MacBook-Air-Brajan.local" time="0.047">
   <properties/>
-  <testcase name="rejectsInvalidShares" classname="pl.tripsync.MoneyTest" time="0.025"/>
+  <testcase name="rejectsInvalidShares" classname="pl.tripsync.MoneyTest" time="0.0"/>
   <testcase name="distributesRemainderWithoutLosingCents" classname="pl.tripsync.MoneyTest" time="0.0"/>
   <testcase name="randomSettlementsConserveMoneyAndClearBalances" classname="pl.tripsync.MoneyTest" time="0.044"/>
-  <testcase name="decimalParsingIsExact" classname="pl.tripsync.MoneyTest" time="0.006"/>
+  <testcase name="decimalParsingIsExact" classname="pl.tripsync.MoneyTest" time="0.001"/>
   <testcase name="rejectsUnsafeAmounts" classname="pl.tripsync.MoneyTest" time="0.0"/>
-  <testcase name="exampleTripHasCorrectBalancesAndTransfers" classname="pl.tripsync.MoneyTest" time="0.001"/>
+  <testcase name="exampleTripHasCorrectBalancesAndTransfers" classname="pl.tripsync.MoneyTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

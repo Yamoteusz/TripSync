@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="pl.tripsync.ExtendedMoneyTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-04T07:47:43.704Z" hostname="MacBook-Air-Brajan.local" time="0.049">
+  <properties/>
+  <testcase name="repaymentReducesDebtAndPreservesZeroSum" classname="pl.tripsync.ExtendedMoneyTest" time="0.019"/>
+  <testcase name="coordinatesRejectNanAndOutOfRange" classname="pl.tripsync.ExtendedMoneyTest" time="0.0"/>
+  <testcase name="overpaymentCreatesReverseDebt" classname="pl.tripsync.ExtendedMoneyTest" time="0.0"/>
+  <testcase name="allRepaymentsRemoveSuggestedTransfers" classname="pl.tripsync.ExtendedMoneyTest" time="0.005"/>
+  <testcase name="selfPaymentRejected" classname="pl.tripsync.ExtendedMoneyTest" time="0.0"/>
+  <testcase name="budgetValidatesTotalOfCategories" classname="pl.tripsync.ExtendedMoneyTest" time="0.001"/>
+  <testcase name="legacyExpenseUsesOtherCategory" classname="pl.tripsync.ExtendedMoneyTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

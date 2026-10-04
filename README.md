@@ -1,6 +1,6 @@
 # TripSync
 
-Aplikacja Android do organizacji wyjazdów grupowych: harmonogram, głosowanie, zadania, pakowanie, wydatki i rozliczenia. Działa offline i synchronizuje dane przez własne API REST. Projekt dla zespołu trzyosobowego.
+Aplikacja Android do organizacji wyjazdów grupowych: harmonogram, głosowanie, zadania, pakowanie, wydatki, kategorie, budżety, spłaty, historia zmian oraz mapa miejsc z prognozą pogody. Wersja 1.1.0. Działa offline i synchronizuje dane przez własne API REST. Projekt dla zespołu trzyosobowego.
 
 ## Szybki start
 
@@ -29,6 +29,20 @@ sdk.dir=/sciezka/do/Android/sdk
 Jeżeli katalog projektu jest synchronizowany przez usługę chmurową, pliki budowania można umieścić poza nim: `./gradlew -PtripsyncBuildRoot=/tmp/tripsync-build :app:assembleDebug`. Wtedy APK powstaje w `/tmp/tripsync-build/app/outputs/apk/debug/`.
 
 APK wynikowy: `app/build/outputs/apk/debug/app-debug.apk`. Jest podpisany kluczem debug i służy do prezentacji. Wersja release wymaga własnego podpisu. Przy pierwszym budowaniu potrzebne jest połączenie z repozytoriami Google Maven i Maven Central.
+
+## Darmowy hosting i prawdziwe dane
+
+Gotowa instrukcja: [docs/hosting.md](docs/hosting.md). Polecany wariant to **PythonAnywhere Beginner Free** z trwałym plikiem SQLite oraz adapterem `backend/wsgi.py`. Wgraj trzy pliki backendu, ustaw WSGI i wpisz adres HTTPS hostingu w aplikacji przed rejestracją. Każdy uczestnik używa własnego konta i tego samego serwera. Demo nie trafia na backend. Nie utworzono jeszcze publicznego serwera; wymaga konta właściciela.
+
+## Nowe funkcje 1.1
+
+- Łączny budżet i limity sześciu kategorii, wskaźnik wykorzystania, ostrzeżenia o przekroczeniu oraz filtr wydatków.
+- Własne deklaracje spłat: CRUD, przeliczenie sald i pozostałych przelewów. Aplikacja nie wykonuje transakcji bankowych; każdy zapisuje własną spłatę, pozostali ją widzą.
+- Historia zaakceptowanych zmian z autorem i czasem serwera; klient nie może wysyłać fałszywych wpisów. Obejmuje dołączanie, zaproszenia i operacje rekordów, bez pełnego porównania wartości przed/po. Ekran pokazuje 200 najnowszych wpisów.
+- Współdzielone miejsca: CRUD współrzędnych, mapa Leaflet/OpenStreetMap, otwarcie w aplikacji map i wybór zapisanej nazwy w planie/pomysłach.
+- Wyszukiwanie miejscowości oraz 7-dniowa prognoza Open-Meteo, bez klucza API dla niekomercyjnego projektu. Temperatury, opis pogody i szansa opadów; ostatnia prognoza jest zapisana lokalnie z datą pobrania. Wyszukiwarka nie jest katalogiem wszystkich punktów POI.
+
+Mapa potrzebuje internetu do kafelków; zapisane miejsca i ostatnia prognoza pozostają lokalnie. Prognoza dotyczy najbliższych dni, nie dowolnie odległego terminu wyjazdu. Przepisywanie współrzędnych do map/pogody nie wymaga uprawnienia GPS. Użycie komercyjne Open-Meteo wymaga sprawdzenia warunków dostawcy. Leaflet 1.9.4 jest dołączony w assets z licencją; mapa nie ma mostka JavaScript do Androida, dane markerów są kodowane przez Gson, nawigacja WebView jest blokowana.
 
 ## Uruchomienie backendu
 
@@ -133,3 +147,5 @@ git clone TripSync-history.bundle TripSync-z-historia
 APK jest załącznikiem prezentacyjnym; nie jest dodawane do historii Git. Po zmianach można odbudować je przez `scripts/build.sh`. Dokumentację PDF można odtworzyć przez `python3 scripts/create_documentation.py` po zainstalowaniu pakietu `reportlab`; wymagane są dołączone screeny, wyniki JSON oraz czcionka Arial albo DejaVu Sans. Gotowa dokumentacja nie wymaga tych narzędzi do odczytu.
 
 Po zatwierdzeniu zmian polecenie `python3 scripts/package_project.py` tworzy ZIP, Git bundle i sumy SHA-256. Nie publikuje projektu w zdalnym repozytorium.
+
+Aktualna dokumentacja wersji 1.1 to `output/pdf/TripSync_dokumentacja_projektu.pdf`. Plik `TripSync_zalozenia_projektu.pdf` zachowuje pierwotną propozycję sprzed rozbudowy.

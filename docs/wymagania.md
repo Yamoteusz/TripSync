@@ -51,3 +51,20 @@ Gość loguje się lub uruchamia demo. Uczestnik dołącza i współpracuje przy
 | Wydatki, rozliczenia, offline i synchronizacja | Obszar osoby 3 |
 
 Każdy obszar obejmuje własne testy i dokumentację. Jest to proponowany podział odpowiedzialności, nie oświadczenie o autorstwie konkretnych osób.
+
+## Rozszerzenie 1.1 — zakres dla trzech osób
+
+| ID | Wymaganie |
+|---|---|
+| F16 | CRUD budżetu i limitów kategorii przez organizatora; wskaźniki oraz ostrzeżenia o przekroczeniu |
+| F17 | Sześć kategorii wydatków, zestawienie kategorii i filtr |
+| F18 | CRUD własnych deklaracji spłat, przeliczenie sald i pozostałych rozliczeń |
+| F19 | Historia zaakceptowanych operacji z autorem i czasem, tylko do odczytu |
+| F20 | Wspólne miejsca: CRUD współrzędnych, mapa i otwarcie zewnętrznej nawigacji |
+| F21 | Wyszukiwanie miejscowości przez API i zapis wyniku jako miejsce |
+| F22 | Prognoza Open-Meteo na 7 dni: min/max temperatur, opis i prawdopodobieństwo opadów |
+| F23 | Cache prognozy z datą, obsługa błędów i informacja o starej prognozie |
+| N10 | Bezpłatny wariant hostingu WSGI z trwałym plikiem SQLite i instrukcją kopii/aktualizacji |
+| N11 | Mapa z atrybucją, bez kluczy w kodzie i bez masowego pobierania kafelków |
+
+Spłata jest deklaracją użytkownika, nie transakcją bankową. Wyszukiwanie obejmuje miejscowości; dokładne punkty POI można dodać współrzędnymi. Mapa wymaga internetu do kafelków; prognoza nie sięga odległych terminów wyjazdu. Konta hostingu oraz publiczny adres nie są automatycznie zakładane.

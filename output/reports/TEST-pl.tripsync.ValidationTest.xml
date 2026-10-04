@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="pl.tripsync.ValidationTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-03T22:44:22.572Z" hostname="MacBook-Air-Brajan.local" time="0.007">
+<testsuite name="pl.tripsync.ValidationTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-04T07:47:43.803Z" hostname="MacBook-Air-Brajan.local" time="0.008">
   <properties/>
-  <testcase name="rejectsReversedDates" classname="pl.tripsync.ValidationTest" time="0.005"/>
+  <testcase name="rejectsReversedDates" classname="pl.tripsync.ValidationTest" time="0.006"/>
   <testcase name="rejectsEventOutsideTrip" classname="pl.tripsync.ValidationTest" time="0.001"/>
-  <testcase name="rejectsEmptyAndOverlongTitles" classname="pl.tripsync.ValidationTest" time="0.001"/>
-  <testcase name="acceptsValidTripAndEvent" classname="pl.tripsync.ValidationTest" time="0.0"/>
+  <testcase name="rejectsEmptyAndOverlongTitles" classname="pl.tripsync.ValidationTest" time="0.0"/>
+  <testcase name="acceptsValidTripAndEvent" classname="pl.tripsync.ValidationTest" time="0.001"/>
   <testcase name="rejectsInvalidDatesAndHours" classname="pl.tripsync.ValidationTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>

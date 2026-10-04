@@ -1,4 +1,6 @@
 test_access_control_is_enforced_on_server (test_server.BackendTests.test_access_control_is_enforced_on_server) ... ok
+test_activity_server_authority_idempotency_and_conflict (test_server.BackendTests.test_activity_server_authority_idempotency_and_conflict) ... ok
+test_budget_singleton_owner_limits_and_recreation (test_server.BackendTests.test_budget_singleton_owner_limits_and_recreation) ... ok
 test_conflict_detected_and_can_be_resolved (test_server.BackendTests.test_conflict_detected_and_can_be_resolved) ... ok
 test_database_persists_after_reopen (test_server.BackendTests.test_database_persists_after_reopen) ... ok
 test_deleted_record_is_tombstone_and_cannot_be_resurrected (test_server.BackendTests.test_deleted_record_is_tombstone_and_cannot_be_resurrected) ... ok
@@ -9,11 +11,20 @@ test_invalid_event_and_date_range_change (test_server.BackendTests.test_invalid_
 test_invalid_login_and_duplicate_email (test_server.BackendTests.test_invalid_login_and_duplicate_email) ... ok
 test_invite_join_rotation_and_owner_role (test_server.BackendTests.test_invite_join_rotation_and_owner_role) ... ok
 test_member_removal_revokes_access_and_clears_assignee (test_server.BackendTests.test_member_removal_revokes_access_and_clears_assignee) ... ok
+test_online_backup_and_nonoverwrite (test_server.BackendTests.test_online_backup_and_nonoverwrite) ... ok
+test_only_trusted_proxy_can_change_rate_limit_ip (test_server.BackendTests.test_only_trusted_proxy_can_change_rate_limit_ip) ... ok
 test_password_is_hashed_and_session_can_be_revoked (test_server.BackendTests.test_password_is_hashed_and_session_can_be_revoked) ... ok
+test_place_coordinates_and_category_validation (test_server.BackendTests.test_place_coordinates_and_category_validation) ... ok
+test_repayment_ownership_edit_delete_and_member_removal (test_server.BackendTests.test_repayment_ownership_edit_delete_and_member_removal) ... ok
 test_trip_delete_revokes_invitation_and_visibility (test_server.BackendTests.test_trip_delete_revokes_invitation_and_visibility) ... ok
 test_votes_are_unique_and_can_be_toggled (test_server.BackendTests.test_votes_are_unique_and_can_be_toggled) ... ok
+test_wsgi_invalid_body_and_unauthorized (test_wsgi.WsgiTests.test_wsgi_invalid_body_and_unauthorized) ... ok
+test_wsgi_real_http_accounts_sync_and_persistence (test_wsgi.WsgiTests.test_wsgi_real_http_accounts_sync_and_persistence) ... 127.0.0.1 - - [04/Oct/2026 09:39:46] "GET /health HTTP/1.1" 200 36
+127.0.0.1 - - [04/Oct/2026 09:39:46] "POST /auth/register HTTP/1.1" 200 180
+127.0.0.1 - - [04/Oct/2026 09:39:46] "GET /sync HTTP/1.1" 200 30
+ok
 
 ----------------------------------------------------------------------
-Ran 14 tests in 4.390s
+Ran 22 tests in 7.575s
 
 OK

@@ -13,7 +13,11 @@ Projekt ma jedną aplikację Android i odrębny backend. Podział folderów umo�
 | `app/src/main/java/pl/tripsync/ui/screens/plan/` | Harmonogram |
 | `app/src/main/java/pl/tripsync/ui/screens/tasks/` | Zadania i pakowanie |
 | `app/src/main/java/pl/tripsync/ui/screens/ideas/` | Propozycje i głosowanie |
-| `app/src/main/java/pl/tripsync/ui/screens/money/` | Koszty, salda i rozliczenia |
+| `app/src/main/java/pl/tripsync/ui/screens/money/` | Koszty, kategorie, salda i CRUD spłat |
+| `app/src/main/java/pl/tripsync/ui/screens/budget/` | Budżet i limity kategorii |
+| `app/src/main/java/pl/tripsync/ui/screens/activity/` | Historia zmian |
+| `app/src/main/java/pl/tripsync/ui/screens/places/` | Mapa, miejsca, wyszukiwanie i pogoda |
+| `deploy/` | Hosting WSGI oraz alternatywnie Docker/Caddy |
 | `app/src/main/java/pl/tripsync/ui/screens/editor/` | Formularze dodawania i edycji |
 | `app/src/main/java/pl/tripsync/ui/screens/members/` | Uczestnicy i zaproszenia |
 | `app/src/main/java/pl/tripsync/ui/screens/conflicts/` | Rozstrzyganie konfliktów |
@@ -44,3 +48,13 @@ Jeżeli poprawka wymaga zmiany repozytorium albo testu, dodaj je w tym samym com
 ## Zawartość paczki
 
 Paczka do oddania obejmuje źródła, Gradle Wrapper, backend, dokumentację, screeny, APK i raporty. Nie zawiera prywatnych sesji, baz testowych, lokalnych ścieżek SDK ani cache narzędzi. Git bundle pozwala odtworzyć lokalną historię również bez zdalnego serwera.
+
+## Zakres dla trzech osób po rozbudowie
+
+| Osoba | Główne moduły | Weryfikacja |
+|---|---|---|
+| 1 | Konta, uprawnienia, API, WSGI/hosting, historia i kopie bazy | Testy backendu, idempotencja, trwałość i instrukcja wdrożenia |
+| 2 | Plan, zadania, pomysły, mapa wspólnych miejsc, Open-Meteo i cache prognozy | Formularze, błędy API, UI i dokumentacja map/pogody |
+| 3 | Wydatki i kategorie, budżety, spłaty, algorytm sald, Room/synchronizacja | Testy domeny i integracja między kontami |
+
+To propozycja odpowiedzialności do dalszej pracy i obrony. Każda osoba powinna rozumieć swój zakres oraz wspólną architekturę.

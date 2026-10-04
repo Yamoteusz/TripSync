@@ -7,6 +7,10 @@ flowchart TD
     UI[Jetpack Compose / Navigation] --> VM[TripViewModel / StateFlow]
     VM --> DOMAIN[Walidacja / Money / modele domenowe]
     VM --> REPO[Repository / Mutex]
+    VM --> TRAVEL[TravelRepository / Retrofit]
+    TRAVEL --> METEO[Open-Meteo: geokodowanie i pogoda]
+    TRAVEL --> CACHE[Prywatny cache ostatniej prognozy]
+    UI --> MAP[WebView / lokalny Leaflet / kafelki OSM]
     REPO --> ROOM[Room: records, operations, conflicts]
     ROOM --> FLOW[Flow lokalnych danych]
     FLOW --> VM
@@ -61,6 +65,13 @@ flowchart LR
     U --> SETTINGS((Motyw / wylogowanie))
     O[Organizator] --> CREATE((Tworzenie / edycja / usunięcie wyjazdu))
     O --> INVITE((Zaproszenia / usunięcie uczestnika))
+    O --> BUDGET((CRUD budżetu))
+    U --> PAY((CRUD własnych spłat))
+    U --> MAP((CRUD miejsc / mapa / pogoda))
+    U --> AUDIT((Odczyt historii zmian))
+    O --> MAP
+    O --> AUDIT
+    O --> PAY
     O --> PLAN
     O --> TASK
     O --> IDEA
@@ -152,3 +163,15 @@ erDiagram
 ```
 
 Room ma indeksy records.tripId, records.kind i unikalny indeks operations.recordId. Nie deklaruje fizycznych FK pomiędzy tymi trzema tabelami; spójność jest utrzymywana przez transakcje repozytorium. Schemat wyeksportowany przez Room znajduje się w app/schemas.
+
+## Budżety, spłaty, mapa i pogoda
+
+Nowe typy JSON korzystają z istniejącej tabeli records i tego samego protokołu wersjonowania, więc schemat Room pozostaje w wersji 1. Starsze wydatki bez kategorii trafiają do „Pozostałe”. Saldo to zapłacone wydatki minus własne udziały, powiększone o wysłane spłaty i pomniejszone o otrzymane spłaty. Suma sald pozostaje zerowa. Nadpłata tworzy należność w przeciwnym kierunku; nie jest ukrywana.
+
+Historia jest dopisywana po zaakceptowanym zapisie w tej samej transakcji SQLite. Serwer nie akceptuje activity od klienta. Pełny snapshot obejmuje historię, a ekran ogranicza wyświetlenie do 200 najnowszych wpisów. Nie ma paginacji ani mechanizmu cofania historii.
+
+TravelRepository pobiera prognozy przez osobnego Retrofit bez tokenów kont. Błąd sieci pozostawia ostatnią zapisaną prognozę z czasem pobrania, datami i wyraźnym komunikatem. Zmiana wybranego miejsca anuluje poprzednie żądanie. Pogoda jest osobnym stanem ViewModel; nie trafia do współdzielonej kolejki operacji.
+
+Leaflet 1.9.4 jest lokalną biblioteką w assets. WebView renderuje własny HTML, znaczniki używają JSON Gson oraz textContent, pliki i treści Android są niedostępne, brak JavascriptInterface. CSP ogranicza źródła do własnych skryptów/stylów i kafelków HTTPS. Link atrybucji otwiera zewnętrzną przeglądarkę. Włączenie JavaScript jest lokalnie oznaczone SuppressLint, ponieważ jest wymagane przez Leaflet; nie wyłączono ogólnie sprawdzeń bezpieczeństwa.
+
+Adapter WSGI i samodzielny serwer używają tej samej logiki Handler/Store. Wariant PythonAnywhere Free zakłada pojedynczy worker. Rekomendacje większego wdrożenia wymagają przeglądu współbieżności i testów obciążenia. Alternatywny Caddy przekazuje IP tylko z jawnie zaufanego proxy; backend nie ufa dowolnemu X-Forwarded-For.
