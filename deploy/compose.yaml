@@ -1,0 +1,47 @@
+services:
+  api:
+    build:
+      context: ../backend
+    command: ["python", "server.py", "--host", "0.0.0.0", "--db", "/data/tripsync.sqlite", "--trusted-proxy", "172.30.42.3"]
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    volumes:
+      - tripsync_data:/data
+    networks:
+      tripsync:
+        ipv4_address: 172.30.42.2
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?Ustaw API_DOMAIN w pliku .env}
+      ACME_EMAIL: ${ACME_EMAIL:?Ustaw ACME_EMAIL w pliku .env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      tripsync:
+        ipv4_address: 172.30.42.3
+    depends_on:
+      api:
+        condition: service_healthy
+networks:
+  tripsync:
+    ipam:
+      config:
+        - subnet: 172.30.42.0/24
+volumes:
+  tripsync_data:
+  caddy_data:
+  caddy_config:

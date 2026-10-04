@@ -2,6 +2,7 @@ import argparse
 import hashlib
 import hmac
 import json
+import ipaddress
 import re
 import secrets
 import sqlite3
@@ -38,6 +39,9 @@ def iso_date(value):
         return date.fromisoformat(value)
     except (ValueError, TypeError):
         raise ApiError(400, 'Nieprawidłowa data. Użyj RRRR-MM-DD.')
+
+
+CATEGORIES = {'transport', 'accommodation', 'food', 'activities', 'shopping', 'other'}
 
 
 class Store:
@@ -119,6 +123,10 @@ CREATE TABLE IF NOT EXISTS operations(user_id TEXT NOT NULL, id TEXT NOT NULL, d
         self.db.execute('INSERT OR REPLACE INTO records VALUES(?,?,?,?,?,?)', (record_id, trip, kind, json.dumps(payload, ensure_ascii=False), version, int(deleted)))
         return self.record(self.db.execute('SELECT * FROM records WHERE id=?', (record_id,)).fetchone())
 
+    def activity(self, trip, user, action, kind, title):
+        actor = self.db.execute('SELECT name FROM users WHERE id=?', (user,)).fetchone()
+        self.save_record(str(uuid.uuid4()), trip, 'activity', {'actorId': user, 'actorName': actor['name'], 'action': action, 'recordKind': kind, 'title': title, 'at': int(time.time() * 1000)}, 1)
+
     def member_record(self, trip, user_id, role):
         user = self.db.execute('SELECT * FROM users WHERE id=?', (user_id,)).fetchone()
         rid = f'{trip}:{user_id}'
@@ -134,7 +142,7 @@ CREATE TABLE IF NOT EXISTS operations(user_id TEXT NOT NULL, id TEXT NOT NULL, d
             text(payload.get('description', ''), 'Opis', 2000, True)
             require(iso_date(payload.get('startDate')) <= iso_date(payload.get('endDate')), 'Koniec wyjazdu nie może poprzedzać początku.')
             require(payload.get('currency') in ['PLN', 'EUR', 'USD'], 'Nieobsługiwana waluta.')
-            existing = self.db.execute("SELECT payload FROM records WHERE trip_id=? AND kind='expense' AND deleted=0", (trip,)).fetchone()
+            existing = self.db.execute("SELECT payload FROM records WHERE trip_id=? AND kind IN ('expense','settlement','budget') AND deleted=0", (trip,)).fetchone()
             previous = self.db.execute('SELECT payload FROM records WHERE id=?', (trip,)).fetchone()
             if existing and previous:
                 require(json.loads(previous['payload'])['currency'] == payload['currency'], 'Nie można zmienić waluty po dodaniu wydatków.')
@@ -174,7 +182,8 @@ CREATE TABLE IF NOT EXISTS operations(user_id TEXT NOT NULL, id TEXT NOT NULL, d
             proposal = self.db.execute("SELECT id FROM records WHERE id=? AND trip_id=? AND kind='proposal' AND deleted=0", (payload.get('proposalId'), trip)).fetchone()
             require(proposal is not None, 'Propozycja nie istnieje.')
         elif kind == 'expense':
-            allowed = {'title', 'amount', 'payer', 'shares', 'date'}
+            allowed = {'title', 'amount', 'payer', 'shares', 'date', 'category'}
+            require(payload.get('category', 'other') in CATEGORIES, 'Nieprawidłowa kategoria wydatku.')
             text(payload.get('title'), 'Nazwa', 120)
             iso_date(payload.get('date'))
             amount = payload.get('amount')
@@ -184,6 +193,26 @@ CREATE TABLE IF NOT EXISTS operations(user_id TEXT NOT NULL, id TEXT NOT NULL, d
             require(isinstance(shares, dict) and 0 < len(shares) <= 100, 'Wybierz uczestników kosztu.')
             require(all(type(v) is int and v >= 0 and self.role(k, trip) for k, v in shares.items()), 'Nieprawidłowy podział kosztu.')
             require(sum(shares.values()) == amount, 'Suma udziałów musi być równa kwocie wydatku.')
+        elif kind == 'budget':
+            allowed = {'limit', 'categoryLimits'}
+            require(type(payload.get('limit')) is int and 0 < payload['limit'] <= 100000000, 'Nieprawidłowy limit budżetu.')
+            limits = payload.get('categoryLimits')
+            require(isinstance(limits, dict) and set(limits) <= CATEGORIES, 'Nieprawidłowe kategorie budżetu.')
+            require(all(type(v) is int and 0 <= v <= payload['limit'] for v in limits.values()), 'Limity kategorii muszą mieścić się w budżecie.')
+            require(sum(limits.values()) <= payload['limit'], 'Suma limitów kategorii przekracza budżet.')
+        elif kind == 'settlement':
+            allowed = {'from', 'to', 'amount', 'date', 'note'}
+            require(payload.get('from') == user, 'Możesz zapisać wyłącznie własną spłatę.', 403)
+            require(payload.get('from') != payload.get('to') and self.role(payload.get('to'), trip), 'Wybierz innego uczestnika.')
+            require(type(payload.get('amount')) is int and 0 < payload['amount'] <= 100000000, 'Nieprawidłowa kwota spłaty.')
+            require(iso_date(payload.get('date')) <= date.today(), 'Spłata nie może być z przyszłości.')
+            text(payload.get('note', ''), 'Notatka', 500, True)
+        elif kind == 'place':
+            allowed = {'title', 'latitude', 'longitude', 'description'}
+            text(payload.get('title'), 'Nazwa', 120)
+            text(payload.get('description', ''), 'Opis', 2000, True)
+            require(type(payload.get('latitude')) in (int, float) and -90 <= payload['latitude'] <= 90, 'Nieprawidłowa szerokość geograficzna.')
+            require(type(payload.get('longitude')) in (int, float) and -180 <= payload['longitude'] <= 180, 'Nieprawidłowa długość geograficzna.')
         elif kind == 'member':
             allowed = {'userId', 'name', 'role'}
         else:
@@ -196,7 +225,7 @@ CREATE TABLE IF NOT EXISTS operations(user_id TEXT NOT NULL, id TEXT NOT NULL, d
         rid = text(op.get('recordId'), 'Identyfikator rekordu', 150)
         trip = text(op.get('tripId'), 'Identyfikator wyjazdu', 100)
         kind = op.get('kind')
-        require(kind in ['trip', 'event', 'task', 'proposal', 'vote', 'expense', 'member'], 'Nieznany rodzaj rekordu.')
+        require(kind in ['trip', 'event', 'task', 'proposal', 'vote', 'expense', 'member', 'budget', 'settlement', 'place'], 'Nieznany rodzaj rekordu.')
         base = op.get('baseVersion')
         deleted = op.get('deleted', False)
         require(type(base) is int and base >= 0 and type(deleted) is bool, 'Nieprawidłowa wersja.')
@@ -214,14 +243,19 @@ CREATE TABLE IF NOT EXISTS operations(user_id TEXT NOT NULL, id TEXT NOT NULL, d
             parent = self.db.execute('SELECT deleted FROM records WHERE id=?', (trip,)).fetchone()
             if not creating:
                 require(role is not None and parent is not None and not parent['deleted'], 'Brak dostępu do wyjazdu.', 403)
-                if kind in ['trip', 'member']:
+                if kind in ['trip', 'member', 'budget']:
                     require(role == 'owner', 'Ta operacja wymaga roli organizatora.', 403)
             if (current['version'] if current else 0) != base:
                 return {'id': oid, 'status': 'conflict', 'record': self.record(current) if current else None}
-            if current and current['deleted'] and not deleted and kind != 'vote':
+            if current and current['deleted'] and not deleted and kind not in ('vote', 'budget'):
                 raise ApiError(409, 'Usuniętego rekordu nie można przywrócić.')
             payload = op.get('payload')
             require(isinstance(payload, dict), 'Nieprawidłowe dane.')
+            if kind == 'budget':
+                require(rid == f'budget:{trip}', 'Budżet musi mieć stały identyfikator.')
+            if kind == 'settlement':
+                original = json.loads(current['payload']) if current else payload
+                require(original.get('from') == user and payload.get('from') == user, 'Możesz zarządzać wyłącznie własnymi spłatami.', 403)
             if kind == 'vote':
                 require(payload.get('userId') == user and rid == f"{payload.get('proposalId')}:{user}", 'Nieprawidłowy głos.', 403)
             if kind == 'member':
@@ -230,6 +264,8 @@ CREATE TABLE IF NOT EXISTS operations(user_id TEXT NOT NULL, id TEXT NOT NULL, d
                 require(self.role(target, trip) != 'owner', 'Nie można usunąć organizatora.')
                 expenses = self.db.execute("SELECT payload FROM records WHERE trip_id=? AND kind='expense' AND deleted=0", (trip,)).fetchall()
                 require(not any(target == (e := json.loads(r['payload']))['payer'] or target in e['shares'] for r in expenses), 'Najpierw usuń lub zmień wydatki dotyczące tej osoby.')
+                settlements = self.db.execute("SELECT payload FROM records WHERE trip_id=? AND kind='settlement' AND deleted=0", (trip,)).fetchall()
+                require(not any(target in (json.loads(r['payload'])['from'], json.loads(r['payload'])['to']) for r in settlements), 'Najpierw usuń spłaty dotyczące tej osoby.')
                 self.db.execute('DELETE FROM members WHERE trip_id=? AND user_id=?', (trip, target))
                 for row in self.db.execute("SELECT * FROM records WHERE trip_id=? AND kind IN ('task','vote') AND deleted=0", (trip,)).fetchall():
                     data = json.loads(row['payload'])
@@ -251,6 +287,9 @@ CREATE TABLE IF NOT EXISTS operations(user_id TEXT NOT NULL, id TEXT NOT NULL, d
             if deleted and kind == 'trip':
                 self.db.execute('DELETE FROM invites WHERE trip_id=?', (trip,))
                 self.db.execute('UPDATE records SET deleted=1,version=version+1 WHERE trip_id=? AND id<>?', (trip, rid))
+            if not (kind == 'trip' and deleted):
+                original = json.loads(current['payload']) if current else payload
+                self.activity(trip, user, 'delete' if deleted else 'update' if current else 'create', kind, (original if deleted else payload).get('title', '') or kind)
             result = {'id': oid, 'status': 'applied', 'record': record}
             self.db.execute('INSERT INTO operations VALUES(?,?,?,?)', (user, oid, digest, json.dumps(result)))
             return result
@@ -265,6 +304,7 @@ CREATE TABLE IF NOT EXISTS operations(user_id TEXT NOT NULL, id TEXT NOT NULL, d
                 self.db.execute('DELETE FROM invites WHERE trip_id=?', (trip,))
                 code = secrets.token_hex(6).upper()
                 self.db.execute('INSERT INTO invites VALUES(?,?)', (code, trip))
+                self.activity(trip, user, 'invite', 'member', 'Utworzenie lub odnowienie zaproszenia')
             else:
                 code = current['code']
             return {'code': code, 'tripId': trip}
@@ -279,11 +319,16 @@ CREATE TABLE IF NOT EXISTS operations(user_id TEXT NOT NULL, id TEXT NOT NULL, d
             if not self.role(user, trip):
                 self.db.execute('INSERT INTO members VALUES(?,?,?)', (trip, user, 'participant'))
                 self.member_record(trip, user, 'participant')
+                self.activity(trip, user, 'join', 'member', 'Dołączenie do grupy')
             return {'tripId': trip}
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = 'TripSync/1.0'
+    server_version = 'TripSync/1.1'
+
+    def setup(self):
+        super().setup()
+        self.connection.settimeout(15)
 
     def log_message(self, fmt, *args):
         return
@@ -313,11 +358,17 @@ class Handler(BaseHTTPRequestHandler):
             path = urlparse(self.path).path.rstrip('/')
             store = self.server.store
             if method == 'GET' and path == '/health':
-                return self.respond(200, {'status': 'ok', 'version': '1.0.0'})
+                return self.respond(200, {'status': 'ok', 'version': '1.1.0'})
             if method == 'POST' and path in ['/auth/register', '/auth/login']:
                 with self.server.rate_lock:
                     now = time.time()
                     key = self.client_address[0]
+                    if key in self.server.trusted_proxies:
+                        forwarded = self.headers.get('X-Forwarded-For', '')
+                        try:
+                            key = str(ipaddress.ip_address(forwarded))
+                        except ValueError:
+                            raise ApiError(400, 'Nieprawidłowy adres klienta proxy.')
                     attempts = [t for t in self.server.attempts.get(key, []) if now-t < 300]
                     require(len(attempts) < 30, 'Zbyt wiele prób. Spróbuj za kilka minut.', 429)
                     attempts.append(now)
@@ -361,9 +412,10 @@ class Handler(BaseHTTPRequestHandler):
         self.route('POST')
 
 
-def make_server(store, host='127.0.0.1', port=8080):
+def make_server(store, host='127.0.0.1', port=8080, trusted_proxies=()):
     server = ThreadingHTTPServer((host, port), Handler)
     server.store = store
+    server.trusted_proxies = set(trusted_proxies)
     server.attempts = {}
     server.rate_lock = threading.Lock()
     return server
@@ -374,13 +426,14 @@ def main():
     parser.add_argument('--host', default='127.0.0.1')
     parser.add_argument('--port', type=int, default=8080)
     parser.add_argument('--db', default=str(Path(__file__).with_name('tripsync.sqlite')))
+    parser.add_argument('--trusted-proxy', action='append', default=[])
     parser.add_argument('--cert')
     parser.add_argument('--key')
     args = parser.parse_args()
     if bool(args.cert) != bool(args.key):
         parser.error('Podaj jednocześnie --cert i --key.')
     store = Store(args.db)
-    server = make_server(store, args.host, args.port)
+    server = make_server(store, args.host, args.port, args.trusted_proxy)
     if args.cert:
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         ctx.minimum_version = ssl.TLSVersion.TLSv1_2

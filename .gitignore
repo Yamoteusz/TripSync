@@ -13,3 +13,5 @@ output/apk/
 output/*.zip
 output/*.bundle
 output/checksums.sha256
+deploy/.env
+backend/backups/

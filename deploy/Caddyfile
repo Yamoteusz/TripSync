@@ -1,0 +1,16 @@
+{
+    email {$ACME_EMAIL}
+}
+{$API_DOMAIN} {
+    request_body {
+        max_size 256KB
+    }
+    header {
+        Strict-Transport-Security "max-age=31536000"
+        X-Content-Type-Options nosniff
+        -Server
+    }
+    reverse_proxy api:8080 {
+        header_up X-Forwarded-For {http.request.remote.host}
+    }
+}

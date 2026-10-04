@@ -162,6 +162,107 @@ class BackendTests(unittest.TestCase):
         self.assertIn(self.trip, self.store.snapshot(self.owner['user']['id'])['tripIds'])
         self.assertEqual(self.owner['user']['id'], self.store.authenticate(self.owner['token']))
 
+    def test_budget_singleton_owner_limits_and_recreation(self):
+        self.join()
+        a, b = self.owner['user']['id'], self.member['user']['id']
+        budget = {'limit': 100000, 'categoryLimits': {'food': 30000, 'transport': 20000}}
+        rid = f'budget:{self.trip}'
+        self.store.apply(a, self.op(rid, 'budget', budget))
+        with self.assertRaises(ApiError):
+            self.store.apply(b, self.op(rid, 'budget', budget, 1))
+        with self.assertRaises(ApiError):
+            self.store.apply(a, self.op('other-budget', 'budget', budget))
+        with self.assertRaises(ApiError):
+            self.store.apply(a, self.op(rid, 'budget', dict(budget, categoryLimits={'food': 80000, 'transport': 80000}), 1))
+        self.store.apply(a, self.op(rid, 'budget', budget, 1, True))
+        self.assertEqual('applied', self.store.apply(a, self.op(rid, 'budget', budget, 2))['status'])
+
+    def test_repayment_ownership_edit_delete_and_member_removal(self):
+        self.join()
+        a, b = self.owner['user']['id'], self.member['user']['id']
+        from datetime import date
+        payment = {'from': b, 'to': a, 'amount': 10000, 'date': date.today().isoformat(), 'note': 'Oddano gotówkę'}
+        self.store.apply(b, self.op('payment', 'settlement', payment))
+        with self.assertRaises(ApiError):
+            self.store.apply(a, self.op('payment', 'settlement', dict(payment, **{'from': a, 'to': b}), 1))
+        with self.assertRaises(ApiError):
+            self.store.apply(a, self.op('payment', 'settlement', payment, 1, True))
+        with self.assertRaises(ApiError):
+            self.store.apply(b, self.op('other', 'settlement', dict(payment, to=b)))
+        with self.assertRaises(ApiError):
+            self.store.apply(b, self.op('other', 'settlement', dict(payment, date='2999-01-01')))
+        member = next(r for r in self.store.snapshot(a)['records'] if r['kind']=='member' and r['payload']['userId']==b)
+        with self.assertRaises(ApiError):
+            self.store.apply(a, self.op(member['id'], 'member', member['payload'], 1, True))
+        self.store.apply(b, self.op('payment', 'settlement', dict(payment, amount=5000), 1))
+        self.store.apply(b, self.op('payment', 'settlement', payment, 2, True))
+        self.store.apply(a, self.op(member['id'], 'member', member['payload'], 1, True))
+
+    def test_activity_server_authority_idempotency_and_conflict(self):
+        a = self.owner['user']['id']
+        operation = self.op('event', 'event', self.event())
+        self.store.apply(a, operation)
+        def history():
+            return [r for r in self.store.snapshot(a)['records'] if r['kind']=='activity']
+        before = history()
+        self.store.apply(a, operation)
+        self.assertEqual(len(before), len(history()))
+        self.store.apply(a, self.op('event', 'event', self.event('Zmiana'), 1))
+        self.assertEqual('conflict', self.store.apply(a, self.op('event', 'event', self.event('Konflikt'), 1))['status'])
+        self.assertEqual(len(before)+1, len(history()))
+        with self.assertRaises(ApiError):
+            self.store.apply(a, self.op('fake', 'activity', {'actorName': 'Ktoś'}))
+        self.assertTrue(all(r['payload']['actorId']==a for r in history()))
+
+    def test_place_coordinates_and_category_validation(self):
+        a = self.owner['user']['id']
+        place = {'title': 'Morskie Oko', 'latitude': 49.1978, 'longitude': 20.0700, 'description': ''}
+        self.store.apply(a, self.op('place', 'place', place))
+        for bad in [dict(place, latitude=91), dict(place, longitude=float('nan')), dict(place, latitude=True)]:
+            with self.assertRaises(ApiError):
+                self.store.apply(a, self.op(str(uuid.uuid4()), 'place', bad))
+        expense = {'title': 'Hotel', 'date': '2026-10-10', 'amount': 100, 'payer': a, 'shares': {a: 100}, 'category': 'accommodation'}
+        self.store.apply(a, self.op('expense', 'expense', expense))
+        with self.assertRaises(ApiError):
+            self.store.apply(a, self.op('bad-expense', 'expense', dict(expense, category='fake')))
+
+    def test_online_backup_and_nonoverwrite(self):
+        from backup import backup
+        destination = Path(self.tmp.name) / 'backup.sqlite'
+        backup(Path(self.tmp.name) / 'test.sqlite', destination)
+        restored = Store(str(destination))
+        try:
+            self.assertIn(self.trip, restored.snapshot(self.owner['user']['id'])['tripIds'])
+            self.assertEqual(self.owner['user']['id'], restored.authenticate(self.owner['token']))
+        finally:
+            restored.close()
+        with self.assertRaises(ValueError):
+            backup(Path(self.tmp.name) / 'test.sqlite', destination)
+
+    def test_only_trusted_proxy_can_change_rate_limit_ip(self):
+        for trusted in [(), ('127.0.0.1',)]:
+            server = make_server(self.store, port=0, trusted_proxies=trusted)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            url = f'http://127.0.0.1:{server.server_port}/auth/login'
+            def attempt(ip):
+                request = Request(url, data=b'{broken', headers={'X-Forwarded-For': ip})
+                try:
+                    urlopen(request)
+                except HTTPError as error:
+                    return error.code
+            try:
+                for _ in range(30):
+                    self.assertEqual(400, attempt('198.51.100.1'))
+                self.assertEqual(429, attempt('198.51.100.1'))
+                self.assertEqual(400 if trusted else 429, attempt('198.51.100.2'))
+                if trusted:
+                    self.assertEqual(400, attempt('not-an-ip'))
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join()
+
     def test_http_auth_sync_and_error_contract(self):
         server = make_server(self.store, port=0)
         thread = threading.Thread(target=server.serve_forever, daemon=True)

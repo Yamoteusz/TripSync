@@ -34,6 +34,26 @@ JSON UTF-8; wszystkie endpointy poza health i uwierzytelnianiem wymagają `Autho
 
 Wyniki: `applied` z aktualnym rekordem, `conflict` z wersją serwera, `forbidden` lub `invalid` z komunikatem. Wynik operacji jest niezależny od pozostałych elementów batcha; nie jest to transakcja całej paczki. Rekord ma pola `id`, `tripId`, `kind`, `payload`, `version`, `deleted`.
 
-Rodzaje rekordów: trip, member, event, task, proposal, vote, expense. Wyjazd ma `id=tripId`. Uczestnik ma `id=tripId:userId`. Głos ma `id=proposalId:userId`. Wydatki używają całkowitych kwot w groszach/centach i mapy `shares` od identyfikatora użytkownika do jego udziału.
+Rodzaje rekordów: trip, member, event, task, proposal, vote, expense, budget, settlement, place oraz generowane przez serwer activity. Wyjazd ma `id=tripId`. Uczestnik ma `id=tripId:userId`. Głos ma `id=proposalId:userId`. Wydatki używają całkowitych kwot w groszach/centach i mapy `shares` od identyfikatora użytkownika do jego udziału.
 
 `member` powstaje wyłącznie po utworzeniu wyjazdu lub dołączeniu przez zaproszenie. API operacji dopuszcza tylko usunięcie uczestnika przez organizatora. Nie ma endpointu zmiany właściciela.
+
+## Rekordy wersji 1.1
+
+- `expense`: dodatkowe opcjonalne `category`: transport, accommodation, food, activities, shopping, other. Starszy rekord bez pola traktowany jest jako other.
+- `budget`: stały `recordId=budget:tripId`, `limit` i mapa `categoryLimits` (kwoty całkowite w groszach/centach). Jeden budżet wyjazdu; zapis/usunięcie/przywrócenie tylko przez organizatora. Suma limitów kategorii ≤ limit całkowity.
+- `settlement`: `from`, `to`, `amount`, `date`, `note`. Nadawca musi być zalogowanym użytkownikiem i nie może zmienić właściciela istniejącej spłaty. Tylko nadawca edytuje i usuwa. Data nie może być z przyszłości. To deklaracja, bez potwierdzenia bankowego.
+- `place`: `title`, `latitude`, `longitude`, `description`. Zakresy współrzędnych [-90,90] i [-180,180].
+- `activity`: `actorId`, `actorName`, `action`, `recordKind`, `title`, `at` (czas serwera w ms). Powstaje wyłącznie na serwerze, w transakcji zapisu. Ponowienia i konflikty nie tworzą powtórnych wpisów. Nie przyjmuje operacji klienta i nie zawiera sekretów zaproszeń.
+
+Waluta jest blokowana po dodaniu aktywnych wydatków, budżetu lub spłat. Usunięcie uczestnika z aktywnymi spłatami wymaga ich wcześniejszego usunięcia przez nadawcę.
+
+## Zewnętrzne publiczne API
+
+Android używa oddzielnych klientów Retrofit bez tokenu TripSync:
+
+- `https://geocoding-api.open-meteo.com/v1/search?name=...&count=8&language=pl` — miejscowości.
+- `https://api.open-meteo.com/v1/forecast?latitude=...&longitude=...&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=7` — prognoza.
+- `https://tile.openstreetmap.org/{z}/{x}/{y}.png` — kafelki, standardowy cache WebView, identyfikujący User-Agent TripSync/1.1, widoczna atrybucja, brak masowego pobierania.
+
+Źródła: [Open-Meteo](https://open-meteo.com/en/docs), [geokodowanie](https://open-meteo.com/en/docs/geocoding-api), [polityka kafelków](https://operations.osmfoundation.org/policies/tiles/). Darmowe Open-Meteo jest przeznaczone do niekomercyjnego użycia i ma limity oraz brak SLA. Współrzędne wybranego miejsca są przekazywane tym dostawcom po użyciu mapy/prognozy; lokalizacja telefonu nie jest pobierana.
