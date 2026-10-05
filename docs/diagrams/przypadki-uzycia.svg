@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1040" viewBox="0 0 1000 1040" role="img" aria-label="Diagram UML przypadków użycia TripSync"><title>Diagram UML przypadków użycia TripSync</title><rect x="0" y="0" width="1000" height="1040" fill="#FFFFFF"/>
+<rect x="250" y="25" width="555" height="990" rx="12" fill="#FFFFFF" stroke="#CEDBD3" stroke-width="2"/>
+<text x="528" y="58" font-family="Arial, sans-serif" font-size="23" fill="#122E38" font-weight="700" text-anchor="middle">TripSync</text>
+<line x1="130" y1="145" x2="280" y2="100" stroke="#006B62" stroke-width="2"/>
+<line x1="130" y1="145" x2="280" y2="175" stroke="#006B62" stroke-width="2"/>
+<line x1="130" y1="440" x2="280" y2="250" stroke="#006B62" stroke-width="2"/>
+<line x1="130" y1="440" x2="280" y2="325" stroke="#006B62" stroke-width="2"/>
+<line x1="130" y1="440" x2="280" y2="400" stroke="#006B62" stroke-width="2"/>
+<line x1="130" y1="440" x2="280" y2="475" stroke="#006B62" stroke-width="2"/>
+<line x1="130" y1="440" x2="280" y2="550" stroke="#006B62" stroke-width="2"/>
+<line x1="130" y1="440" x2="280" y2="625" stroke="#006B62" stroke-width="2"/>
+<line x1="130" y1="440" x2="280" y2="700" stroke="#006B62" stroke-width="2"/>
+<line x1="130" y1="800" x2="280" y2="775" stroke="#006B62" stroke-width="2"/>
+<line x1="130" y1="800" x2="280" y2="850" stroke="#006B62" stroke-width="2"/>
+<line x1="130" y1="800" x2="280" y2="925" stroke="#006B62" stroke-width="2"/>
+<line x1="880" y1="925" x2="775" y2="975" stroke="#006B62" stroke-width="2"/>
+<line x1="880" y1="925" x2="775" y2="625" stroke="#006B62" stroke-width="2"/>
+<line x1="100" y1="743" x2="100" y2="505" stroke="#006B62" stroke-width="2"/>
+<polygon points="100,487 87,507 113,507" fill="#FFFFFF" stroke="#006B62" stroke-width="2"/>
+<ellipse cx="528" cy="100" rx="248" ry="25" fill="#F2F6F0" stroke="#006B62" stroke-width="2"/>
+<text x="528" y="106" font-family="Arial, sans-serif" font-size="18" fill="#122E38" font-weight="400" text-anchor="middle">Rejestracja i logowanie</text>
+<ellipse cx="528" cy="175" rx="248" ry="25" fill="#F2F6F0" stroke="#006B62" stroke-width="2"/>
+<text x="528" y="181" font-family="Arial, sans-serif" font-size="18" fill="#122E38" font-weight="400" text-anchor="middle">Demo lokalne</text>
+<ellipse cx="528" cy="250" rx="248" ry="25" fill="#F2F6F0" stroke="#006B62" stroke-width="2"/>
+<text x="528" y="256" font-family="Arial, sans-serif" font-size="18" fill="#122E38" font-weight="400" text-anchor="middle">Tworzenie wyjazdu / dołączenie</text>
+<ellipse cx="528" cy="325" rx="248" ry="25" fill="#F2F6F0" stroke="#006B62" stroke-width="2"/>
+<text x="528" y="331" font-family="Arial, sans-serif" font-size="18" fill="#122E38" font-weight="400" text-anchor="middle">Plan, zadania i pakowanie</text>
+<ellipse cx="528" cy="400" rx="248" ry="25" fill="#F2F6F0" stroke="#006B62" stroke-width="2"/>
+<text x="528" y="406" font-family="Arial, sans-serif" font-size="18" fill="#122E38" font-weight="400" text-anchor="middle">Propozycje i własne głosy</text>
+<ellipse cx="528" cy="475" rx="248" ry="25" fill="#F2F6F0" stroke="#006B62" stroke-width="2"/>
+<text x="528" y="481" font-family="Arial, sans-serif" font-size="18" fill="#122E38" font-weight="400" text-anchor="middle">Wydatki, salda i własne spłaty</text>
+<ellipse cx="528" cy="550" rx="248" ry="25" fill="#F2F6F0" stroke="#006B62" stroke-width="2"/>
+<text x="528" y="556" font-family="Arial, sans-serif" font-size="18" fill="#122E38" font-weight="400" text-anchor="middle">Miejsca, mapa i prognoza</text>
+<ellipse cx="528" cy="625" rx="248" ry="25" fill="#F2F6F0" stroke="#006B62" stroke-width="2"/>
+<text x="528" y="631" font-family="Arial, sans-serif" font-size="18" fill="#122E38" font-weight="400" text-anchor="middle">Synchronizacja i konflikty</text>
+<ellipse cx="528" cy="700" rx="248" ry="25" fill="#F2F6F0" stroke="#006B62" stroke-width="2"/>
+<text x="528" y="706" font-family="Arial, sans-serif" font-size="18" fill="#122E38" font-weight="400" text-anchor="middle">Odczyt historii zmian</text>
+<ellipse cx="528" cy="775" rx="248" ry="25" fill="#F2F6F0" stroke="#006B62" stroke-width="2"/>
+<text x="528" y="781" font-family="Arial, sans-serif" font-size="18" fill="#122E38" font-weight="400" text-anchor="middle">Edycja/usunięcie wyjazdu</text>
+<ellipse cx="528" cy="850" rx="248" ry="25" fill="#F2F6F0" stroke="#006B62" stroke-width="2"/>
+<text x="528" y="856" font-family="Arial, sans-serif" font-size="18" fill="#122E38" font-weight="400" text-anchor="middle">Zarządzanie budżetem</text>
+<ellipse cx="528" cy="925" rx="248" ry="25" fill="#F2F6F0" stroke="#006B62" stroke-width="2"/>
+<text x="528" y="931" font-family="Arial, sans-serif" font-size="18" fill="#122E38" font-weight="400" text-anchor="middle">Zaproszenia i uczestnicy</text>
+<ellipse cx="528" cy="975" rx="248" ry="20" fill="#F2F6F0" stroke="#006B62" stroke-width="2"/>
+<text x="528" y="981" font-family="Arial, sans-serif" font-size="18" fill="#122E38" font-weight="400" text-anchor="middle">Lokalne przypomnienia</text>
+<circle cx="100" cy="101" r="12" fill="#FFFFFF" stroke="#122E38" stroke-width="2"/>
+<line x1="100" y1="113" x2="100" y2="151" stroke="#006B62" stroke-width="2"/>
+<line x1="77" y1="130" x2="123" y2="130" stroke="#006B62" stroke-width="2"/>
+<line x1="100" y1="151" x2="80" y2="178" stroke="#006B62" stroke-width="2"/>
+<line x1="100" y1="151" x2="120" y2="178" stroke="#006B62" stroke-width="2"/>
+<text x="100" y="202" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">Gość</text>
+<circle cx="100" cy="381" r="12" fill="#FFFFFF" stroke="#122E38" stroke-width="2"/>
+<line x1="100" y1="393" x2="100" y2="431" stroke="#006B62" stroke-width="2"/>
+<line x1="77" y1="410" x2="123" y2="410" stroke="#006B62" stroke-width="2"/>
+<line x1="100" y1="431" x2="80" y2="458" stroke="#006B62" stroke-width="2"/>
+<line x1="100" y1="431" x2="120" y2="458" stroke="#006B62" stroke-width="2"/>
+<text x="100" y="482" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">Uczestnik</text>
+<circle cx="100" cy="756" r="12" fill="#FFFFFF" stroke="#122E38" stroke-width="2"/>
+<line x1="100" y1="768" x2="100" y2="806" stroke="#006B62" stroke-width="2"/>
+<line x1="77" y1="785" x2="123" y2="785" stroke="#006B62" stroke-width="2"/>
+<line x1="100" y1="806" x2="80" y2="833" stroke="#006B62" stroke-width="2"/>
+<line x1="100" y1="806" x2="120" y2="833" stroke="#006B62" stroke-width="2"/>
+<text x="100" y="857" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">Organizator</text>
+<circle cx="905" cy="886" r="12" fill="#FFFFFF" stroke="#122E38" stroke-width="2"/>
+<line x1="905" y1="898" x2="905" y2="936" stroke="#006B62" stroke-width="2"/>
+<line x1="882" y1="915" x2="928" y2="915" stroke="#006B62" stroke-width="2"/>
+<line x1="905" y1="936" x2="885" y2="963" stroke="#006B62" stroke-width="2"/>
+<line x1="905" y1="936" x2="925" y2="963" stroke="#006B62" stroke-width="2"/>
+<text x="905" y="987" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">Android</text>
+<text x="35" y="620" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Dziedziczenie</text>
+<text x="35" y="643" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">uprawnień</text>
+</svg>

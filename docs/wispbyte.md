@@ -1,61 +1,62 @@
-# TripSync na płatnym Wispbyte
+# Wispbyte + MySQL: aktualna konfiguracja
 
-Konfiguracja dla udostępnionego planu: 1120 MB RAM, 10 GB dysku, środowisko Python i własna komenda startowa. Zużycie przy większym ruchu trzeba zmierzyć; parametry wystarczają do rozpoczęcia testów grupowych lekkiego backendu SQLite.
+To główna instrukcja hostowanego backendu TripSync. Obecny serwer projektu używa domeny `https://tripsync.wisp.uno/`, portu API 9853, Pythona 3.11 i MySQL. Zrzut panelu wskazywał 1 GiB RAM i 10 GiB dysku. Użytkownik potwierdził działanie aplikacji po poprawieniu konfiguracji bazy; nie przedstawiamy tego jako automatycznego testu obciążenia czy audytu hostingu.
 
-1. W panelu wybierz Python 3.10 lub nowszy.
-2. Wgraj `backend/server.py` i `backend/start_hosted.py` do katalogu głównego serwera. Backend nie potrzebuje instalacji pakietów pip.
-3. Ustaw komendę startową `python3 start_hosted.py`.
-4. Ustaw `PORT` na przydzielony port aplikacji. Skrypt odczytuje najpierw `PORT`, następnie `SERVER_PORT`, a przy braku obu używa `9853`. Port należy potwierdzić w przydziałach panelu; adres panelu sam w sobie nie potwierdza portu aplikacji.
-5. Opcjonalnie ustaw `TRIPSYNC_DB=data/tripsync.sqlite`. Przy aktualizacji wymieniaj pliki Python i zachowuj cały katalog `data`. Potwierdź z hostingiem, że dysk przetrwa restart; reinstalacja serwera może usunąć dane.
-6. Jeśli panel udostępnia domenę, przypisz dostępną `tripsync.wisp.uno` do portu aplikacji i włącz HTTPS obsługiwane przez hosting. Sam wpis domeny nie potwierdza działania TLS ani routingu.
-7. Sprawdź `https://tripsync.wisp.uno/health`. Oczekiwana odpowiedź: JSON ze statusem `ok`. Następnie wpisz `https://tripsync.wisp.uno/` jako adres API w ustawieniach aplikacji i utwórz prawdziwe konto.
-8. Uruchom test: utwórz wyjazd, zrestartuj backend, zaloguj się ponownie i sprawdź zachowanie wyjazdu. Powtórz test po aktualizacji plików serwera.
+## Startup: zachowaj domyślną komendę
 
-Adres `https://78.154.103.2:9853` nie został zweryfikowany jako działający endpoint API. Certyfikat domeny może nie obejmować adresu IP. Nie wyłączaj walidacji certyfikatów w aplikacji.
+Nie trzeba zmieniać komendy startowej Wispbyte. Jej ostatni krok uruchamia `/usr/local/bin/python /home/container/main.py`. Root repozytorium zawiera `main.py`, `requirements.txt` i `backend/`. Katalog `/home/container` musi być checkoutem repozytorium, bez dodatkowego nadrzędnego folderu.
 
-Domyślnie backend nie ufa nagłówkom przekazanego adresu klienta. `TRIPSYNC_TRUSTED_PROXIES` ustawiaj tylko na potwierdzone adresy IP proxy hostingu, rozdzielone przecinkami. Bez tej konfiguracji wspólny adres proxy może powodować wspólny limit logowania dla użytkowników.
+W ustawieniach startupu panelu:
 
-Do kopii bazy wgraj również `backend/backup.py` i korzystaj z instrukcji w `docs/hosting.md`. Przechowuj kopie poza tym samym serwerem. Bazy, kopii, tokenów i haseł nie dodawaj do Git.
+| Pole / zmienna panelu | Wartość |
+|---|---|
+| Python | 3.11 lub zgodne 3.10+ |
+| REQUIREMENTS_FILE | requirements.txt |
+| PY_FILE, jeśli udostępnione | main.py |
+| AUTO_UPDATE, jeśli udostępnione | 1 dla git pull przy starcie |
+| Port aplikacji | Przydzielony przez panel, obecnie 9853 |
 
-Obecny etap obejmuje darmową wersję aplikacji. Premium organizatora dla całej grupy jest planem późniejszego etapu, bez płatności w obecnym wydaniu.
+`requirements.txt` wskazuje zależności MySQL z `backend/requirements-mysql.txt`. Panel instaluje je przed uruchomieniem. Ustawienie REQUIREMENTS_FILE musi być dostępne dla komendy panelu; wpis tylko do pliku czytanego później przez aplikację nie gwarantuje instalacji pakietów przed startem.
 
+## Environment albo plik .env
 
-## Baza MySQL Wispbyte
+W **Configuration → Environment** można podać zmienne. W pokazanym panelu edytor wskazuje `.env`. Każdy wpis pliku ma format `NAZWA=wartość`; sama nazwa bez `=` jest błędem. Wzór znajduje się w `backend/wispbyte.env.example`, bez hasła.
 
-Wgraj także `backend/mysql_database.py` i `backend/requirements-mysql.txt`. Przy uruchamianiu z repozytorium zachowaj strukturę `backend/` i ustaw komendę:
+| Zmienna | Znaczenie |
+|---|---|
+| TRIPSYNC_DATABASE_ENGINE | mysql |
+| TRIPSYNC_MYSQL_HOST | Host bazy z panelu |
+| TRIPSYNC_MYSQL_PORT | 3306 lub port bazy z panelu |
+| TRIPSYNC_MYSQL_DATABASE | Pełna nazwa bazy z panelu |
+| TRIPSYNC_MYSQL_USER | Pełna nazwa użytkownika z panelu, dokładnie z właściwym prefiksem |
+| TRIPSYNC_MYSQL_PASSWORD | Hasło bazy, wyłącznie na serwerze |
+| PORT | 9853 lub przydzielony port API |
+| TRIPSYNC_MYSQL_SSL_CA | Opcjonalna ścieżka CA, gdy hosting zapewnia TLS MySQL |
+| TRIPSYNC_TRUSTED_PROXIES | Opcjonalne, potwierdzone adresy IP proxy, rozdzielone przecinkami |
 
-```sh
-python3 -m pip install -r requirements.txt && python3 main.py
-```
+Plik `/home/container/.env` znajduje się obok `main.py`. Parser nie usuwa cudzysłowów, spacji ani znaków `$`, `#`, `=` z wartości: są dosłowne. Nie dopisuj komentarza po haśle. Każda wartość zajmuje jeden wiersz. Wpisy nieobsługiwane przez aplikację, np. poprawny `REQUIREMENTS_FILE=requirements.txt`, są pomijane przez parser aplikacji; nadal mogą służyć panelowi.
 
-W panelu ustaw zmienne z `backend/wispbyte.env.example`. `TRIPSYNC_MYSQL_PASSWORD` uzupełnij wyłącznie w panelu, zapisując wcześniej hasło w menedżerze haseł. Plik `.env` w głównym katalogu repozytorium jest odczytywany przez `start_hosted.py` i `main.py`. Port API `PORT` jest niezależny od portu MySQL `3306`.
+Rzeczywiste zmienne środowiskowe mają pierwszeństwo nad plikiem, także jeśli błędną wartość wpisano wcześniej. Pełna konfiguracja MySQL w środowisku pozwala pominąć plik. Hasła nie wpisuj do publicznego szablonu, README, komendy startupu ani GitHuba. `.env` jest ignorowany przez Git.
 
-Backend tworzy sześć tabel w wybranej bazie. Konto potrzebuje uprawnień do tworzenia tabel i operacji SELECT/INSERT/UPDATE/DELETE. Domyślna lokalna wersja SQLite pozostaje dostępna. Istniejące dane SQLite nie są automatycznie przenoszone do MySQL; przed przełączeniem zachowaj kopię i wykonaj osobną migrację, jeśli masz już prawdziwe dane.
+## Baza i sieć
 
-Jeżeli hosting udostępnia certyfikat CA bazy, ustaw `TRIPSYNC_MYSQL_SSL_CA` na jego ścieżkę. W tym trybie sprawdzany jest certyfikat i tożsamość serwera. HTTPS domeny aplikacji nie zapewnia szyfrowania osobnego połączenia z bazą; obsługę TLS MySQL należy potwierdzić u hostingu.
+API tworzy sześć tabel w już istniejącej bazie: users, sessions, records, members, invites, operations. Konto potrzebuje CREATE oraz SELECT/INSERT/UPDATE/DELETE. Port 3306 bazy i port 9853 API to dwa odrębne połączenia. HTTPS domeny nie zabezpiecza automatycznie MySQL; certyfikat CA bazy jest osobną konfiguracją.
 
-`remote: %` oznacza dopuszczenie połączeń z dowolnego hosta przy poprawnym uwierzytelnieniu. Jeżeli panel pozwala, ogranicz dostęp do adresu wyjściowego serwera aplikacji, potwierdzonego przez hosting. Nie jest to adres telefonu użytkownika.
+Nie ma automatycznej migracji SQLite do MySQL. Nie uruchamiaj kilku procesów backendu na tej samej bazie w ramach tego projektu; kontrola współbieżności zakłada pojedynczy proces. Ogranicz zdalny dostęp do bazy według możliwości hostingu. `remote: %` dopuszcza wszystkie hosty przy poprawnym uwierzytelnieniu i nie zastępuje hasła ani kontroli sieci.
 
-Po konfiguracji wykonaj rejestrację i zapis wyjazdu, następnie restart i ponowny odczyt. `/health` potwierdza dostępność procesu API, a operacja zapisu i odczytu potwierdza działanie bazy. Nie uruchamiaj jednocześnie kilku procesów backendu: obecna kontrola synchronizacji opiera się na blokadzie jednego procesu.
+## Uruchomienie i sprawdzenie
 
-Adapter zweryfikowano testami jednostkowymi; rzeczywiste połączenie z MySQL Wispbyte wymaga hasła ustawionego w panelu i nie zostało jeszcze wykonane.
+1. W GitHub Desktop wyślij sprawdzone commity przez Push origin.
+2. Sprawdź połączenie Wispbyte z repozytorium i gałęzią main. Dostęp do repozytorium prywatnego ustaw w panelu.
+3. Zapisz konfigurację startupu i Environment; sprawdź pełną nazwę użytkownika bazy.
+4. Uruchom serwer. Oczekiwany log: `TripSync API na porcie 9853`.
+5. Sprawdź `https://tripsync.wisp.uno/health`; aktualne API raportuje `version: 1.1.0`, Android ma 1.2.0.
+6. Utwórz konto prezentacyjne i wyjazd, odczytaj na drugim koncie po zaproszeniu, zrestartuj backend i sprawdź trwałość.
 
+Health potwierdza działający proces. Zapis, odczyt i restart weryfikują dodatkowo pracę bazy. Zwracanie 404 dla `/` nie oznacza błędu: backend jest API, nie stroną internetową. Nie wyłączaj sprawdzania certyfikatów, aby korzystać z adresu IP zamiast domeny.
 
-## Domyślna komenda startowa panelu Wispbyte
+## Aktualizacje, kopie i błędy
 
-Jeśli panel uruchamia `/usr/local/bin/python /home/container/main.py`, zachowaj tę komendę. Repozytorium zawiera teraz `main.py` i `requirements.txt` w katalogu głównym. Ustaw `REQUIREMENTS_FILE=requirements.txt`. W katalogu `/home/container` powinny znajdować się `main.py`, `requirements.txt` i katalog `backend`, bez dodatkowego nadrzędnego folderu `TripSync`.
+Domyślny startup robi git pull, instaluje requirements i uruchamia main.py. Kroki w pokazanej komendzie są rozdzielone średnikami: błąd pull/pip nie musi zatrzymać dalszego startu, dlatego sprawdzaj cały log. Aktualizacja kodu nie powinna zastępować `.env` ani kasować bazy.
 
-Startup panelu pobiera aktualizacje przez `git pull`, instaluje zależności z `REQUIREMENTS_FILE`, a następnie uruchamia backend. Aby aktualizacje działały, katalog główny serwera musi być checkoutem repozytorium z `.git` i dostępem do prywatnego repozytorium. Token dostępu ustaw przez konfigurację hostingu, nie w kodzie lub komendzie publikowanej w Git.
-
-Ustaw także `TRIPSYNC_DATABASE_ENGINE=mysql` i wszystkie zmienne MySQL ze wzoru `backend/wispbyte.env.example`; sam `REQUIREMENTS_FILE` nie wybiera bazy. Hasło wpisz w panelu jako `TRIPSYNC_MYSQL_PASSWORD`. Zachowaj port API przydzielony przez hosting. Po restarcie sprawdź log konsoli i endpoint `/health`, następnie zapis i odczyt wyjazdu.
-
-W przedstawionej komendzie kroki są rozdzielone średnikami, więc nieudany `git pull` lub instalacja pakietów nie zatrzyma automatycznie kolejnego kroku. Po każdym wdrożeniu sprawdź log, czy pobranie kodu i instalacja zakończyły się powodzeniem.
-
-
-## Gdzie wpisać hasło, gdy panel nie ma własnych zmiennych
-
-Domyślna komenda startowa nadal obowiązuje. W panelu plików serwera utwórz `/home/container/.env`, obok `main.py`. Skopiuj zawartość `backend/wispbyte.env.example` i wpisz hasło po `TRIPSYNC_MYSQL_PASSWORD=`. Wartości są dosłowne: nie dodawaj cudzysłowów, spacji po znaku `=` ani komentarza za hasłem. Symbole `#`, `$`, `=` i cudzysłowy będą częścią hasła. Hasło musi zajmować jeden wiersz. Ustaw zmienną panelu `REQUIREMENTS_FILE` na `requirements.txt`, żeby domyślna komenda zainstalowała zależności.
-
-Plik `.env` nie jest publikowany w Git. Utwórz go bezpośrednio na serwerze, nie edytuj publicznego wzoru hasłem. Jeśli plik powstanie na Macu, `.gitignore` również go wykluczy. Zmienne ustawione w panelu mają pierwszeństwo nad plikiem; usuń błędne istniejące wartości w panelu przed użyciem tego wariantu. Jeśli menedżer plików ukrywa pliki z kropką, włącz ich widoczność. Jeżeli panel udostępnia uprawnienia plików, ogranicz `.env` do odczytu i zapisu właściciela (`600`).
-
-Po zapisaniu pliku i pobraniu aktualizacji z GitHuba uruchom ponownie serwer. Skrypt czyta `.env` niezależnie od bieżącego katalogu roboczego. Nie wypisuje konfiguracji ani hasła do logów.
+MySQL kopiuj przez eksport panelu lub odpowiednio skonfigurowany mysqldump; `backend/backup.py` jest wyłącznie dla SQLite. Kopie przechowuj poza serwerem. Przy błędzie MySQL sprawdź kolejno host, port, pełny login, nazwę bazy, hasło i dopuszczenie połączenia z serwera API. Nie publikuj zrzutu z widocznym hasłem.

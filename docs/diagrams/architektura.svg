@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="790" viewBox="0 0 1000 790" role="img" aria-label="Architektura MVVM TripSync"><title>Architektura MVVM TripSync</title><rect x="0" y="0" width="1000" height="790" fill="#FFFFFF"/>
+<line x1="500" y1="110" x2="500" y2="155" stroke="#006B62" stroke-width="2"/>
+<polygon points="500,155 495.6503446588877,145.99552897647322 504.3496553411123,145.99552897647322" fill="#006B62"/>
+<line x1="500" y1="235" x2="500" y2="280" stroke="#006B62" stroke-width="2"/>
+<polygon points="500,280 495.6503446588877,270.9955289764732 504.3496553411123,270.9955289764732" fill="#006B62"/>
+<line x1="360" y1="360" x2="180" y2="420" stroke="#006B62" stroke-width="2"/>
+<polygon points="180,420 187.1669094763365,413.0260908696773 189.9178730592628,421.2789816184562" fill="#006B62"/>
+<line x1="500" y1="360" x2="500" y2="420" stroke="#006B62" stroke-width="2"/>
+<polygon points="500,420 495.6503446588877,410.9955289764732 504.3496553411123,410.9955289764732" fill="#006B62"/>
+<line x1="640" y1="360" x2="820" y2="420" stroke="#006B62" stroke-width="2"/>
+<polygon points="820,420 810.0821269407372,421.2789816184562 812.8330905236635,413.0260908696773" fill="#006B62"/>
+<line x1="500" y1="500" x2="500" y2="550" stroke="#006B62" stroke-width="2"/>
+<polygon points="500,550 495.6503446588877,540.9955289764732 504.3496553411123,540.9955289764732" fill="#006B62"/>
+<line x1="500" y1="630" x2="500" y2="680" stroke="#006B62" stroke-width="2"/>
+<polygon points="500,680 495.6503446588877,670.9955289764732 504.3496553411123,670.9955289764732" fill="#006B62"/>
+<line x1="290" y1="315" x2="320" y2="315" stroke="#006B62" stroke-width="2"/>
+<polygon points="320,315 310.9955289764732,319.3496553411123 310.9955289764732,310.6503446588877" fill="#006B62"/>
+<line x1="680" y1="195" x2="730" y2="195" stroke="#006B62" stroke-width="2"/>
+<polygon points="730,195 720.9955289764732,199.3496553411123 720.9955289764732,190.6503446588877" fill="#006B62"/>
+<line x1="840" y1="235" x2="840" y2="285" stroke="#006B62" stroke-width="2"/>
+<polygon points="840,285 835.6503446588877,275.9955289764732 844.3496553411123,275.9955289764732" fill="#006B62"/>
+<line x1="680" y1="75" x2="740" y2="75" stroke="#006B62" stroke-width="2"/>
+<polygon points="740,75 730.9955289764732,79.3496553411123 730.9955289764732,70.6503446588877" fill="#006B62"/>
+<line x1="40" y1="470" x2="20" y2="470" stroke="#006B62" stroke-width="2" stroke-dasharray="7 5"/>
+<line x1="20" y1="470" x2="20" y2="195" stroke="#006B62" stroke-width="2" stroke-dasharray="7 5"/>
+<line x1="20" y1="195" x2="320" y2="195" stroke="#006B62" stroke-width="2" stroke-dasharray="7 5"/>
+<polygon points="320,195 310.9955289764732,199.3496553411123 310.9955289764732,190.6503446588877" fill="#006B62"/>
+<text x="40" y="180" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Flow</text>
+<line x1="300" y1="620" x2="310" y2="620" stroke="#006B62" stroke-width="2"/>
+<line x1="310" y1="620" x2="310" y2="220" stroke="#006B62" stroke-width="2"/>
+<line x1="310" y1="220" x2="320" y2="220" stroke="#006B62" stroke-width="2"/>
+<polygon points="320,220 310.9955289764732,224.3496553411123 310.9955289764732,215.6503446588877" fill="#006B62"/>
+<line x1="165" y1="360" x2="165" y2="420" stroke="#006B62" stroke-width="2"/>
+<polygon points="165,420 160.6503446588877,410.9955289764732 169.3496553411123,410.9955289764732" fill="#006B62"/>
+<rect x="320" y="40" width="360" height="70" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="500.0" y="69" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">Jetpack Compose / Navigation</text>
+<text x="338" y="96" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Ekrany, formularze i motywy</text>
+<rect x="320" y="155" width="360" height="80" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="500.0" y="184" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">TripViewModel / StateFlow</text>
+<text x="338" y="211" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Stan UI i działania użytkownika</text>
+<rect x="320" y="280" width="360" height="80" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="500.0" y="309" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">Repository / Mutex</text>
+<text x="338" y="336" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Transakcje, kolejka i konflikty</text>
+<rect x="40" y="420" width="260" height="100" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="170.0" y="449" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">Room / SQLite</text>
+<text x="58" y="476" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">records, operations, conflicts</text>
+<text x="58" y="498" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Lokalne źródło danych / Flow</text>
+<rect x="360" y="420" width="280" height="80" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="500.0" y="449" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">Retrofit / TripApi</text>
+<text x="378" y="476" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">REST, DTO i token sesji</text>
+<rect x="700" y="420" width="260" height="100" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="830.0" y="449" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">Keystore / DataStore</text>
+<text x="718" y="476" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Szyfrowana sesja</text>
+<text x="718" y="498" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Motyw oraz adres API</text>
+<rect x="360" y="550" width="280" height="80" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="500.0" y="579" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">Backend Python</text>
+<text x="378" y="606" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Store / Handler / role</text>
+<rect x="360" y="680" width="280" height="80" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="500.0" y="709" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">MySQL lub SQLite</text>
+<text x="378" y="736" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Trwała baza backendu</text>
+<rect x="40" y="275" width="250" height="85" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="165.0" y="304" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">WorkManager</text>
+<text x="58" y="331" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">SyncWorker / ReminderWorker</text>
+<rect x="730" y="155" width="240" height="80" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="850.0" y="184" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">TravelRepository</text>
+<text x="748" y="211" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Osobny Retrofit / cache</text>
+<rect x="730" y="285" width="240" height="70" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="850.0" y="314" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">Open-Meteo</text>
+<text x="748" y="341" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Miejscowości i prognoza</text>
+<rect x="740" y="40" width="230" height="70" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="855.0" y="69" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">Mapa miejsc</text>
+<text x="758" y="96" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">WebView / Leaflet / OSM</text>
+<rect x="40" y="580" width="260" height="90" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="170.0" y="609" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">Domena</text>
+<text x="58" y="636" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Money / Validation / Dates</text>
+<text x="58" y="658" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Typowane modele Kotlin</text>
+<text x="40" y="775" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Dane ekranów pochodzą z Room; synchronizacja aktualizuje lokalną bazę.</text>
+</svg>

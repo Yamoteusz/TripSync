@@ -1,6 +1,8 @@
-# TripSync 1.1 — prawdziwe konta i darmowy hosting
+# Alternatywny hosting SQLite / WSGI
 
-## Polecany wariant: PythonAnywhere, plan Beginner Free
+Ten dokument zachowuje alternatywną konfigurację opracowaną dla 1.1, nie opisuje obecnego hostingu projektu. Aktualny Wispbyte + MySQL ma jedną instrukcję w [wispbyte.md](wispbyte.md). Parametry darmowego planu poniżej są stanem z 04.10.2026 i wymagają ponownego sprawdzenia przed wyborem hostingu.
+
+## Wariant: PythonAnywhere, plan Beginner Free
 
 Backend ma adapter WSGI (`backend/wsgi.py`) do hostingu PythonAnywhere. SQLite zapisuje prawdziwe konta, wyjazdy i zmiany na dysku konta. Nie potrzebujesz domeny ani płatnego klucza API. Android łączy się przez HTTPS. Dane demonstracyjne nie są wysyłane na serwer.
 
@@ -19,7 +21,7 @@ Pogoda i geokodowanie są pobierane przez telefon bezpośrednio z Open-Meteo, a 
 5. W zakładce Web otwórz plik konfiguracji **WSGI**. Zastąp jego treść zawartością `deploy/pythonanywhere_wsgi.py.example`. Szablon sam używa katalogu domowego konta. Katalog projektu musi nazywać się `TripSync`.
 6. Kliknij **Reload** w zakładce Web. Baza powstanie w `/home/TWOJ_LOGIN/tripsync-data.sqlite`, poza katalogiem kodu. Przy aktualizacji nie usuwaj tego pliku ani plików `-wal`/`-shm` działającej bazy.
 7. Otwórz w przeglądarce `https://TWOJ_LOGIN.pythonanywhere.com/health`. Poprawny wynik: `{"status":"ok","version":"1.1.0"}`. Jeśli korzystasz z regionu EU, użyj dokładnie domeny pokazanej w panelu.
-8. Zainstaluj najnowszy APK 1.1.0. W TripSync wyloguj się z demo, otwórz **Ustawienia** i wpisz `https://TWOJ_LOGIN.pythonanywhere.com/` jako adres API. Zapisz adres przed zalogowaniem. Każda osoba musi wpisać ten sam adres.
+8. Zainstaluj najnowszy APK 1.2.0. W TripSync wyloguj się z demo, otwórz **Ustawienia** i wpisz `https://TWOJ_LOGIN.pythonanywhere.com/` jako adres API. Zapisz adres przed zalogowaniem. Każda osoba musi wpisać ten sam adres.
 9. Zarejestruj trzy oddzielne konta. E-mail służy jako identyfikator; projekt nie wysyła e-maili potwierdzających. Organizator tworzy własny wyjazd i synchronizuje go, potem udostępnia kod w **Uczestnicy i zaproszenia**. Pozostałe osoby wybierają **Dołącz kodem**.
 10. Dodaj rzeczywisty wydatek na jednym urządzeniu, zsynchronizuj oba i sprawdź dane na drugim. Następnie wyłącz internet, zmień zadanie, włącz internet i sprawdź, czy kolejka została wysłana.
 

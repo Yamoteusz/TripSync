@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="760" viewBox="0 0 1000 760" role="img" aria-label="Schemat fizycznej bazy backendu SQLite / MySQL"><title>Schemat fizycznej bazy backendu SQLite / MySQL</title><rect x="0" y="0" width="1000" height="760" fill="#FFFFFF"/>
+<line x1="470" y1="150" x2="530" y2="150" stroke="#006B62" stroke-width="2"/>
+<polygon points="530,150 520.9955289764732,154.3496553411123 520.9955289764732,145.6503446588877" fill="#006B62"/>
+<line x1="250" y1="235" x2="250" y2="275" stroke="#006B62" stroke-width="2"/>
+<polygon points="250,275 245.6503446588877,265.9955289764732 254.3496553411123,265.9955289764732" fill="#006B62"/>
+<line x1="530" y1="365" x2="470" y2="365" stroke="#006B62" stroke-width="2" stroke-dasharray="7 5"/>
+<polygon points="470,365 479.0044710235268,360.6503446588877 479.0044710235268,369.3496553411123" fill="#006B62"/>
+<line x1="750" y1="455" x2="750" y2="500" stroke="#006B62" stroke-width="2" stroke-dasharray="7 5"/>
+<polygon points="750,500 745.6503446588877,490.9955289764732 754.3496553411123,490.9955289764732" fill="#006B62"/>
+<line x1="45" y1="150" x2="20" y2="150" stroke="#006B62" stroke-width="2" stroke-dasharray="7 5"/>
+<line x1="20" y1="150" x2="20" y2="580" stroke="#006B62" stroke-width="2" stroke-dasharray="7 5"/>
+<line x1="20" y1="580" x2="45" y2="580" stroke="#006B62" stroke-width="2" stroke-dasharray="7 5"/>
+<polygon points="45,580 35.99552897647323,584.3496553411123 35.99552897647323,575.6503446588877" fill="#006B62"/>
+<rect x="45" y="45" width="425" height="190" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="257.5" y="74" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">users</text>
+<text x="63" y="101" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">id PK · email UNIQUE</text>
+<text x="63" y="123" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">name</text>
+<text x="63" y="145" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">salt · password (hash)</text>
+<rect x="530" y="45" width="425" height="190" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="742.5" y="74" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">sessions</text>
+<text x="548" y="101" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">token_hash PK</text>
+<text x="548" y="123" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">user_id FK → users.id</text>
+<text x="548" y="145" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">expires (Unix, sekundy)</text>
+<rect x="45" y="275" width="425" height="180" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="257.5" y="304" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">members</text>
+<text x="63" y="331" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">trip_id + user_id PK</text>
+<text x="63" y="353" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">user_id FK → users.id</text>
+<text x="63" y="375" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">role</text>
+<rect x="530" y="275" width="425" height="180" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="742.5" y="304" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">records</text>
+<text x="548" y="331" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">id PK · trip_id · kind</text>
+<text x="548" y="353" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">payload JSON</text>
+<text x="548" y="375" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">version · deleted · indeks trip_id</text>
+<rect x="45" y="500" width="425" height="180" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="257.5" y="529" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">operations</text>
+<text x="63" y="556" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">user_id + id PK</text>
+<text x="63" y="578" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">digest · result JSON</text>
+<text x="63" y="600" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Wyniki przyjętych operacji</text>
+<rect x="530" y="500" width="425" height="180" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="742.5" y="529" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">invites</text>
+<text x="548" y="556" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">code PK</text>
+<text x="548" y="578" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">trip_id UNIQUE</text>
+<text x="548" y="600" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Jeden aktualny kod wyjazdu</text>
+<text x="45" y="714" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Linia ciągła: fizyczna relacja FK. Linia przerywana: relacja logiczna kontrolowana w kodzie.</text>
+<text x="45" y="739" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">MySQL: InnoDB / utf8mb4. SQLite: FK włączone / WAL. Typy szczegółowe: baza-danych.md.</text>
+</svg>

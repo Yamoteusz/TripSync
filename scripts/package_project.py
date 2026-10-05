@@ -7,7 +7,7 @@ root = Path(__file__).resolve().parent.parent
 output = root / 'output'
 apk = output / 'apk/TripSync-debug.apk'
 pdf = output / 'pdf/TripSync_dokumentacja_projektu.pdf'
-for artifact in [apk, pdf, root / 'docs/test-results.json']:
+for artifact in [apk, pdf, root / 'docs/test-results-1.2.json']:
     if not artifact.is_file():
         raise RuntimeError(f'Brak wymaganego pliku: {artifact}')
 bundle = output / 'TripSync-history.bundle'

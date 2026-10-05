@@ -1,4 +1,6 @@
-# API REST
+# API REST - kontrakt backendu 1.1.0
+
+Android 1.2.0 zachowuje kontrakt API 1.1.0. Endpoint `/health` raportuje wersję backendu, a nie interfejsu.
 
 JSON UTF-8; wszystkie endpointy poza health i uwierzytelnianiem wymagają `Authorization: Bearer TOKEN`. Odpowiedź błędu HTTP zawiera `message`. Limit treści żądania: 256 KiB. Żądania nie mają interfejsu CORS dla przeglądarki; klientem jest aplikacja Android.
 
@@ -38,7 +40,7 @@ Rodzaje rekordów: trip, member, event, task, proposal, vote, expense, budget, s
 
 `member` powstaje wyłącznie po utworzeniu wyjazdu lub dołączeniu przez zaproszenie. API operacji dopuszcza tylko usunięcie uczestnika przez organizatora. Nie ma endpointu zmiany właściciela.
 
-## Rekordy wersji 1.1
+## Payloady obsługiwane przez Android 1.2
 
 - `expense`: dodatkowe opcjonalne `category`: transport, accommodation, food, activities, shopping, other. Starszy rekord bez pola traktowany jest jako other.
 - `budget`: stały `recordId=budget:tripId`, `limit` i mapa `categoryLimits` (kwoty całkowite w groszach/centach). Jeden budżet wyjazdu; zapis/usunięcie/przywrócenie tylko przez organizatora. Suma limitów kategorii ≤ limit całkowity.
@@ -54,6 +56,29 @@ Android używa oddzielnych klientów Retrofit bez tokenu TripSync:
 
 - `https://geocoding-api.open-meteo.com/v1/search?name=...&count=8&language=pl` — miejscowości.
 - `https://api.open-meteo.com/v1/forecast?latitude=...&longitude=...&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=7` — prognoza.
-- `https://tile.openstreetmap.org/{z}/{x}/{y}.png` — kafelki, standardowy cache WebView, identyfikujący User-Agent TripSync/1.1, widoczna atrybucja, brak masowego pobierania.
+- `https://tile.openstreetmap.org/{z}/{x}/{y}.png` — kafelki, standardowy cache WebView, identyfikujący User-Agent TripSync/<wersja aplikacji>, widoczna atrybucja, brak masowego pobierania.
 
 Źródła: [Open-Meteo](https://open-meteo.com/en/docs), [geokodowanie](https://open-meteo.com/en/docs/geocoding-api), [polityka kafelków](https://operations.osmfoundation.org/policies/tiles/). Darmowe Open-Meteo jest przeznaczone do niekomercyjnego użycia i ma limity oraz brak SLA. Współrzędne wybranego miejsca są przekazywane tym dostawcom po użyciu mapy/prognozy; lokalizacja telefonu nie jest pobierana.
+
+## Odpowiedzi HTTP
+
+| Status | Znaczenie |
+|---|---|
+| 200 | Sukces, także batch z wynikami poszczególnych operacji |
+| 400 | Błędny JSON lub dane żądania |
+| 401 | Brak tokenu, błędna lub wygasła sesja |
+| 403 | Brak wymaganych uprawnień |
+| 404 | Nieznany endpoint lub zasób |
+| 429 | Limit prób rejestracji/logowania |
+| 503 | Chwilowa niedostępność bazy lub I/O |
+| 500 | Inny błąd serwera, bez ujawniania szczegółów |
+
+Status wyniku operacji `conflict` nie jest osobnym HTTP 409: batch odpowiada 200, a klient odczytuje `results[].status`. Autoryzacja całego żądania jest sprawdzana przed obsługą paczki.
+
+Przykład publicznego endpointu bez sekretów:
+
+```sh
+curl https://tripsync.wisp.uno/health
+```
+
+Dokładny model rekordu i schemat bazy opisuje `baza-danych.md`.

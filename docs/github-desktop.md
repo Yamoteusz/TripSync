@@ -1,40 +1,25 @@
-# Publikacja TripSync przez GitHub Desktop
+# GitHub Desktop i aktualizacje zespołu
 
-Projekt ma już lokalne repozytorium Git i historię zmian. Publikuj istniejący katalog, zachowując podział na `app`, `backend`, `docs`, `deploy` i `scripts`.
+Repozytorium jest skonfigurowane jako [Yamoteusz/TripSync](https://github.com/Yamoteusz/TripSync), gałąź main. Zachowujemy istniejącą historię; nie trzeba ponownie publikować repozytorium pod inną nazwą.
 
-## Pierwsza publikacja
+## Lokalny katalog
 
-1. W GitHub Desktop zaloguj się na swoje konto.
-2. Wybierz **File → Add Local Repository…** i wskaż katalog `Android`, zawierający ten README oraz katalog `.git`. Nie wybieraj samego `app` ani rozpakowanego ZIP-a.
-3. Kliknij **Add Repository**. Sprawdź, że aktywna gałąź to `main`.
-4. Kliknij **Publish repository**, wpisz nazwę `TripSync` i pozostaw **Keep this code private**.
-5. Kliknij **Publish Repository**. Link do opublikowanego repozytorium możesz dodać do dokumentacji projektu.
-6. Zaproś dwie pozostałe osoby w ustawieniach repozytorium na GitHubie. Wispbyte połącz z tym repozytorium i gałęzią `main`.
+W GitHub Desktop wybierz File → Add Local Repository i katalog zawierający README, app, backend i `.git`. Nie dodawaj osobno `app` ani rozpakowanego ZIP-a. Gdy nowe commity już istnieją lokalnie, kliknij **Push origin**. Gdy dopiero zmieniłeś pliki, najpierw wykonaj commit z opisem rzeczywistej zmiany.
 
-Nie skonfigurowano jeszcze zdalnego repozytorium ani publikacji. Logowanie do GitHub Desktop i wybór konta wykonuje właściciel.
+## Praca trzech osób
 
-## Kolejne aktualizacje
+Przed pracą Fetch origin i Pull origin. Przy równoległym rozwijaniu używajcie osobnych gałęzi i pull requestów. Przykład nazwy: `codex/plan-kalendarz`. Włączcie dostęp pozostałych osób oraz prowadzącego, jeśli repozytorium jest prywatne. Podział odpowiedzialności opisuje `organizacja-pracy.md`, a faktyczny wkład należy wpisać do `AUTHORS.md`.
 
-Przed rozpoczęciem pracy wybierz **Fetch origin**, a następnie **Pull origin**, jeśli są zmiany zespołu. Po wykonaniu i sprawdzeniu konkretnej funkcji zaznacz jej pliki w zakładce **Changes**, wpisz opis w **Summary**, kliknij **Commit to main**, a następnie **Push origin**. Commit zapisuje zmiany lokalnie; push wysyła je na GitHub. Nie twórz fikcyjnych commitów przez wysyłanie gotowych folderów w odstępach czasu.
+Commit zapisuje stan lokalnie, push publikuje go na GitHubie, a aktualizacja Wispbyte pobiera zdalny kod. Nie tworzymy fikcyjnej historii przez rozłożone w czasie wysyłanie gotowych folderów.
 
-Przy równoległej pracy twórzcie osobne gałęzie i pull requesty. Przed połączeniem sprawdzajcie wyniki **Actions → Project checks**. Workflow buduje debug APK, uruchamia testy jednostkowe Android, lint i testy backendu. APK można pobrać z artefaktów zakończonego przebiegu. Testy emulatora pozostają osobnym krokiem opisanym w README. Workflow został przygotowany lokalnie; pierwszy rzeczywisty przebieg nastąpi po publikacji.
+## GitHub Actions
 
-## Pliki lokalne
+Workflow `.github/workflows/checks.yml` wykonuje testy backendu, kontrolę składni Python, debug APK, testy jednostkowe Android oraz lint. Publikuje artefakty TripSync-debug i android-reports. Nie uruchamia testów emulatora i nie wdraża automatycznie backendu. Wyniki lokalne dokumentacji nie są dowodem udanego przebiegu Actions; jego stan należy sprawdzić na GitHubie.
 
-`.gitignore` wyklucza bazę i kopie, `.env`, pliki podpisu aplikacji, lokalną ścieżkę SDK, cache, APK oraz pliki budowania. Plik `gradle/gradle-daemon-jvm.properties` wygenerowany przez Android Studio pozostaje lokalny; wymagania JDK opisano w README.
+## Co nie trafia do historii
 
-Przykłady `*.env.example` są szablonami z pustym hasłem. Pliki `*.env.example` nie są odczytywane automatycznie; skopiuj wzór do `.env` na serwerze. Hasło MySQL wpisz jako `TRIPSYNC_MYSQL_PASSWORD` w zmiennych Wispbyte. Nie umieszczaj go w komendzie startowej ani w GitHubie.
+Bazy i kopie, `.env`, hasła, tokeny, klucze podpisu, local.properties, cache, pliki budowania i APK. `gradle/gradle-daemon-jvm.properties` pozostaje lokalny. Przykłady env są szablonami bez hasła; nie są automatycznie odczytywane. PDF, screeny i raporty dokumentacyjne są wersjonowane.
 
-## Wispbyte z MySQL
+## Aktualizacja hostingu
 
-Po podłączeniu repozytorium do serwera ustaw Python 3.10+ i komendę:
-
-```sh
-python3 -m pip install -r requirements.txt && python3 main.py
-```
-
-Zmienne: `TRIPSYNC_DATABASE_ENGINE=mysql`, dane połączenia i hasło z panelu bazy, oraz `PORT` z przydziału serwera aplikacji. Port bazy `3306` nie jest portem API. Domenę HTTPS przypisz do API zgodnie z [instrukcją Wispbyte](wispbyte.md).
-
-Aktualizacja kodu z repozytorium nie zawiera danych MySQL i nie kasuje istniejących tabel. Przed wdrożeniem zachowaj kopię bazy; po pierwszym wdrożeniu sprawdź rejestrację, zapis wyjazdu oraz odczyt po restarcie. Pierwsze wdrożenia uruchamiaj ręcznie z panelu po sprawdzeniu zmian.
-
-Instrukcje GitHub Desktop: [dodanie lokalnego repozytorium](https://docs.github.com/en/desktop/adding-and-cloning-repositories/adding-a-repository-from-your-local-computer-to-github-desktop), [publikacja istniejącego projektu](https://docs.github.com/en/desktop/adding-and-cloning-repositories/adding-an-existing-project-to-github-using-github-desktop).
+Po Push origin uruchom lub zrestartuj Wispbyte zgodnie z [wispbyte.md](wispbyte.md). Zachowaj domyślny startup uruchamiający main.py oraz konfigurację Environment. Publikacja plików app nie instaluje nowego Androida na telefonie: aplikację aktualizuje się przez Run albo APK.

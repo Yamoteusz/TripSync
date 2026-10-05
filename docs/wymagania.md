@@ -1,70 +1,56 @@
 # Cel, zakres i wymagania
 
-## Cel
+## Cel projektu
 
-TripSync porządkuje wspólne wyjazdy w jednym miejscu i zapewnia dostęp do danych podczas braku sieci. Odbiorcami są niewielkie grupy znajomych. Projekt sprawdza projektowanie, implementację, testowanie i dokumentowanie aplikacji Android, w rozszerzonym zakresie dla trzech osób.
+TripSync porządkuje organizację podróży niewielkich grup znajomych: plan, zadania, pomysły i wspólne koszty. Projekt sprawdza projektowanie, implementację, testowanie oraz dokumentowanie aplikacji Android w zakresie dla trzech osób. Stan: Android 1.2.0, backend API 1.1.0. Zakres nie obejmuje monetyzacji.
+
+## Role i odbiorcy
+
+Gość może utworzyć konto, zalogować się lub skorzystać z demo. Uczestnik współpracuje przy planie, zadaniach, pomysłach, miejscach i kosztach. Organizator ma dodatkowe uprawnienia do zarządzania wyjazdem, zaproszeniami, uczestnikami i budżetem. System Android wykonuje zadania WorkManager i lokalne powiadomienia. Uprawnienia opisuje macierz w `przypadki-uzycia.md`.
 
 ## Wymagania funkcjonalne
 
 | ID | Wymaganie | Kryterium odbioru |
 |---|---|---|
-| F01 | Rejestracja, logowanie i wylogowanie | Walidacja adresu i hasła, szyfrowana lokalna sesja, wyczyszczenie danych po wylogowaniu |
-| F02 | CRUD wyjazdów | Nazwa, miejsce, daty, waluta i opis; edycja/usunięcie tylko przez organizatora |
-| F03 | Uczestnicy i zaproszenia | Dołączenie przez 12-znakowy kod lub link; unieważnienie poprzedniego kodu |
-| F04 | CRUD harmonogramu | Data w terminie wyjazdu, godzina, miejsce, opis, kolejność i status wykonania |
-| F05 | Propozycje i głosowanie | Dodawanie/edycja/usuwanie propozycji, jeden głos użytkownika na propozycję, cofnięcie głosu |
-| F06 | Przeniesienie propozycji do planu | Powstaje punkt planu, propozycja znika z listy po potwierdzeniu formularza |
-| F07 | Zadania i pakowanie | CRUD, dwie kategorie, osoba odpowiedzialna, status wykonania |
-| F08 | CRUD wydatków | Kwota, data, płatnik, wybrani uczestnicy; podział równy lub własne kwoty |
-| F09 | Salda i rozliczenia | Dokładność najmniejszej jednostki waluty, suma sald zero, propozycje przelewów |
-| F10 | Offline i trwałość | CRUD lokalnie bez sieci; dane odtwarzane po ponownym uruchomieniu |
-| F11 | Synchronizacja i konflikty | Kolejka, ponowienia bez duplikatów, wykrywanie wersji, wybór lokalnej/zdalnej wersji |
-| F12 | Powiadomienia lokalne | Włączanie dla punktu/zadania, anulowanie po wykonaniu/usunięciu, zgoda systemowa |
-| F13 | Nawigacja i ustawienia | Stan formularza po odtworzeniu aktywności, jasny/ciemny motyw zapisany w DataStore |
-| F14 | Obsługa błędów | Komunikaty walidacji, sieci i serwera; status oczekujących/odrzuconych zmian |
-| F15 | Prezentacja i udostępnianie | Edytowalny przykład bez konta, eksport planu przez systemowe udostępnianie |
+| F01 | Rejestracja, logowanie, wylogowanie | Walidacja, sesja lokalna i unieważnienie tokenu przy wylogowaniu online |
+| F02 | CRUD wyjazdów | Nazwa, cel, daty, waluta i opis; edycja/usunięcie przez organizatora |
+| F03 | Uczestnicy i zaproszenia | Kod 12 znaków lub link; rotacja kodu i kontrola dostępu |
+| F04 | CRUD harmonogramu | Data w terminie wyjazdu, godzina, miejsce, kolejność i wykonanie |
+| F05 | Propozycje i głosy | CRUD propozycji, jeden własny głos na propozycję, cofnięcie i ponowne oddanie |
+| F06 | Propozycja do planu | Po potwierdzeniu formularza powstaje punkt i znika propozycja |
+| F07 | Zadania i pakowanie | CRUD, kategoria, osoba, wykonanie i opcjonalne przypomnienie |
+| F08 | Wydatki | CRUD, płatnik, data, uczestnicy, podział równy lub kwoty własne |
+| F09 | Rozliczenia | Dokładność groszy, suma sald zero i propozycje przelewów |
+| F10 | Offline i trwałość | Lokalny zapis bez sieci, ponowny odczyt po uruchomieniu |
+| F11 | Synchronizacja | Kolejka, ponowienia bez duplikatów, wersje oraz wybór wersji przy konflikcie |
+| F12 | Powiadomienia lokalne | Przypomnienie punktu/zadania, anulowanie po wykonaniu/usunięciu |
+| F13 | Stan i ustawienia | Zachowanie formularza po odtworzeniu aktywności, motyw i adres API w DataStore |
+| F14 | Obsługa błędów | Walidacja, komunikaty sieci/serwera i stan odrzuconych operacji |
+| F15 | Demo i udostępnianie | Edytowalny przykład offline oraz udostępnienie tekstowego planu |
+| F16 | Budżet | CRUD limitu całkowitego i kategorii przez organizatora |
+| F17 | Kategorie i lista kosztów | Sześć kategorii, zestawienie, filtr, wyszukiwanie i sortowanie |
+| F18 | Spłaty | CRUD własnych spłat; salda uwzględniają spłatę częściową i nadpłatę |
+| F19 | Historia zmian | Autorytatywne wpisy serwera z autorem i czasem, odczyt bez edycji klienta |
+| F20 | Miejsca | CRUD współrzędnych, mapa wspólna i otwarcie w zewnętrznych mapach |
+| F21 | Wyszukiwanie | Geokodowanie miejscowości i zapis wyniku jako miejsce |
+| F22 | Prognoza | 7 dni, temperatury, opis oraz szansa opadów |
+| F23 | Cache pogody | Ostatni wynik i daty dostępne po błędzie sieci |
+| F24 | Daty i godziny | Kalendarz i zegar 24-godzinny; w bazie ISO, prezentacja po polsku |
+| F25 | Ochrona formularza | Potwierdzenie odrzucenia zmian w głównym edytorze przy cofnięciu |
+| F26 | Widoki wyjazdów i planu | Wyszukiwanie, aktywne/zakończone wyjazdy, plan według dni |
 
 ## Wymagania niefunkcjonalne
 
-| ID | Wymaganie | Realizacja |
+| ID | Wymaganie | Realizacja i granice |
 |---|---|---|
-| N01 | Material Design 3 i responsywność | Compose, przewijanie, ograniczenie maksymalnej szerokości, elastyczne wiersze |
-| N02 | Modularność | UI / domain / data, ViewModel i repozytorium, odrębny backend |
-| N03 | Asynchroniczność | Coroutines, Flow, suspend Room/Retrofit, WorkManager; brak sieci na głównym wątku |
-| N04 | Odporność na konfigurację | ViewModel, rememberSaveable, nawigacja Compose, trwały Room |
-| N05 | Ochrona danych | Keystore, HTTPS, prywatny katalog, brak backupu, autoryzacja serwera |
-| N06 | Dostępność | Material components, opisy przycisków ikonowych, etykiety pól, kontrast i skalowanie tekstu |
-| N07 | Testowalność | Testy domeny, testy backendu, testy Compose i rzeczywistej synchronizacji |
-| N08 | Możliwość rozbudowy | Typowane payloady, repozytorium, wersjonowany schemat bazy |
-| N09 | Wersjonowanie i dokumentacja | Git, instrukcja startu, diagramy, screeny, raport testów i APK |
+| N01 | Material 3 i responsywność | Compose, motywy, przewijanie, maksymalna szerokość i kompaktowe pickery; szeroka weryfikacja tabletów pozostaje do wykonania |
+| N02 | Architektura i modularność | MVVM, foldery ui/domain/data i odrębny backend; jedna aplikacja Gradle, nie pełna Clean Architecture |
+| N03 | Asynchroniczność | Coroutines, Flow, suspend Room/Retrofit i I/O poza głównym wątkiem |
+| N04 | Zmiana konfiguracji | ViewModel i rememberSaveable; test odtworzenia aktywności, bez pełnej macierzy wszystkich konfiguracji |
+| N05 | Ochrona danych | Keystore, HTTPS, kontrola dostępu i walidacja; baza Room bez SQLCipher |
+| N06 | Dostępność | Etykiety pól i ikon funkcyjnych, kontrast i większa czcionka; audyt TalkBack pozostaje do wykonania |
+| N07 | Testy | Domena Kotlin, backend, Compose UI i integracja REST |
+| N08 | Rozbudowa | Typowane modele, wersjonowane operacje, repozytorium i eksport schematu Room |
+| N09 | Git i dokumentacja | Historia, README, diagramy, testy, screeny, PDF i APK |
 
-## Role
-
-Gość loguje się lub uruchamia demo. Uczestnik dołącza i współpracuje przy planie, zadaniach, propozycjach i kosztach. Organizator dodatkowo zarządza wyjazdem i uczestnikami. System Android wykonuje synchronizację w tle i przypomnienia.
-
-## Zakres trzyosobowy
-
-| Obszar | Odpowiedzialność zespołowa |
-|---|---|
-| Konta, backend, wyjazdy, uprawnienia | Obszar osoby 1 |
-| Harmonogram, zadania, głosowanie, interfejs | Obszar osoby 2 |
-| Wydatki, rozliczenia, offline i synchronizacja | Obszar osoby 3 |
-
-Każdy obszar obejmuje własne testy i dokumentację. Jest to proponowany podział odpowiedzialności, nie oświadczenie o autorstwie konkretnych osób.
-
-## Rozszerzenie 1.1 — zakres dla trzech osób
-
-| ID | Wymaganie |
-|---|---|
-| F16 | CRUD budżetu i limitów kategorii przez organizatora; wskaźniki oraz ostrzeżenia o przekroczeniu |
-| F17 | Sześć kategorii wydatków, zestawienie kategorii i filtr |
-| F18 | CRUD własnych deklaracji spłat, przeliczenie sald i pozostałych rozliczeń |
-| F19 | Historia zaakceptowanych operacji z autorem i czasem, tylko do odczytu |
-| F20 | Wspólne miejsca: CRUD współrzędnych, mapa i otwarcie zewnętrznej nawigacji |
-| F21 | Wyszukiwanie miejscowości przez API i zapis wyniku jako miejsce |
-| F22 | Prognoza Open-Meteo na 7 dni: min/max temperatur, opis i prawdopodobieństwo opadów |
-| F23 | Cache prognozy z datą, obsługa błędów i informacja o starej prognozie |
-| N10 | Bezpłatny wariant hostingu WSGI z trwałym plikiem SQLite i instrukcją kopii/aktualizacji |
-| N11 | Mapa z atrybucją, bez kluczy w kodzie i bez masowego pobierania kafelków |
-
-Spłata jest deklaracją użytkownika, nie transakcją bankową. Wyszukiwanie obejmuje miejscowości; dokładne punkty POI można dodać współrzędnymi. Mapa wymaga internetu do kafelków; prognoza nie sięga odległych terminów wyjazdu. Konta hostingu oraz publiczny adres nie są automatycznie zakładane.
+Dowody i status wymagań prowadzącego: `zgodnosc.md`. Ograniczenia i funkcje przyszłe: `ograniczenia.md`. Dane autorów oraz rzeczywisty wkład: `AUTHORS.md`.

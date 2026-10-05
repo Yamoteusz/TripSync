@@ -56,6 +56,6 @@
   "limits": [
     "Device checks were performed on API 29; this is not an exhaustive audit of all Android versions or every possible defect.",
     "APK uses a development debug signing key.",
-    "The PDF for 1.1 is retained as the previous release documentation."
+    "Documentation PDF updated for version 1.2.0; previous 1.1 screenshots and test results remain archival."
   ]
 }

@@ -24,4 +24,4 @@ Pakiet Android pozostaje `pl.tripsync`, versionCode to 3, a versionName to 1.2.0
 
 ## Weryfikacja
 
-Dokładne wyniki i zakres testów znajdują się w `test-results-1.2.json`; raporty w `output/reports/ui-1.2/`. Zrzuty przedstawiają działający emulator API 29 i przykładowe dane demo, w `screenshots-1.2/`. Dokumentacja PDF 1.1 pozostaje materiałem poprzedniego wydania; ten plik opisuje zmiany 1.2.
+Dokładne wyniki i zakres testów znajdują się w `test-results-1.2.json`; raporty w `output/reports/ui-1.2/`. Zrzuty przedstawiają działający emulator API 29 oraz dane demonstracyjne i izolowane środowisko testowe, w `screenshots-1.2/`. Dokumentacja zbiorcza PDF została uaktualniona do Android 1.2.0. Starsze screeny i raporty są archiwalne; ten plik opisuje zakres zmian UI.

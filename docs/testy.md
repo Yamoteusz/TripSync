@@ -1,64 +1,71 @@
-# Raport testów
+# Testowanie i wyniki wersji 1.2
 
-Wykonano 04.10.2026. Wszystkie opisane poniżej wyniki pochodzą z uruchomionych testów, a nie z planu testowania.
+## Wykonane sprawdzenia
+
+Wyniki zachowane z 05.10.2026. To raport z wykonanych przebiegów, nie plan przyszłych testów.
 
 | Grupa | Liczba | Niepowodzenia |
 |---|---:|---:|
-| Backend Python | 22 | 0 |
-| Domena Kotlin / JUnit | 18 | 0 |
-| Android: UI i integracja REST | 16 | 0 |
-| Razem | 56 | 0 |
+| Backend Python | 37 | 0 |
+| Jednostkowe Android / Kotlin | 21 | 0 |
+| Android: UI, integracja REST i cache pogody | 20 | 0 |
+| Razem, unikalne testy | 78 | 0 |
 
-`assembleDebug` zakończone powodzeniem. Końcowy Android Lint: 0 błędów, 1 ostrzeżenie informujące o nowszej wersji Lifecycle. Końcowe budowanie i Lint wykonano z `--offline`; zdalne sprawdzanie najnowszych wersji bibliotek nie jest częścią tego przebiegu. Nie użyto baseline ani wyłączenia błędów Lint. Lokalnie oznaczono wymagane przez Leaflet włączenie JavaScript; WebView renderuje własny HTML bez mostka Android.
+Dodatkowo powtórzono wybór daty i godziny na ekranie 320 dp ze skalą czcionki 1.3 oraz pokaz głównych widoków ze sprawdzeniem kontrastu systemowych pasków w ciemnym motywie. Powtórzenia nie zwiększają liczby 78. Budowanie zakończyło się powodzeniem. Lint: 0 błędów i 16 ostrzeżeń wyłącznie o dostępnych aktualizacjach Gradle oraz zależności.
 
-## Środowisko
+Po poprawce katalogu kompilacji na macOS ponownie wykonano świeże budowanie i 21 testów jednostkowych, a następnie powtórne budowanie bez dodatkowej konfiguracji ścieżki. Oba przebiegi zakończyły się powodzeniem; nowe pliki nie miały kopii ` 2.class` / ` 3.class`.
 
-Android Emulator Medium_Phone, Android 10 / API 29, ARM64, 1080 × 2400, gęstość 420 dpi. SDK kompilacji 36.1, AGP 9.1.1, Gradle 9.3.1, JDK 21. Python 3.13. Backend testowany na localhost:8080; klient emulatora używa 10.0.2.2:8080.
+## Środowisko i dowody
 
-Pliki budowania umieszczono poza katalogiem synchronizowanym przez usługę chmurową, przez opcję `-PtripsyncBuildRoot=/private/tmp/tripsync-build`. Jest to lokalna opcja uruchomienia, nie zależność projektu od tego katalogu.
+API 29 / Android 10, ARM64, 1080 × 2400 px, 420 dpi; wariant kompaktowy 840 × 1470 px i font scale 1.3. Kompilacja: SDK 36.1, AGP 9.1.1, Gradle 9.3.1, JDK 21. Backend testów: Python 3.13 i osobna lokalna SQLite. Testy integracji nie tworzyły kont na publicznym serwerze.
 
-## Domena: 18 testów
+- Wyniki maszynowe: `docs/test-results-1.2.json`.
+- JUnit XML, logi budowania i Lint HTML/XML/TXT: `output/reports/ui-1.2/`.
+- Zrzuty działającego interfejsu: `docs/screenshots-1.2/`.
+- Poprzednie wyniki w `docs/test-results.json`, `docs/screenshots/` oraz raportach poza `ui-1.2/` są archiwalne.
 
-- Dokładne odczytanie kwot z kropką i przecinkiem; graniczna dopuszczalna kwota.
-- Odrzucenie zera, liczb ujemnych, nadmiernej precyzji, NaN, notacji naukowej i przepełnienia.
-- Podział 101 groszy na trzy osoby bez utraty reszty.
-- Salda i przelewy dla kosztów 720 PLN i 180 PLN.
-- 200 deterministycznych losowych zestawów wydatków: suma sald zero, wszystkie salda wyzerowane po przelewach, brak ujemnych przelewów i limit n−1.
-- Odrzucenie niespójnych udziałów, pustych oraz powtórzonych uczestników.
-- Poprawne terminy i punkty planu; odrzucenie odwróconych dat, punktu poza wyjazdem, niepoprawnych dat/godzin i nazw.
+## Zakres testów jednostkowych
 
-## Backend: 22 testy
+Odczyt kwot, przecinek/kropka, precyzja, granice i przepełnienie; dokładny podział groszy, walidacja udziałów, salda i przelewy. Testy obejmują 200 deterministycznych losowych zestawów rozliczeń, spłaty częściowe, całkowite i nadpłatę. Sprawdzono budżety, współrzędne, daty i godziny. Testy dat weryfikują polskie formatowanie oraz zachowanie dnia przy zmianach strefy i przejściu czasu letniego.
 
-Hasła przechowywane jako hash z solą; sesja może zostać unieważniona. Błędne logowanie i duplikat e-mail są odrzucane. Zaproszenie dodaje uczestnika, rotacja unieważnia poprzedni kod. Obca osoba nie widzi wyjazdu, a uczestnik nie może zmienić danych wyjazdu wymagających organizatora.
+## Zakres backendu
 
-Ponowienie operacji nie tworzy duplikatu ani kolejnej wersji. Równoczesne edycje tworzą konflikt, możliwe jest ponowienie na aktualnej wersji. Usunięty punkt pozostaje tombstone. Głos można dodać, cofnąć i dodać ponownie. Nieprawidłowe wydatki, zmiana waluty po kosztach i usunięcie uczestnika z aktywnymi udziałami są odrzucane.
+Konta, hashowanie, sesje, logowanie i błędne dane; uprawnienia, zaproszenia, idempotencja, konflikty, tombstone i głosowanie; wydatki, kategorie, budżety, spłaty i historia. Dodatkowo kopia SQLite, kontrola proxy, WSGI, kontrakt HTTP, konfiguracja `.env` i adapter MySQL. Testy adaptera MySQL używają sterownika zastępczego; nie są pełnym automatycznym testem usługi MySQL Wispbyte.
 
-Usunięcie uczestnika cofa dostęp i czyści jego przypisanie do zadań. Usunięcie wyjazdu odbiera widoczność i unieważnia zaproszenie. Walidowane są daty punktów i zawężenie terminu wyjazdu. Dane i sesje zachowują się po ponownym otwarciu SQLite. Test HTTP sprawdza health, uwierzytelnione pobieranie oraz odpowiedzi 400 i 401.
+## Zakres urządzeniowy
 
-## Android: 16 testów
+CRUD wydatku i salda, walidacja formularza, głosowanie, budżet, spłata, miejsca, historia i główne ekrany. Odtwarzanie aktywności zachowuje formularz i dane. Regresje 1.2 obejmują wybór daty/godziny, ochronę przed odrzuceniem formularza, filtr kosztów po przełączeniu zakładki oraz zachowanie udziałów przy dołączeniu nowej osoby.
 
-Dziesięć testów UI: najważniejsze widoki, CRUD wydatku i aktualizacja salda, zachowanie nierównego podziału przy edycji, formularz po odtworzeniu aktywności, walidacja pustego formularza, trzykrotna zmiana głosu i odtworzenie danych po restarcie aktywności.
+Integracja REST używa dwóch niezależnych repozytoriów i kont: zapis, kolejka, synchronizacja, konflikt z wyborem obu wersji, usunięcie i cofnięcie dostępu. Test cache pogody sprawdza zachowanie zapisanej prognozy po błędzie sieci.
 
-Pięć testów rzeczywistego REST używają dwóch oddzielnych repozytoriów Android i dwóch kont: kolejka lokalna, konflikt dwóch edycji i wybór lokalnej wersji, przyjęcie wersji serwera, przesłanie usunięcia, cofnięcie uprawnień z wyczyszczeniem lokalnego wyjazdu i ponowne oddanie cofniętego głosu.
+## Jak powtórzyć testy
 
-Dodatkowo powtórzono scenariusze UI zapisujące screeny, aby pobrać obrazy przed odinstalowaniem aplikacji przez narzędzie Gradle. Nie jest on liczony drugi raz do sumy 56.
+```sh
+python3 -m unittest discover -s backend -v
+./gradlew :app:testDebugUnitTest :app:lintDebug
+```
 
-## Dowody i ograniczenia
+Do testów urządzeniowych uruchom dedykowany emulator oraz osobny serwer na porcie 8080:
 
-Raporty JUnit XML, Lint HTML/XML/TXT oraz logi budowania i backendu są dołączone w `output/reports/`. W `docs/screenshots/` znajdują się rzeczywiste zrzuty z aplikacji. Nie wykonano testów na fizycznym urządzeniu, audytu bezpieczeństwa ani testów obciążeniowych. Test odtworzenia aktywności nie jest deklarowany jako test zabicia procesu przez system. Lokalne przypomnienia nie mają gwarancji dokładnej godziny dostarczenia.
+```sh
+python3 backend/server.py --db /tmp/tripsync-test.sqlite
+```
 
-Dodatkowa weryfikacja ręczna przez ADB: `am force-stop` i ponowne uruchomienie aplikacji zachowały sesję demonstracyjną oraz wyjazd w lokalnej bazie. Podpis końcowego APK zweryfikowano narzędziem apksigner (certyfikat Android Debug).
+W drugim terminalu:
 
-## Nowe scenariusze 1.1
+```sh
+./gradlew :app:connectedDebugAndroidTest
+```
 
-Siedem nowych testów domeny: spłata częściowa i całkowita, nadpłata, zakaz spłaty do siebie, zgodność starych wydatków bez kategorii, limity budżetu i niepoprawne współrzędne.
+Testy UI wylogowują aplikację i tworzą demo, więc nie uruchamiaj ich na urządzeniu z ważnymi danymi użytkownika. Integracja ustawia adres `http://10.0.2.2:8080/`. Przy kilku emulatorach ogranicz wybór do testowego urządzenia zmienną `ANDROID_SERIAL`; nie testuj przypadkowo aktywnego telefonu.
 
-Osiem nowych testów backendu: organizator i stały identyfikator budżetu, suma limitów i odtworzenie budżetu po usunięciu; właściciel spłaty, daty, edycja i usunięcie; niezmienialna historia z autorami oraz brak duplikatów po ponowieniu/konflikcie; współrzędne i kategorie; spójna kopia SQLite i zakaz nadpisania; rozróżnienie zaufanego proxy od fałszywego X-Forwarded-For; dwa testy WSGI obejmujące rzeczywisty HTTP, konto, snapshot i odpowiedzi błędów.
+Gradle może usunąć APK po testach. Do zachowania screenów można osobno zainstalować oba APK i uruchomić runner:
 
-Trzy nowe testy UI: zapis limitu budżetu, formularz i usunięcie spłaty, dodanie miejsca oraz wpis historii. Nowy test REST synchronizuje budżet, wydatek w kategorii, miejsce i spłatę między kontami; sprawdza wyzerowanie sald, autora historii i odrzucenie usuwania cudzej spłaty.
+```sh
+adb -s EMULATOR shell am instrument -w -e class 'pl.tripsync.TripSyncUiTest#mainScreensAndRealScreenshots' pl.tripsync.test/androidx.test.runner.AndroidJUnitRunner
+adb -s EMULATOR pull /sdcard/Android/data/pl.tripsync/files/screenshots/. /tmp/tripsync-screenshots/
+```
 
-Sprawdzenie zewnętrznych API 04.10.2026: geokodowanie zwróciło Zakopane (49.29899, 19.94885), prognoza zwróciła 7 dni 04–10.10.2026, z polami temperatur, kodów pogody i opadów. To osobny test ręczny rzeczywistych HTTPS, poza sumą 56 i bez gwarancji dostępności dostawcy. Hosting PythonAnywhere i kontenery Docker nie zostały publicznie uruchomione. Wariant WSGI przetestowano lokalnie.
+## Granice weryfikacji
 
-Test cache prognozy używa kontrolowanego API: zapisuje poprawną prognozę, odtwarza repozytorium i symuluje błąd sieci, sprawdzając zachowanie wcześniejszego cache i brak wyniku dla innych współrzędnych. Test miejsca sprawdza także rzeczywistą wysokość mapy w DOM WebView (co najmniej 320 px), aby wykryć regresję pustego obszaru mapy.
-
-Ręcznie na emulatorze potwierdzono rzeczywiste kafelki OSM i marker Morskiego Oka, oraz prognozę Morskiego Oka z Open-Meteo. Zrzuty 10 i 12 dokumentują te integracje.
+Nie wykonano pełnych testów na nowszych Androidach, tablecie i fizycznym telefonie, audytu TalkBack, bezpieczeństwa ani testów obciążenia. Test `scenario.recreate()` nie jest testem zabicia procesu przez system. Starszy raport opisuje dodatkowe ręczne force-stop i odczyt demo; nie rozciągamy tego wyniku na wszystkie scenariusze wersji 1.2. Wyniki nie dowodzą braku każdego możliwego błędu.

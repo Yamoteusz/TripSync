@@ -43,7 +43,7 @@ git add app/src/main/java/pl/tripsync/ui/screens/plan
 git commit -m "fix(plan): popraw wyświetlanie kolejności punktów"
 ```
 
-Jeżeli poprawka wymaga zmiany repozytorium albo testu, dodaj je w tym samym commicie. Do publikacji wymagany jest własny adres zdalny. Ustaw go poleceniem `git remote add origin ADRES_REPOZYTORIUM`, a następnie wyślij rzeczywistą historię poleceniem `git push -u origin main`. Nie wpisuj do dokumentacji fikcyjnego linku.
+Jeżeli poprawka wymaga zmiany repozytorium albo testu, dodaj je w tym samym commicie. Repozytorium origin jest skonfigurowane jako https://github.com/Yamoteusz/TripSync. Zatwierdzone zmiany wysyłaj przez Push origin w GitHub Desktop. Faktyczny wkład trzech osób uzupełnij w AUTHORS.md.
 
 ## Zawartość paczki
 

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="390" viewBox="0 0 1000 390" role="img" aria-label="Lokalny schemat Room, wersja 1"><title>Lokalny schemat Room, wersja 1</title><rect x="0" y="0" width="1000" height="390" fill="#FFFFFF"/>
+<line x1="320" y1="175" x2="345" y2="175" stroke="#006B62" stroke-width="2" stroke-dasharray="7 5"/>
+<polygon points="345,175 335.9955289764732,179.3496553411123 335.9955289764732,170.6503446588877" fill="#006B62"/>
+<line x1="175" y1="310" x2="175" y2="343" stroke="#006B62" stroke-width="2" stroke-dasharray="7 5"/>
+<line x1="175" y1="343" x2="825" y2="343" stroke="#006B62" stroke-width="2" stroke-dasharray="7 5"/>
+<line x1="825" y1="343" x2="825" y2="310" stroke="#006B62" stroke-width="2" stroke-dasharray="7 5"/>
+<polygon points="825,310 829.3496553411123,319.0044710235268 820.6503446588877,319.0044710235268" fill="#006B62"/>
+<rect x="30" y="35" width="290" height="275" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="175.0" y="64" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">records</text>
+<text x="48" y="91" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">id PK</text>
+<text x="48" y="113" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">tripId · kind</text>
+<text x="48" y="135" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">json · version</text>
+<text x="48" y="157" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">deleted · pending</text>
+<text x="48" y="179" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Indeksy: tripId, kind</text>
+<rect x="345" y="35" width="310" height="275" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="500.0" y="64" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">operations</text>
+<text x="363" y="91" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">id PK</text>
+<text x="363" y="113" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">recordId UNIQUE</text>
+<text x="363" y="135" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">tripId · kind · json</text>
+<text x="363" y="157" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">baseVersion · deleted</text>
+<text x="363" y="179" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">createdAt</text>
+<text x="363" y="201" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Kolejka oczekujących zapisów</text>
+<rect x="680" y="35" width="290" height="275" rx="12" fill="#F2F6F0" stroke="#CEDBD3" stroke-width="2"/>
+<text x="825.0" y="64" font-family="Arial, sans-serif" font-size="19" fill="#122E38" font-weight="700" text-anchor="middle">conflicts</text>
+<text x="698" y="91" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">recordId PK</text>
+<text x="698" y="113" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">serverJson</text>
+<text x="698" y="135" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">message</text>
+<text x="698" y="157" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">invalid</text>
+<text x="30" y="375" font-family="Arial, sans-serif" font-size="16" fill="#54645E" font-weight="400" text-anchor="start">Powiązania logiczne, bez fizycznych FK. Zapis rekordu i operacji w jednej transakcji Room.</text>
+</svg>
