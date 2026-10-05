@@ -3,9 +3,11 @@ import os
 from pathlib import Path
 
 from server import Store, make_server
+from hosting_config import load_hosting_config
 
 
 def main():
+    load_hosting_config()
     port = int(os.environ.get('PORT') or os.environ.get('SERVER_PORT') or '9853')
     if not 1 <= port <= 65535:
         raise ValueError('Port musi być w zakresie 1–65535.')

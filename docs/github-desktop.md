@@ -23,7 +23,7 @@ Przy równoległej pracy twórzcie osobne gałęzie i pull requesty. Przed poł�
 
 `.gitignore` wyklucza bazę i kopie, `.env`, pliki podpisu aplikacji, lokalną ścieżkę SDK, cache, APK oraz pliki budowania. Plik `gradle/gradle-daemon-jvm.properties` wygenerowany przez Android Studio pozostaje lokalny; wymagania JDK opisano w README.
 
-Przykłady `*.env.example` są szablonami z pustym hasłem. Backend nie odczytuje ich automatycznie. Hasło MySQL wpisz jako `TRIPSYNC_MYSQL_PASSWORD` w zmiennych Wispbyte. Nie umieszczaj go w komendzie startowej ani w GitHubie.
+Przykłady `*.env.example` są szablonami z pustym hasłem. Pliki `*.env.example` nie są odczytywane automatycznie; skopiuj wzór do `.env` na serwerze. Hasło MySQL wpisz jako `TRIPSYNC_MYSQL_PASSWORD` w zmiennych Wispbyte. Nie umieszczaj go w komendzie startowej ani w GitHubie.
 
 ## Wispbyte z MySQL
 

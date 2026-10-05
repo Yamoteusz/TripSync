@@ -28,7 +28,7 @@ Wgraj także `backend/mysql_database.py` i `backend/requirements-mysql.txt`. Prz
 python3 -m pip install -r requirements.txt && python3 main.py
 ```
 
-W panelu ustaw zmienne z `backend/wispbyte.env.example`. `TRIPSYNC_MYSQL_PASSWORD` uzupełnij wyłącznie w panelu, zapisując wcześniej hasło w menedżerze haseł. Plik `.env` nie jest automatycznie odczytywany przez backend. Port API `PORT` jest niezależny od portu MySQL `3306`.
+W panelu ustaw zmienne z `backend/wispbyte.env.example`. `TRIPSYNC_MYSQL_PASSWORD` uzupełnij wyłącznie w panelu, zapisując wcześniej hasło w menedżerze haseł. Plik `.env` w głównym katalogu repozytorium jest odczytywany przez `start_hosted.py` i `main.py`. Port API `PORT` jest niezależny od portu MySQL `3306`.
 
 Backend tworzy sześć tabel w wybranej bazie. Konto potrzebuje uprawnień do tworzenia tabel i operacji SELECT/INSERT/UPDATE/DELETE. Domyślna lokalna wersja SQLite pozostaje dostępna. Istniejące dane SQLite nie są automatycznie przenoszone do MySQL; przed przełączeniem zachowaj kopię i wykonaj osobną migrację, jeśli masz już prawdziwe dane.
 
@@ -50,3 +50,12 @@ Startup panelu pobiera aktualizacje przez `git pull`, instaluje zależności z `
 Ustaw także `TRIPSYNC_DATABASE_ENGINE=mysql` i wszystkie zmienne MySQL ze wzoru `backend/wispbyte.env.example`; sam `REQUIREMENTS_FILE` nie wybiera bazy. Hasło wpisz w panelu jako `TRIPSYNC_MYSQL_PASSWORD`. Zachowaj port API przydzielony przez hosting. Po restarcie sprawdź log konsoli i endpoint `/health`, następnie zapis i odczyt wyjazdu.
 
 W przedstawionej komendzie kroki są rozdzielone średnikami, więc nieudany `git pull` lub instalacja pakietów nie zatrzyma automatycznie kolejnego kroku. Po każdym wdrożeniu sprawdź log, czy pobranie kodu i instalacja zakończyły się powodzeniem.
+
+
+## Gdzie wpisać hasło, gdy panel nie ma własnych zmiennych
+
+Domyślna komenda startowa nadal obowiązuje. W panelu plików serwera utwórz `/home/container/.env`, obok `main.py`. Skopiuj zawartość `backend/wispbyte.env.example` i wpisz hasło po `TRIPSYNC_MYSQL_PASSWORD=`. Wartości są dosłowne: nie dodawaj cudzysłowów, spacji po znaku `=` ani komentarza za hasłem. Symbole `#`, `$`, `=` i cudzysłowy będą częścią hasła. Hasło musi zajmować jeden wiersz. Ustaw zmienną panelu `REQUIREMENTS_FILE` na `requirements.txt`, żeby domyślna komenda zainstalowała zależności.
+
+Plik `.env` nie jest publikowany w Git. Utwórz go bezpośrednio na serwerze, nie edytuj publicznego wzoru hasłem. Jeśli plik powstanie na Macu, `.gitignore` również go wykluczy. Zmienne ustawione w panelu mają pierwszeństwo nad plikiem; usuń błędne istniejące wartości w panelu przed użyciem tego wariantu. Jeśli menedżer plików ukrywa pliki z kropką, włącz ich widoczność. Jeżeli panel udostępnia uprawnienia plików, ogranicz `.env` do odczytu i zapisu właściciela (`600`).
+
+Po zapisaniu pliku i pobraniu aktualizacji z GitHuba uruchom ponownie serwer. Skrypt czyta `.env` niezależnie od bieżącego katalogu roboczego. Nie wypisuje konfiguracji ani hasła do logów.
