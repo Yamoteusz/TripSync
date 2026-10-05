@@ -2,33 +2,53 @@ package pl.tripsync.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
-val Navy = Color(0xFF142C46)
-val Teal = Color(0xFF007B78)
-val Mint = Color(0xFF57D9CC)
-val Warm = Color(0xFFF0B977)
-private val Light = lightColorScheme(primary=Teal, onPrimary=Color.White, primaryContainer=Color(0xFFDAF4EF), onPrimaryContainer=Navy, secondary=Navy, secondaryContainer=Color(0xFFDAF4EF), onSecondaryContainer=Navy, onBackground=Navy, background=Color(0xFFF5F7F8), surface=Color.White, surfaceVariant=Color(0xFFE9EFF2), onSurface=Navy, onSurfaceVariant=Color(0xFF4A5C6D), outline=Color(0xFF6B7E8D))
-private val Dark = darkColorScheme(primary=Mint, onPrimary=Navy, primaryContainer=Color(0xFF194743), onPrimaryContainer=Color(0xFFDAF4EF), secondary=Color(0xFFBBCEE5), secondaryContainer=Color(0xFF194743), onSecondaryContainer=Mint, background=Color(0xFF101C29), surface=Color(0xFF182A3C), surfaceVariant=Color(0xFF283C50), onSurface=Color(0xFFE8F0F7), onSurfaceVariant=Color(0xFFB4C5D2))
+val Navy = Color(0xFF122E38)
+val Teal = Color(0xFF006B62)
+val Mint = Color(0xFFB5E9CA)
+val Warm = Color(0xFFF1BC79)
+private val Light = lightColorScheme(primary=Teal,onPrimary=Color.White,primaryContainer=Color(0xFFDFF2E7),onPrimaryContainer=Navy,secondary=Navy,secondaryContainer=Color(0xFFECE8DB),onSecondaryContainer=Navy,background=Color(0xFFF5F4EF),onBackground=Navy,surface=Color(0xFFFFFEFA),onSurface=Navy,surfaceVariant=Color(0xFFEBEEE6),onSurfaceVariant=Color(0xFF54645E),outline=Color(0xFF71817B),outlineVariant=Color(0xFFDCE2D9))
+private val Dark = darkColorScheme(primary=Mint,onPrimary=Navy,primaryContainer=Color(0xFF214A3D),onPrimaryContainer=Color(0xFFDFF2E7),secondary=Color(0xFFB8CDC4),secondaryContainer=Color(0xFF35493F),onSecondaryContainer=Mint,background=Color(0xFF111E1B),onBackground=Color(0xFFE6EEE7),surface=Color(0xFF192B25),onSurface=Color(0xFFE6EEE7),surfaceVariant=Color(0xFF2B3F35),onSurfaceVariant=Color(0xFFB5C5BA),outline=Color(0xFF81958A),outlineVariant=Color(0xFF3B5146))
+private val Type = Typography(
+    headlineLarge=TextStyle(fontWeight=FontWeight.Bold,fontSize=32.sp,lineHeight=38.sp,letterSpacing=(-1).sp),
+    headlineMedium=TextStyle(fontWeight=FontWeight.Bold,fontSize=28.sp,lineHeight=34.sp,letterSpacing=(-0.7).sp),
+    headlineSmall=TextStyle(fontWeight=FontWeight.Bold,fontSize=24.sp,lineHeight=30.sp,letterSpacing=(-0.4).sp),
+    titleLarge=TextStyle(fontWeight=FontWeight.SemiBold,fontSize=21.sp,lineHeight=28.sp),
+    titleMedium=TextStyle(fontWeight=FontWeight.SemiBold,fontSize=17.sp,lineHeight=24.sp),
+    bodyLarge=TextStyle(fontSize=16.sp,lineHeight=24.sp),
+    bodyMedium=TextStyle(fontSize=14.sp,lineHeight=21.sp),
+    bodySmall=TextStyle(fontSize=12.sp,lineHeight=18.sp),
+    labelLarge=TextStyle(fontWeight=FontWeight.SemiBold,fontSize=14.sp,lineHeight=20.sp),
+    labelMedium=TextStyle(fontWeight=FontWeight.Medium,fontSize=12.sp,lineHeight=18.sp)
+)
 
 @Composable
-fun TripTheme(dark: Boolean, content: @Composable () -> Unit) { MaterialTheme(colorScheme=if(dark) Dark else Light, content=content) }
+fun TripTheme(dark: Boolean, content: @Composable () -> Unit) {
+    MaterialTheme(colorScheme=if(dark) Dark else Light,typography=Type,shapes=Shapes(small=RoundedCornerShape(12.dp),medium=RoundedCornerShape(18.dp),large=RoundedCornerShape(24.dp)),content=content)
+}
 
 @Composable
-fun RouteLogo(modifier: Modifier = Modifier, color: Color = Teal) {
+fun RouteLogo(modifier: Modifier = Modifier, color: Color = MaterialTheme.colorScheme.primary) {
     Canvas(modifier.size(38.dp)) {
-        val points=listOf(Offset(size.width*.12f,size.height*.66f),Offset(size.width*.38f,size.height*.22f),Offset(size.width*.63f,size.height*.75f),Offset(size.width*.90f,size.height*.31f))
-        val path=Path().apply { moveTo(points[0].x,points[0].y); points.drop(1).forEach { lineTo(it.x,it.y) } }
-        drawPath(path,color,style=Stroke(width=3.dp.toPx()))
-        points.take(3).forEach { drawCircle(color,4.dp.toPx(),it) }
-        drawLine(color,points.last(),Offset(size.width*.7f,size.height*.31f),3.dp.toPx())
-        drawLine(color,points.last(),Offset(size.width*.9f,size.height*.51f),3.dp.toPx())
+        val points=listOf(Offset(size.width*.15f,size.height*.72f),Offset(size.width*.39f,size.height*.24f),Offset(size.width*.64f,size.height*.70f),Offset(size.width*.87f,size.height*.28f))
+        val path=Path().apply {moveTo(points[0].x,points[0].y);points.drop(1).forEach {lineTo(it.x,it.y)}}
+        drawPath(path,color,style=Stroke(width=size.width*.085f,cap=StrokeCap.Round,join=StrokeJoin.Round))
+        points.take(3).forEach {drawCircle(color,size.width*.075f,it)}
+        drawLine(color,points.last(),Offset(size.width*.69f,size.height*.28f),size.width*.085f,cap=StrokeCap.Round)
+        drawLine(color,points.last(),Offset(size.width*.87f,size.height*.46f),size.width*.085f,cap=StrokeCap.Round)
     }
 }

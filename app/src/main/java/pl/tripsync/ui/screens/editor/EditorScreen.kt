@@ -3,6 +3,7 @@
 package pl.tripsync.ui.screens.editor
 
 import androidx.compose.foundation.layout.*
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -40,7 +41,7 @@ fun EditorScreen(vm: TripViewModel,state: AppState,nav: NavHostController,tripId
     val oldEvent=if(kind=="event" && existing!=null) vm.decode(existing,EventData::class.java) else EventData(date=trip.startDate,rank=state.records.count {it.tripId==tripId && it.kind=="event"})
     val oldTask=if(kind=="task" && existing!=null) vm.decode(existing,TaskData::class.java) else TaskData(date=trip.startDate)
     val oldProposal=if(kind in listOf("proposal","convert") && existing!=null) vm.decode(existing,ProposalData::class.java) else ProposalData()
-    val oldExpense=if(kind=="expense" && existing!=null) vm.decode(existing,ExpenseData::class.java) else ExpenseData(date=trip.startDate,payer=state.session?.user?.id ?: "")
+    val oldExpense=if(kind=="expense" && existing!=null) vm.decode(existing,ExpenseData::class.java) else ExpenseData(date=LocalDate.now().toString(),payer=state.session?.user?.id ?: "")
     var title by rememberSaveable(recordId,kind) {mutableStateOf(when(kind) {"trip"->oldTrip.title;"event"->oldEvent.title;"task"->oldTask.title;"expense"->oldExpense.title;else->oldProposal.title})}
     var destination by rememberSaveable(recordId,kind) {mutableStateOf(oldTrip.destination)}
     var date by rememberSaveable(recordId,kind) {mutableStateOf(when(kind) {"trip"->oldTrip.startDate;"event"->oldEvent.date;"task"->oldTask.date;"expense"->oldExpense.date;else->trip.startDate})}
@@ -57,9 +58,14 @@ fun EditorScreen(vm: TripViewModel,state: AppState,nav: NavHostController,tripId
     var payer by rememberSaveable(recordId,kind) {mutableStateOf(oldExpense.payer)}
     var selected by rememberSaveable(recordId,kind) {mutableStateOf(if(oldExpense.shares.isNotEmpty()) oldExpense.shares.keys.toList() else members.map {it.userId})}
     var custom by rememberSaveable(recordId,kind) {mutableStateOf(oldExpense.amount > 0 && oldExpense.shares.isNotEmpty() && oldExpense.shares != Money.equalSplit(oldExpense.amount,oldExpense.shares.keys.toList()))}
-    var sharesText by rememberSaveable(recordId,kind) {mutableStateOf(members.map {java.math.BigDecimal.valueOf(oldExpense.shares[it.userId] ?: 0,2).toPlainString()})}
+    var sharesText by rememberSaveable(recordId,kind) {mutableStateOf(members.associate {it.userId to java.math.BigDecimal.valueOf(oldExpense.shares[it.userId] ?: 0,2).toPlainString()})}
+    var formError by rememberSaveable {mutableStateOf<String?>(null)}
     var delete by rememberSaveable {mutableStateOf(false)}
+    val draft=listOf(title,destination,date,endDate,time,place,description,currency,category,assignee,reminder.toString(),amount,expenseCategory,payer,selected.joinToString(),custom.toString(),sharesText.toSortedMap().toString())
+    val original by rememberSaveable(recordId,kind) {mutableStateOf(draft)}
+    var discard by rememberSaveable {mutableStateOf(false)}
     val busy by vm.busy.collectAsStateWithLifecycle()
+    BackHandler(enabled=busy || draft!=original) {if(!busy) discard=true}
     if(kind!="trip" && tripRecord==null) {Page("Wyjazd niedostępny") {Text("Wróć do listy wyjazdów.")};return}
     val label=when(kind) {"trip"->"wyjazd";"event","convert"->"punkt planu";"task"->"zadanie";"proposal"->"propozycję";else->"wydatek"}
     Page(if(existing==null || kind=="convert") "Dodaj $label" else "Edytuj $label",if(kind=="convert") "Propozycja zostanie przeniesiona do harmonogramu." else "Zmiany zapiszemy również bez internetu.") {
@@ -68,14 +74,14 @@ fun EditorScreen(vm: TripViewModel,state: AppState,nav: NavHostController,tripId
             when(kind) {
                 "trip" -> {
                     Field("Miejsce docelowe",destination,{destination=it})
-                    Field("Początek (RRRR-MM-DD)",date,{date=it})
-                    Field("Koniec (RRRR-MM-DD)",endDate,{endDate=it})
+                    DateField("Początek wyjazdu",date,{date=it;if(endDate<it) endDate=it})
+                    DateField("Koniec wyjazdu",endDate,{endDate=it},minimum=date)
                     Choice("Waluta wyjazdu",currency,listOf("PLN" to "PLN - polski złoty","EUR" to "EUR - euro","USD" to "USD - dolar")) {currency=it}
                     Field("Opis",description,{description=it},multiline=true)
                 }
                 "event","convert" -> {
-                    Field("Data (RRRR-MM-DD)",date,{date=it})
-                    Field("Godzina (GG:MM)",time,{time=it})
+                    DateField("Data",date,{date=it},minimum=if(kind in listOf("event","convert")) trip.startDate else null,maximum=if(kind in listOf("event","convert")) trip.endDate else null)
+                    TimeField("Godzina",time,{time=it})
                     if(savedPlaces.isNotEmpty()) Choice("Miejsca ze wspólnej mapy",place,savedPlaces.map {it.title to it.title}) {place=it}
                     Field("Miejsce",place,{place=it})
                     Field("Opis",description,{description=it},multiline=true)
@@ -86,25 +92,28 @@ fun EditorScreen(vm: TripViewModel,state: AppState,nav: NavHostController,tripId
                     Choice("Lista",category,listOf("task" to "Zadania","packing" to "Pakowanie")) {category=it}
                     Choice("Osoba odpowiedzialna",assignee,listOf("" to "Bez przypisania")+members.map {it.userId to it.name}) {assignee=it}
                     Row(verticalAlignment=Alignment.CenterVertically) {Text("Przypomnienie",Modifier.weight(1f));Switch(reminder,onCheckedChange={reminder=it})}
-                    if(reminder) {Field("Data (RRRR-MM-DD)",date,{date=it});Field("Godzina (GG:MM)",time,{time=it})}
+                    if(reminder) {DateField("Data",date,{date=it},minimum=if(kind in listOf("event","convert")) trip.startDate else null,maximum=if(kind in listOf("event","convert")) trip.endDate else null);TimeField("Godzina",time,{time=it})}
                 }
                 "proposal" -> {if(savedPlaces.isNotEmpty()) Choice("Miejsca ze wspólnej mapy",place,savedPlaces.map {it.title to it.title}) {place=it};Field("Miejsce",place,{place=it});Field("Opis",description,{description=it},multiline=true)}
                 "expense" -> {
                     Choice("Kategoria wydatku",expenseCategory,Categories.options) {expenseCategory=it}
                     Field("Kwota (${trip.currency})",amount,{amount=it},keyboard=KeyboardType.Decimal)
-                    Field("Data (RRRR-MM-DD)",date,{date=it})
+                    DateField("Data",date,{date=it},minimum=if(kind in listOf("event","convert")) trip.startDate else null,maximum=if(kind in listOf("event","convert")) trip.endDate else null)
                     Choice("Kto zapłacił?",payer,members.map {it.userId to it.name}) {payer=it}
                     Row(verticalAlignment=Alignment.CenterVertically) {Text("Własne kwoty udziałów",Modifier.weight(1f));Switch(custom,onCheckedChange={custom=it})}
                     Text(if(custom) "Udziały muszą sumować się do kwoty wydatku." else "Koszt podzielimy równo; resztę groszy rozdzielimy automatycznie.",style=MaterialTheme.typography.bodySmall)
-                    members.forEachIndexed {index,m ->
+                    members.forEach {m ->
                         Row(verticalAlignment=Alignment.CenterVertically) {Checkbox(m.userId in selected,modifier=Modifier.semantics {contentDescription="Udział w koszcie: ${m.name}"},onCheckedChange={selected=if(it) selected+m.userId else selected-m.userId});Text(m.name,Modifier.weight(1f))}
-                        if(custom && m.userId in selected) Field("Udział: ${m.name}",sharesText.getOrElse(index) {"0.00"},{value -> sharesText=sharesText.toMutableList().apply {while(size<=index) add("0.00");this[index]=value}},keyboard=KeyboardType.Decimal)
+                        if(custom && m.userId in selected) Field("Udział: ${m.name}",sharesText[m.userId] ?: "0.00",{value -> sharesText=sharesText+(m.userId to value)},keyboard=KeyboardType.Decimal)
                     }
                 }
             }
         }
+        formError?.let {ErrorNotice(it)}
         Button(onClick={
+            formError=null
             vm.action {
+                try {
                 Validation.title(title.trim())
                 when(kind) {
                     "trip" -> {
@@ -140,16 +149,18 @@ fun EditorScreen(vm: TripViewModel,state: AppState,nav: NavHostController,tripId
                         val value=Money.parse(amount);Validation.date(date)
                         require(members.any {it.userId==payer}) {"Wybierz płatnika."}
                         require(selected.isNotEmpty() && selected.all {id -> members.any {it.userId==id}}) {"Wybierz uczestników kosztu."}
-                        val split=if(custom) selected.associateWith {id -> val input=sharesText[members.indexOfFirst {it.userId==id}].trim().replace(',','.');if(input in listOf("0","0.0","0.00")) 0L else Money.parse(input)} else Money.equalSplit(value,selected)
+                        val split=if(custom) selected.associateWith {id -> val input=(sharesText[id] ?: "0.00").trim().replace(',','.');if(input in listOf("0","0.0","0.00")) 0L else Money.parse(input)} else Money.equalSplit(value,selected)
                         require(split.values.sum()==value) {"Suma udziałów musi być równa kwocie wydatku."}
                         val expense=ExpenseData(title.trim(),value,payer,split,date,expenseCategory)
                         if(existing==null) vm.repo.save(tripId,"expense",expense) else vm.repo.save(tripId,"expense",expense,recordId)
                         nav.popBackStack()
                     }
                 }
+                } catch (error: IllegalArgumentException) {formError=error.message ?: "Sprawdź dane formularza."}
             }
-        },Modifier.fillMaxWidth(),enabled=!busy) {Icon(Icons.Default.Check,null);Spacer(Modifier.width(8.dp));Text("Zapisz")}
+        },Modifier.fillMaxWidth().heightIn(min=52.dp),enabled=!busy) {Icon(Icons.Default.Check,null);Spacer(Modifier.width(8.dp));Text("Zapisz")}
         if(existing!=null && kind !in listOf("trip","convert")) TextButton(onClick={delete=true},Modifier.fillMaxWidth(),enabled=!busy) {Text("Usuń",color=MaterialTheme.colorScheme.error)}
     }
+    if(discard) AlertDialog(onDismissRequest={discard=false},title={Text("Odrzucić zmiany?")},text={Text("Ten formularz ma niezapisane zmiany.")},confirmButton={TextButton(onClick={discard=false;nav.popBackStack()}) {Text("Odrzuć zmiany")}},dismissButton={TextButton(onClick={discard=false}) {Text("Zostań")}})
     if(delete) AlertDialog(onDismissRequest={delete=false},title={Text("Usunąć element?")},text={Text("Usunięcie zostanie przekazane pozostałym uczestnikom po synchronizacji.")},confirmButton={TextButton(onClick={vm.action {vm.repo.save(tripId,kind,vm.repo.gson.fromJson(existing!!.json,com.google.gson.JsonObject::class.java),recordId,true);delete=false;nav.popBackStack()}}) {Text("Usuń")}},dismissButton={TextButton(onClick={delete=false}) {Text("Anuluj")}})
 }

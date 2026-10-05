@@ -1,0 +1,4 @@
+<resources>
+    <style name="Theme.TripSync.DatePicker" parent="android:style/Theme.Material.Light.Dialog.Alert"><item name="android:colorAccent">#006B62</item></style>
+    <style name="Theme.TripSync.DatePicker.Dark" parent="android:style/Theme.Material.Dialog.Alert"><item name="android:colorAccent">#B5E9CA</item></style>
+</resources>

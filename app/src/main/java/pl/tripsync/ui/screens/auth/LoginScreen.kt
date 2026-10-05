@@ -32,21 +32,22 @@ fun LoginScreen(vm: TripViewModel) {
     var register by rememberSaveable {mutableStateOf(false)}
     var name by rememberSaveable {mutableStateOf("")}
     var email by rememberSaveable {mutableStateOf("")}
-    var password by rememberSaveable {mutableStateOf("")}
+    var password by remember {mutableStateOf("")}
     var visible by rememberSaveable {mutableStateOf(false)}
     val busy by vm.busy.collectAsStateWithLifecycle()
-    Page("Przygoda zaczyna się tutaj","Zaplanuj wspólny wyjazd. Resztę ogarnij w TripSync.") {
+    Page("Podróżujcie razem","Plan, miejsca i wspólne koszty. Jeden spokojny plan na całą przygodę.") {
+        TravelHero("TRIPSYNC", "Więcej świata.\nMniej ustaleń.","Od pierwszego pomysłu do ostatniego rozliczenia.")
         Panel {
             RouteLogo(Modifier.size(62.dp))
             Text(if(register) "Utwórz konto" else "Witaj ponownie",style=MaterialTheme.typography.titleLarge,fontWeight=FontWeight.Bold)
             if(register) Field("Imię",name,{name=it})
             Field("E-mail",email,{email=it},keyboard=KeyboardType.Email)
             OutlinedTextField(password,onValueChange={password=it},label={Text("Hasło (min. 8 znaków)")},modifier=Modifier.fillMaxWidth(),singleLine=true,visualTransformation=if(visible) VisualTransformation.None else PasswordVisualTransformation(),keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Password),trailingIcon={IconButton(onClick={visible=!visible}) {Icon(if(visible) Icons.Default.VisibilityOff else Icons.Default.Visibility,if(visible) "Ukryj hasło" else "Pokaż hasło")}})
-            Button(onClick={vm.action {vm.repo.auth(name,email,password,register)}},Modifier.fillMaxWidth(),enabled=!busy) {Text(if(register) "Zarejestruj się" else "Zaloguj się")}
-            TextButton(onClick={register=!register},Modifier.fillMaxWidth(),enabled=!busy) {Text(if(register) "Mam już konto" else "Nie mam konta - rejestracja")}
+            Button(onClick={vm.action {vm.repo.auth(name,email,password,register)}},Modifier.fillMaxWidth().heightIn(min=52.dp),enabled=!busy) {Text(if(register) "Zarejestruj się" else "Zaloguj się")}
+            TextButton(onClick={register=!register;visible=false},Modifier.fillMaxWidth(),enabled=!busy) {Text(if(register) "Mam już konto" else "Nie mam konta - rejestracja")}
         }
         OutlinedButton(onClick={vm.action {vm.repo.demo()}},Modifier.fillMaxWidth(),enabled=!busy) {Icon(Icons.Default.Explore,null);Spacer(Modifier.width(8.dp));Text("Wypróbuj bez konta")}
-        Text("Demo zawiera przykładowy wyjazd i działa lokalnie. Współdzielenie wymaga własnego konta oraz uruchomionego API. Adres serwera ustawisz ikoną ustawień.",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
+        Text("Konto pozwala planować wspólnie z grupą. W trybie demo możesz spokojnie poznać aplikację bez rejestracji.",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

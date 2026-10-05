@@ -38,7 +38,9 @@ fun ColumnScope.MoneyContent(vm: TripViewModel, state: AppState, nav: NavHostCon
                 val settlements=state.records.filter { it.tripId==tripId && it.kind=="settlement" }
                 val paid=settlements.map { vm.decode(it,SettlementData::class.java) }
                 val budget=state.records.find { it.tripId==tripId && it.kind=="budget" }?.let { vm.decode(it,BudgetData::class.java) }
-                var filter by rememberSaveable { mutableStateOf("all") }
+                var filter by rememberSaveable(tripId) { mutableStateOf(vm.viewOptions["$tripId/money/filter"] ?: "all") }
+                var query by rememberSaveable(tripId) {mutableStateOf(vm.viewOptions["$tripId/money/query"] ?: "")}
+                var order by rememberSaveable(tripId) {mutableStateOf(vm.viewOptions["$tripId/money/order"] ?: "date")}
                 OutlinedButton(onClick={nav.navigate("budget/$tripId")},Modifier.fillMaxWidth()) {Text(if(budget==null) "Ustal budżet" else "Zobacz lub zmień budżet")}
                 val data=expenses.map {vm.decode(it,ExpenseData::class.java)}
                 AddButton("Dodaj wydatek") {editor("expense","new")}
@@ -55,7 +57,11 @@ fun ColumnScope.MoneyContent(vm: TripViewModel, state: AppState, nav: NavHostCon
                     Categories.options.forEach { (id,label) ->
                         val spent=totals[id] ?: 0L
                         val limit=budget?.categoryLimits?.get(id)
-                        Text("$label: ${Money.format(spent,t.currency)}${if(limit!=null) " / ${Money.format(limit,t.currency)}" else ""}",color=if(limit!=null && spent>limit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
+                        if(spent>0 || limit!=null) Column(verticalArrangement=Arrangement.spacedBy(6.dp)) {
+                            Row {Text(label,Modifier.weight(1f),style=MaterialTheme.typography.bodyMedium);Text(Money.format(spent,t.currency),fontWeight=FontWeight.SemiBold,color=if(limit!=null && spent>limit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)}
+                            LinearProgressIndicator(progress=if(data.sumOf {it.amount}==0L) 0f else (spent.toDouble()/data.sumOf {it.amount}).toFloat().coerceIn(0f,1f),modifier=Modifier.fillMaxWidth(),color=MaterialTheme.colorScheme.primary,trackColor=MaterialTheme.colorScheme.surfaceVariant)
+                            if(limit!=null) Text("Limit: ${Money.format(limit,t.currency)}",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
                 }
                 val balances=Money.balances(data,paid)
@@ -75,14 +81,19 @@ fun ColumnScope.MoneyContent(vm: TripViewModel, state: AppState, nav: NavHostCon
                     Text("Zapisane spłaty",style=MaterialTheme.typography.titleMedium)
                     settlements.sortedByDescending {vm.decode(it,SettlementData::class.java).date}.forEach {row ->
                         val p=vm.decode(row,SettlementData::class.java)
-                        Text("${name(p.from)} → ${name(p.to)} · ${Money.format(p.amount,t.currency)} · ${p.date}")
+                        Text("${name(p.from)} → ${name(p.to)} · ${Money.format(p.amount,t.currency)} · ${Dates.display(p.date)}")
                         if(p.note.isNotBlank()) Text(p.note,style=MaterialTheme.typography.bodySmall)
                         if(p.from==state.session?.user?.id) TextButton(onClick={nav.navigate("settlement/$tripId/${row.id}")}) {Text("Edytuj spłatę")}
                     }
                 }
-                Choice("Filtr kategorii",filter,listOf("all" to "Wszystkie")+Categories.options) {filter=it}
+                SectionTitle("Historia wydatków","Wyszukuj po nazwie, kategorii lub osobie")
+                Field("Szukaj wydatku",query,{query=it;vm.viewOptions["$tripId/money/query"]=it})
+                Choice("Kolejność",order,listOf("date" to "Najnowsze","amount" to "Najwyższa kwota","title" to "Nazwa A–Z")) {order=it;vm.viewOptions["$tripId/money/order"]=it}
+                Choice("Filtr kategorii",filter,listOf("all" to "Wszystkie")+Categories.options) {filter=it;vm.viewOptions["$tripId/money/filter"]=it}
                 if(expenses.isEmpty()) EmptyState(Icons.Default.AccountBalanceWallet,"Kto za co zapłacił?","Zapisz pierwszy koszt. TripSync policzy udziały i salda.")
-                expenses.filter {filter=="all" || (vm.decode(it,ExpenseData::class.java).category ?: "other")==filter}.sortedByDescending {vm.decode(it,ExpenseData::class.java).date}.forEach {r ->val e=vm.decode(r,ExpenseData::class.java)
-                    Panel {Row {Text(e.title,Modifier.weight(1f),fontWeight=FontWeight.SemiBold);IconButton(onClick={editor("expense",r.id)},Modifier.size(30.dp)) {Icon(Icons.Default.Edit,"Edytuj wydatek")}};Text(Money.format(e.amount,t.currency),style=MaterialTheme.typography.headlineSmall,fontWeight=FontWeight.Bold);Text(Categories.label(e.category),style=MaterialTheme.typography.labelMedium);Text("Zapłacił(a): ${name(e.payer)} · ${e.date}",style=MaterialTheme.typography.bodySmall);Text(e.shares.entries.joinToString(" · ") {"${name(it.key)}: ${Money.format(it.value,t.currency)}"},style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)}
+                val visible=expenses.filter {val e=vm.decode(it,ExpenseData::class.java);(filter=="all" || (e.category ?: "other")==filter) && (e.title.contains(query,true) || name(e.payer).contains(query,true) || Categories.label(e.category).contains(query,true))}.let {records -> when(order) {"amount" -> records.sortedByDescending {vm.decode(it,ExpenseData::class.java).amount};"title" -> records.sortedBy {vm.decode(it,ExpenseData::class.java).title.lowercase()};else -> records.sortedByDescending {vm.decode(it,ExpenseData::class.java).date}}}
+                if(expenses.isNotEmpty() && visible.isEmpty()) EmptyState(Icons.Default.Search,"Brak pasujących wydatków","Zmień wyszukiwaną nazwę lub kategorię.")
+                visible.forEach {r ->val e=vm.decode(r,ExpenseData::class.java)
+                    Panel {Row {Text(e.title,Modifier.weight(1f),fontWeight=FontWeight.SemiBold);IconButton(onClick={editor("expense",r.id)},Modifier.size(48.dp)) {Icon(Icons.Default.Edit,"Edytuj wydatek")}};Text(Money.format(e.amount,t.currency),style=MaterialTheme.typography.headlineSmall,fontWeight=FontWeight.Bold);Text(Categories.label(e.category),style=MaterialTheme.typography.labelMedium);Text("Zapłacił(a): ${name(e.payer)} · ${Dates.display(e.date)}",style=MaterialTheme.typography.bodySmall);Text(e.shares.entries.joinToString(" · ") {"${name(it.key)}: ${Money.format(it.value,t.currency)}"},style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)}
                 }
 }

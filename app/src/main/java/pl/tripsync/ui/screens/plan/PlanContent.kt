@@ -41,8 +41,9 @@ fun ColumnScope.PlanContent(vm: TripViewModel, tripId: String, events: List<Reco
                 if(events.isEmpty()) EmptyState(Icons.Default.Event,"Zaplanuj pierwszy dzień","Dodaj godzinę, miejsce i opis. Przypomnienia pomogą dotrzeć na czas.")
                 events.forEachIndexed {index,r ->
                     val e=vm.decode(r,EventData::class.java)
+                    if(index==0 || vm.decode(events[index-1],EventData::class.java).date!=e.date) SectionTitle(Dates.day(e.date),Dates.display(e.date))
                     Panel {
-                        Row(verticalAlignment=Alignment.CenterVertically) { Surface(color=MaterialTheme.colorScheme.primaryContainer,shape=RoundedCornerShape(10.dp)) {Text(e.time,Modifier.padding(10.dp),fontWeight=FontWeight.Bold)};Spacer(Modifier.width(10.dp));Text(e.date,Modifier.weight(1f),style=MaterialTheme.typography.bodySmall); Checkbox(e.done,modifier=Modifier.semantics {contentDescription="Realizacja punktu: ${e.title}"},onCheckedChange={vm.action {vm.repo.save(tripId,"event",e.copy(done=it),r.id)}}) }
+                        Row(verticalAlignment=Alignment.CenterVertically) { Surface(color=MaterialTheme.colorScheme.primaryContainer,shape=RoundedCornerShape(10.dp)) {Text(e.time,Modifier.padding(10.dp),fontWeight=FontWeight.Bold)};Spacer(Modifier.width(10.dp));Text(if(e.done) "Wykonane" else "Do zrobienia",Modifier.weight(1f),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant); Checkbox(e.done,modifier=Modifier.semantics {contentDescription="Realizacja punktu: ${e.title}"},onCheckedChange={vm.action {vm.repo.save(tripId,"event",e.copy(done=it),r.id)}}) }
                         Text(e.title,style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold)
                         if(e.place.isNotBlank()) Text(e.place,color=MaterialTheme.colorScheme.onSurfaceVariant)
                         if(e.description.isNotBlank()) Text(e.description,style=MaterialTheme.typography.bodySmall)

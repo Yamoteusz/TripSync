@@ -29,7 +29,7 @@ fun SettlementScreen(vm: TripViewModel, state: AppState, nav: NavHostController,
             Text("Od: ${members.find { it.userId == old.from }?.name ?: "Były uczestnik"}")
             Choice("Komu oddano pieniądze?", to, members.filter { it.userId != old.from }.map { it.userId to it.name }) { to = it }
             Field("Kwota ($currency)", amount, { amount = it }, keyboard = KeyboardType.Decimal)
-            Field("Data spłaty (RRRR-MM-DD)", date, { date = it })
+            DateField("Data spłaty", date, { date = it }, maximum=LocalDate.now().toString())
             Field("Notatka", note, { note = it }, multiline = true)
         }
         if (permitted) {

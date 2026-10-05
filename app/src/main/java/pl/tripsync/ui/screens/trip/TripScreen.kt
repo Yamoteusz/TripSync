@@ -56,32 +56,25 @@ fun TripScreen(vm: TripViewModel,state: AppState,nav: NavHostController,tripId: 
     val context=LocalContext.current
     var deleting by rememberSaveable {mutableStateOf(false)}
     val editor:(String,String)->Unit={kind,id -> nav.navigate("edit/$tripId/$kind/$id")}
-    Page(when(tab) {"plan"->"Plan podróży"; "tasks"->"Zadania i pakowanie";"ideas"->"Pomysły grupy";"money"->"Wspólne koszty";else->t.title},"${t.destination} · ${t.startDate} - ${t.endDate}") {
+    Page(when(tab) {"plan"->"Plan podróży"; "tasks"->"Zadania i pakowanie";"ideas"->"Pomysły grupy";"money"->"Wspólne koszty";else->t.title},"${t.destination} · ${Dates.range(t.startDate,t.endDate)}",positionKey="$tripId/$tab",positions=vm.scrollPositions) {
         when(tab) {
             "overview" -> {
                 SyncCard(state,nav)
-                Card(Modifier.fillMaxWidth(),colors=CardDefaults.cardColors(containerColor=Navy),shape=RoundedCornerShape(24.dp)) {
-                    Column(Modifier.padding(24.dp),verticalArrangement=Arrangement.spacedBy(10.dp)) {
-                        Icon(Icons.Default.Landscape,null,Modifier.size(48.dp),tint=Mint)
-                        Text(t.destination,style=MaterialTheme.typography.headlineSmall,color=Color.White,fontWeight=FontWeight.Bold)
-                        Text(t.description.ifBlank {"Wasz plan na wspólny czas."},color=Color(0xFFD4E3ED))
-                        Text("${members.size} osoby · ${events.size} punktów planu",color=Mint,style=MaterialTheme.typography.labelLarge)
-                    }
-                }
+                TravelHero("${members.size} osób · ${events.size} punktów planu",t.destination,t.description.ifBlank {"Wasz czas. Wasza przygoda. Wszystko, czego potrzebujecie, jest tutaj."})
                 Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(12.dp)) {
                     Stat("Wydatki",Money.format(expenses.sumOf {vm.decode(it,ExpenseData::class.java).amount},t.currency),Modifier.weight(1f))
                     Stat("Zadania", "${tasks.count {vm.decode(it,TaskData::class.java).done}} / ${tasks.size}",Modifier.weight(1f))
                 }
                 Panel {
                     Text("Najbliżej w planie",style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold)
-                    val next=events.firstOrNull {!vm.decode(it,EventData::class.java).done}
-                    if(next!=null) {val e=vm.decode(next,EventData::class.java);Text(e.title);Text("${e.date} · ${e.time} · ${e.place}",style=MaterialTheme.typography.bodySmall)} else Text("Dodaj pierwszy punkt lub odpocznij - plan wykonany.")
+                    val next=events.filter {val e=vm.decode(it,EventData::class.java);!e.done && runCatching {java.time.LocalDateTime.parse("${e.date}T${e.time}")>=java.time.LocalDateTime.now()}.getOrDefault(false)}.minByOrNull {val e=vm.decode(it,EventData::class.java);"${e.date}T${e.time}"}
+                    if(next!=null) {val e=vm.decode(next,EventData::class.java);Text(e.title);Text("${Dates.display(e.date)} · ${e.time} · ${e.place}",style=MaterialTheme.typography.bodySmall)} else Text("Brak nadchodzących punktów. Sprawdź harmonogram lub zaplanuj coś nowego.")
                     TextButton(onClick={nav.navigate("trip/$tripId/plan") {popUpTo("trips")}}) {Text("Zobacz harmonogram")}
                 }
-                OutlinedButton(onClick={nav.navigate("places/$tripId")},Modifier.fillMaxWidth()) {Text("Mapa miejsc i pogoda")}
-                OutlinedButton(onClick={nav.navigate("activity/$tripId")},Modifier.fillMaxWidth()) {Text("Historia zmian")}
-                OutlinedButton(onClick={nav.navigate("members/$tripId")},Modifier.fillMaxWidth()) {Icon(Icons.Default.Group,null);Spacer(Modifier.width(8.dp));Text("Uczestnicy i zaproszenia")}
-                OutlinedButton(onClick={share(context,buildString {append("${t.title}\n${t.destination}\n${t.startDate} - ${t.endDate}\n"); events.forEach {val e=vm.decode(it,EventData::class.java);append("\n${e.date} ${e.time} · ${e.title} · ${e.place}")}})},Modifier.fillMaxWidth()) {Text("Udostępnij plan")}
+                ActionTile("Mapa miejsc i pogoda","Zapisane miejsca i prognoza na 7 dni",Icons.Default.Map) {nav.navigate("places/$tripId")}
+                ActionTile("Historia zmian","Zobacz, co zmieniło się w grupie",Icons.Default.History) {nav.navigate("activity/$tripId")}
+                ActionTile("Uczestnicy i zaproszenia","Zaproś ekipę do wspólnego planowania",Icons.Default.Group) {nav.navigate("members/$tripId")}
+                OutlinedButton(onClick={share(context,buildString {append("${t.title}\n${t.destination}\n${Dates.range(t.startDate,t.endDate)}\n"); events.forEach {val e=vm.decode(it,EventData::class.java);append("\n${Dates.display(e.date)} ${e.time} · ${e.title} · ${e.place}")}})},Modifier.fillMaxWidth()) {Text("Udostępnij plan")}
                 if(owner) {OutlinedButton(onClick={editor("trip",tripId)},Modifier.fillMaxWidth()) {Text("Edytuj wyjazd")}; TextButton(onClick={deleting=true},Modifier.fillMaxWidth()) {Text("Usuń wyjazd",color=MaterialTheme.colorScheme.error)}}
             }
             "plan" -> PlanContent(vm,tripId,events,editor)

@@ -7,6 +7,12 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.Alignment
+import kotlinx.coroutines.delay
 import androidx.core.net.toUri
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -31,6 +37,8 @@ fun PlacesScreen(vm: TripViewModel, state: AppState, nav: NavHostController, tri
     val t = vm.decode(trip,TripData::class.java)
     val rows = state.records.filter { it.tripId == tripId && it.kind == "place" }
     val places = rows.map { vm.decode(it,PlaceData::class.java) }
+    val busy by vm.busy.collectAsStateWithLifecycle()
+    LaunchedEffect(tripId) {vm.locations.value=emptyList();vm.geoMessage.value=null}
     val results by vm.locations.collectAsStateWithLifecycle()
     val geoMessage by vm.geoMessage.collectAsStateWithLifecycle()
     val weather by vm.weather.collectAsStateWithLifecycle()
@@ -47,7 +55,7 @@ fun PlacesScreen(vm: TripViewModel, state: AppState, nav: NavHostController, tri
         AddButton("Dodaj miejsce ręcznie") { nav.navigate("place/$tripId/new") }
         Panel {
             Field("Szukaj miejscowości", query, { query = it })
-            Button(onClick = { vm.searchLocations(query) }, modifier = Modifier.fillMaxWidth()) { Text("Wyszukaj miejscowość") }
+            Button(onClick = { vm.searchLocations(query) }, modifier = Modifier.fillMaxWidth(),enabled=!busy && query.trim().length>=2) { Text("Wyszukaj miejscowość") }
             geoMessage?.let { Text(it,color=MaterialTheme.colorScheme.error) }
             results.forEach { result ->
                 Text(result.label,style=MaterialTheme.typography.titleSmall)
@@ -88,7 +96,7 @@ fun PlacesScreen(vm: TripViewModel, state: AppState, nav: NavHostController, tri
                 val daily=cached.response.daily
                 daily.time.forEachIndexed { i,date ->
                     Divider()
-                    Text("$date · ${pl.tripsync.data.weatherLabel(daily.codes.getOrElse(i){-1})}")
+                    Text("${Dates.day(date)} · ${pl.tripsync.data.weatherLabel(daily.codes.getOrElse(i){-1})}")
                     Text("${daily.minimum.getOrNull(i) ?: "–"}–${daily.maximum.getOrNull(i) ?: "–"} °C · szansa opadów ${daily.rain.getOrNull(i)?.let { "$it%" } ?: "brak danych"}",style=MaterialTheme.typography.bodySmall)
                 }
             }
@@ -102,26 +110,41 @@ fun PlacesScreen(vm: TripViewModel, state: AppState, nav: NavHostController, tri
 @SuppressLint("SetJavaScriptEnabled")
 private fun LeafletMap(places: List<PlaceData>, modifier: Modifier) {
     val context=LocalContext.current
+    var mapState by remember {mutableStateOf("loading")}
+    var generation by remember {mutableIntStateOf(0)}
+    LaunchedEffect(places,generation) {mapState="loading";delay(15000);if(mapState=="loading") mapState="error"}
     val css=remember {context.assets.open("leaflet/leaflet.css").bufferedReader().use {it.readText()}}
     val js=remember {context.assets.open("leaflet/leaflet.js").bufferedReader().use {it.readText()}}
     val html=remember(places) {
         val json=Gson().toJson(places)
-        """<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src https://tile.openstreetmap.org https://*.tile.openstreetmap.org data:;"><style>$css html,body{margin:0;padding:0}#map{height:330px;width:100%}</style></head><body><div id="map" role="img" aria-label="Mapa zapisanych miejsc"></div><script>$js
-const points=$json;const map=L.map('map').setView([52.1,19.4],5);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);points.forEach(p=>{const label=document.createElement('span');label.textContent=p.title;L.circleMarker([p.latitude,p.longitude],{radius:9,color:'#126a68',fillOpacity:0.8}).addTo(map).bindPopup(label)});if(points.length===1)map.setView([points[0].latitude,points[0].longitude],13);else if(points.length>1)map.fitBounds(points.map(p=>[p.latitude,p.longitude]),{padding:[24,24],maxZoom:15});</script></body></html>"""
+        """<!doctype html><html><head><title>map-loading</title><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src https://tile.openstreetmap.org https://*.tile.openstreetmap.org data:;"><style>$css html,body{margin:0;padding:0}#map{height:330px;width:100%}</style></head><body><div id="map" role="img" aria-label="Mapa zapisanych miejsc"></div><script>$js
+const points=$json;const map=L.map('map').setView([52.1,19.4],5);let failed=0;L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).on('loading',()=>{failed=0;document.title='map-loading'}).on('tileerror',()=>{failed++;document.title='map-error'}).on('load',()=>{document.title=failed?'map-error':'map-ready'}).addTo(map);points.forEach(p=>{const label=document.createElement('span');label.textContent=p.title;L.circleMarker([p.latitude,p.longitude],{radius:9,color:'#126a68',fillOpacity:0.8}).addTo(map).bindPopup(label)});if(points.length===1)map.setView([points[0].latitude,points[0].longitude],13);else if(points.length>1)map.fitBounds(points.map(p=>[p.latitude,p.longitude]),{padding:[24,24],maxZoom:15});</script></body></html>"""
     }
-    AndroidView(factory={ c -> WebView(c).apply {
+    Box(modifier.clip(RoundedCornerShape(24.dp))) {
+    key(generation) {AndroidView(factory={ c -> WebView(c).apply {
         if(pl.tripsync.BuildConfig.DEBUG) WebView.setWebContentsDebuggingEnabled(true)
         settings.javaScriptEnabled=true
         settings.allowFileAccess=false
         settings.allowContentAccess=false
         settings.mixedContentMode=WebSettings.MIXED_CONTENT_NEVER_ALLOW
-        settings.userAgentString="TripSync/1.1 Android " + settings.userAgentString
+        settings.userAgentString="TripSync/${pl.tripsync.BuildConfig.VERSION_NAME} Android " + settings.userAgentString
+        webChromeClient=object:WebChromeClient() {
+            override fun onReceivedTitle(view:WebView,title:String?) {when(title) {"map-loading" -> mapState="loading";"map-ready" -> mapState="ready";"map-error" -> mapState="error"}}
+        }
         webViewClient=object:WebViewClient() {
+            override fun onReceivedError(view:WebView,request:WebResourceRequest,error:WebResourceError) {if(request.isForMainFrame) mapState="error"}
             override fun shouldOverrideUrlLoading(view:WebView,request:WebResourceRequest):Boolean {
                 if(request.url.toString()=="https://tripsync.local/") return false
                 if(request.url.toString()=="https://www.openstreetmap.org/copyright") runCatching {context.startActivity(Intent(Intent.ACTION_VIEW,request.url))}
                 return true
             }
         }
-    } },update={ view -> if(view.tag!=html) {view.tag=html;view.loadDataWithBaseURL("https://tripsync.local/",html,"text/html","UTF-8",null)} },modifier=modifier,onRelease={it.stopLoading();it.destroy()})
+    } },update={ view -> if(view.tag!=html) {view.tag=html;view.loadDataWithBaseURL("https://tripsync.local/",html,"text/html","UTF-8",null)} },modifier=Modifier.fillMaxSize(),onRelease={it.stopLoading();it.destroy()})}
+    if(mapState=="loading") Surface(Modifier.align(Alignment.TopCenter).padding(12.dp),shape=RoundedCornerShape(14.dp),color=MaterialTheme.colorScheme.surface) {
+        Row(Modifier.padding(12.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(10.dp)) {CircularProgressIndicator(Modifier.size(18.dp),strokeWidth=2.dp);Text("Ładowanie mapy",style=MaterialTheme.typography.labelMedium)}
+    }
+    if(mapState=="error") Surface(Modifier.align(Alignment.BottomCenter).padding(12.dp),shape=RoundedCornerShape(16.dp),color=MaterialTheme.colorScheme.surface) {
+        Column(Modifier.padding(12.dp)) {Text("Nie udało się pobrać mapy. Zapisane miejsca są nadal dostępne.",style=MaterialTheme.typography.bodySmall);TextButton(onClick={mapState="loading";generation++}) {Text("Ponów ładowanie mapy")}}
+    }
+    }
 }

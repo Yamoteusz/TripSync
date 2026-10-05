@@ -24,7 +24,7 @@ private val Context.settings by preferencesDataStore("settings")
 class Preferences(private val context: Context) {
     private val urlKey = stringPreferencesKey("api_url")
     private val darkKey = booleanPreferencesKey("dark")
-    val url = context.settings.data.map { it[urlKey] ?: if (BuildConfig.DEBUG) "http://10.0.2.2:8080/" else "" }
+    val url = context.settings.data.map { it[urlKey] ?: "https://tripsync.wisp.uno/" }
     val dark = context.settings.data.map { it[darkKey] ?: false }
     suspend fun url() = url.first()
     suspend fun setUrl(value: String) {

@@ -48,7 +48,7 @@ fun SettingsScreen(vm: TripViewModel,state: AppState) {
                 Text(savedUrl.ifBlank {"Adres nie został ustawiony"})
                 Text("Zmiana serwera jest dostępna po wylogowaniu, aby chronić dane konta.",style=MaterialTheme.typography.bodySmall)
             }
-            Text("Emulator debug: http://10.0.2.2:8080/\nUrządzenia fizyczne: adres API przez HTTPS.",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("Domyślny serwer: tripsync.wisp.uno. Połączenie jest szyfrowane przez HTTPS.",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
         }
         if(state.session!=null) Panel {
             Text(state.session.user.name,style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold)

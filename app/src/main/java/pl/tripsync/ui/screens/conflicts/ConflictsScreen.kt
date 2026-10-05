@@ -40,11 +40,11 @@ fun ConflictsScreen(vm: TripViewModel,state: AppState) {
 }
 
 private fun friendly(vm: TripViewModel,kind: String,json: String): String = when(kind) {
-    "trip" -> vm.repo.gson.fromJson(json,TripData::class.java).let {"${it.title}\n${it.destination}\n${it.startDate} - ${it.endDate}\n${it.currency}\n${it.description}"}
-    "event" -> vm.repo.gson.fromJson(json,EventData::class.java).let {"${it.title}\n${it.date} ${it.time}\n${it.place}\n${it.description}\n${if(it.done) "Wykonane" else "Do realizacji"}"}
+    "trip" -> vm.repo.gson.fromJson(json,TripData::class.java).let {"${it.title}\n${it.destination}\n${Dates.range(it.startDate,it.endDate)}\n${it.currency}\n${it.description}"}
+    "event" -> vm.repo.gson.fromJson(json,EventData::class.java).let {"${it.title}\n${Dates.display(it.date)} ${it.time}\n${it.place}\n${it.description}\n${if(it.done) "Wykonane" else "Do realizacji"}"}
     "task" -> vm.repo.gson.fromJson(json,TaskData::class.java).let {"${it.title}\n${if(it.category=="packing") "Pakowanie" else "Zadanie"}\n${if(it.done) "Wykonane" else "Do wykonania"}"}
     "proposal" -> vm.repo.gson.fromJson(json,ProposalData::class.java).let {"${it.title}\n${it.place}\n${it.description}"}
-    "expense" -> vm.repo.gson.fromJson(json,ExpenseData::class.java).let {"${it.title}\n${java.math.BigDecimal.valueOf(it.amount,2)}\n${it.date}"}
+    "expense" -> vm.repo.gson.fromJson(json,ExpenseData::class.java).let {"${it.title}\n${java.math.BigDecimal.valueOf(it.amount,2)}\n${Dates.display(it.date)}"}
     "member" -> vm.repo.gson.fromJson(json,MemberData::class.java).name
     else -> "Głos na propozycję"
 }

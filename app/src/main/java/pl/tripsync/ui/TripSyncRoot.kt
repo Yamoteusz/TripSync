@@ -17,6 +17,12 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.activity.compose.LocalActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,12 +56,21 @@ fun TripSyncRoot(vm: TripViewModel, inviteCode: String?) {
     val busy by vm.busy.collectAsStateWithLifecycle()
     val message by vm.message.collectAsStateWithLifecycle()
     TripTheme(dark) {
+        val activity=LocalActivity.current as? ComponentActivity
+        val barColor=MaterialTheme.colorScheme.background.toArgb()
+        SideEffect {
+            activity?.enableEdgeToEdge(
+                statusBarStyle=SystemBarStyle.auto(android.graphics.Color.TRANSPARENT,android.graphics.Color.TRANSPARENT) {dark},
+                navigationBarStyle=SystemBarStyle.auto(barColor,barColor) {dark}
+            )
+        }
         if (!state.loaded) { Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center) { CircularProgressIndicator() }; return@TripTheme }
         key(state.session?.user?.id ?: "guest") {
             val nav = rememberNavController()
             val entry by nav.currentBackStackEntryAsState()
             val route = entry?.destination?.route ?: ""
             val tripId = entry?.arguments?.getString("tripId")
+            val backDispatcher=LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
             val snackbar = remember { SnackbarHostState() }
             var pendingInvite by rememberSaveable { mutableStateOf(inviteCode ?: "") }
             var joinDialog by rememberSaveable { mutableStateOf(false) }
@@ -66,12 +81,12 @@ fun TripSyncRoot(vm: TripViewModel, inviteCode: String?) {
             LaunchedEffect(message) { message?.let { snackbar.showSnackbar(it); vm.message.value=null } }
             Scaffold(
                 snackbarHost={ SnackbarHost(snackbar) },
-                topBar={ TopAppBar(title={ Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(9.dp)) { RouteLogo(Modifier.size(28.dp)); Text("TripSync",fontWeight=FontWeight.Bold) } }, navigationIcon={ if(route !in listOf("trips","login")) IconButton(onClick={ nav.popBackStack() }) { Icon(Icons.AutoMirrored.Filled.ArrowBack,"Wstecz") } }, actions={
+                topBar={ TopAppBar(colors=TopAppBarDefaults.topAppBarColors(containerColor=MaterialTheme.colorScheme.background),title={ Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(9.dp)) { RouteLogo(Modifier.size(28.dp)); Text("TripSync",fontWeight=FontWeight.Bold) } }, navigationIcon={ if(route !in listOf("trips","login")) IconButton(enabled=!busy,onClick={ backDispatcher?.onBackPressed() }) { Icon(Icons.AutoMirrored.Filled.ArrowBack,"Wstecz") } }, actions={
                     if (state.session != null) IconButton(onClick={ vm.sync() },enabled=!busy) { Icon(Icons.Default.Sync,"Synchronizuj") }
                     if (route != "settings") IconButton(onClick={ nav.navigate("settings") { launchSingleTop=true } }) { Icon(Icons.Default.Settings,"Ustawienia") }
                 }) },
                 bottomBar={ if(route == "trip/{tripId}/{tab}" && tripId != null) {
-                    NavigationBar {
+                    NavigationBar(containerColor=MaterialTheme.colorScheme.surface,tonalElevation=0.dp) {
                         listOf(Triple("overview","Wyjazd",Icons.Default.Explore),Triple("plan","Plan",Icons.Default.Event),Triple("tasks","Zadania",Icons.Default.Checklist),Triple("ideas","Pomysły",Icons.Default.Lightbulb),Triple("money","Koszty",Icons.Default.AccountBalanceWallet)).forEach { (tab,label,icon) ->
                             NavigationBarItem(selected=entry?.arguments?.getString("tab")==tab,onClick={ nav.navigate("trip/$tripId/$tab") { popUpTo("trips"); launchSingleTop=true } },icon={ Icon(icon,label) },label={ Text(label) })
                         }
@@ -100,8 +115,7 @@ fun TripSyncRoot(vm: TripViewModel, inviteCode: String?) {
                     }
                 }
             }
-            if(joinDialog) AlertDialog(onDismissRequest={joinDialog=false},title={Text("Dołącz do wyjazdu")},text={Column(verticalArrangement=Arrangement.spacedBy(12.dp)) { Text("Wpisz 12-znakowy kod od organizatora."); OutlinedTextField(value=pendingInvite,onValueChange={pendingInvite=it.uppercase()},label={Text("Kod zaproszenia")},singleLine=true) }},confirmButton={TextButton(enabled=!busy,onClick={vm.action { val id=vm.repo.join(pendingInvite); vm.repo.sync(); joinDialog=false; pendingInvite=""; nav.navigate("trip/$id/overview") }}) {Text("Dołącz")}},dismissButton={TextButton(onClick={joinDialog=false}) {Text("Anuluj")}})
+            if(joinDialog) AlertDialog(onDismissRequest={joinDialog=false},title={Text("Dołącz do wyjazdu")},text={Column(verticalArrangement=Arrangement.spacedBy(12.dp)) { Text("Wpisz 12-znakowy kod od organizatora."); OutlinedTextField(value=pendingInvite,onValueChange={pendingInvite=it.filter {character -> character.isLetterOrDigit()}.take(12).uppercase()},label={Text("Kod zaproszenia")},singleLine=true) }},confirmButton={TextButton(enabled=!busy && pendingInvite.length==12,onClick={vm.action { val id=vm.repo.join(pendingInvite); vm.repo.sync(); joinDialog=false; pendingInvite=""; nav.navigate("trip/$id/overview") }}) {Text("Dołącz")}},dismissButton={TextButton(onClick={joinDialog=false}) {Text("Anuluj")}})
         }
     }
 }
-

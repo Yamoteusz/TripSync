@@ -24,13 +24,92 @@ class TripSyncUiTest {
     private fun screenshot(name: String) {
         compose.waitForIdle()
         val instrumentation=InstrumentationRegistry.getInstrumentation()
+        instrumentation.uiAutomation.waitForIdle(200,3000)
         val dir=File(instrumentation.targetContext.getExternalFilesDir(null),"screenshots").apply {mkdirs()}
         val image=instrumentation.uiAutomation.takeScreenshot()
         File(dir,"$name.png").outputStream().use {image.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it)}
         image.recycle()
     }
+    @Test fun dateAndTimeDialogsSaveIsoValues() {
+        openTrip();compose.onNodeWithText("Plan",useUnmergedTree=true).performClick()
+        compose.onNodeWithText("Dodaj punkt planu").performClick()
+        compose.onNode(hasSetTextAction() and hasText("Nazwa")).performTextInput("Test kalendarza")
+        compose.onNodeWithText("Data").performScrollTo().performClick()
+        val tripData=runBlocking {graph.repository.decode(graph.db.dao().record("demo-tatry")!!,pl.tripsync.domain.TripData::class.java)}
+        val start=java.time.LocalDate.parse(tripData.startDate)
+        val chosen=start.plusDays(1)
+        val configuration=compose.activity.resources.configuration
+        val compact=configuration.screenHeightDp<640 || configuration.screenWidthDp<360 || configuration.fontScale>1.2f
+        if(compact) {
+            androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom(android.widget.DatePicker::class.java)).perform(object:androidx.test.espresso.ViewAction {
+                override fun getDescription()="Wybierz dzień w systemowym kalendarzu"
+                override fun getConstraints()=androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom(android.widget.DatePicker::class.java)
+                override fun perform(controller:androidx.test.espresso.UiController,view:android.view.View) { (view as android.widget.DatePicker).updateDate(chosen.year,chosen.monthValue-1,chosen.dayOfMonth);controller.loopMainThreadUntilIdle() }
+            })
+            screenshot("14-kalendarz")
+            androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText("Wybierz datę")).perform(androidx.test.espresso.action.ViewActions.click())
+        } else {
+            compose.onNodeWithText("Wybierz datę").assertIsDisplayed()
+            val locale=configuration.locales[0]
+            val format=java.text.SimpleDateFormat(android.text.format.DateFormat.getBestDateTimePattern(locale,"yMMMMEEEEd"),locale).apply {timeZone=java.util.TimeZone.getTimeZone("UTC")}
+            if(chosen.month!=start.month) {
+                val nextMonth=compose.activity.resources.getIdentifier("date_picker_switch_to_next_month","string",compose.activity.packageName)
+                compose.onNodeWithContentDescription(compose.activity.getString(nextMonth)).performClick()
+            }
+            compose.onNodeWithText(format.format(java.util.Date(pl.tripsync.domain.Dates.millis(chosen.toString()))),substring=true).performScrollTo().performClick()
+            screenshot("14-kalendarz")
+            compose.onNodeWithText("Wybierz datę").performClick()
+        }
+        compose.onNodeWithText("Godzina").performScrollTo().performClick()
+        compose.onNodeWithText("Wybierz godzinę").assertIsDisplayed()
+        val context=compose.activity
+        val hours=context.resources.getIdentifier("time_picker_hour_24h_suffix","string",context.packageName)
+        val minutes=context.resources.getIdentifier("time_picker_minute_suffix","string",context.packageName)
+        if(compact) {
+            val hourInput=context.resources.getIdentifier("time_picker_hour_text_field","string",context.packageName)
+            val minuteInput=context.resources.getIdentifier("time_picker_minute_text_field","string",context.packageName)
+            compose.onNode(hasSetTextAction() and hasContentDescription(context.getString(hourInput))).performTextReplacement("14")
+            compose.onNode(hasSetTextAction() and hasContentDescription(context.getString(minuteInput))).performTextReplacement("30")
+        } else {
+            compose.onNodeWithContentDescription(context.getString(hours,14)).performClick()
+            compose.onNodeWithContentDescription(context.getString(minutes,30)).performClick()
+        }
+        screenshot("15-zegar")
+        compose.onNodeWithText("Ustaw godzinę").performClick()
+        compose.onNodeWithText("14:30").assertIsDisplayed()
+        compose.onNodeWithText("Zapisz").performScrollTo().performClick()
+        compose.waitUntil(10000) {runBlocking {graph.db.dao().records().any {it.json.contains("Test kalendarza")}}}
+        val event=runBlocking {graph.repository.decode(graph.db.dao().records().first {it.kind=="event" && it.json.contains("Test kalendarza")},pl.tripsync.domain.EventData::class.java)}
+        org.junit.Assert.assertEquals("14:30",event.time)
+        org.junit.Assert.assertEquals(chosen.toString(),event.date)
+    }
+    @Test fun backRequiresConfirmationForUnsavedForm() {
+        openTrip();compose.onNodeWithText("Koszty",useUnmergedTree=true).performClick();compose.onNodeWithText("Dodaj wydatek").performClick()
+        compose.onNode(hasSetTextAction() and hasText("Nazwa")).performTextInput("Niezapisany wydatek")
+        compose.onNodeWithContentDescription("Wstecz").performClick()
+        compose.onNodeWithText("Odrzucić zmiany?").assertIsDisplayed()
+        compose.onNodeWithText("Zostań").performClick()
+        compose.onNodeWithText("Niezapisany wydatek").assertIsDisplayed()
+    }
+    @Test fun expenseSearchAndTabStateArePreserved() {
+        openTrip();compose.onNodeWithText("Koszty",useUnmergedTree=true).performClick()
+        compose.onNode(hasSetTextAction() and hasText("Szukaj wydatku")).performScrollTo().performTextInput("nie istnieje")
+        compose.onNodeWithText("Brak pasujących wydatków").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Plan",useUnmergedTree=true).performClick()
+        compose.onNodeWithText("Koszty",useUnmergedTree=true).performClick()
+        compose.onNode(hasSetTextAction() and hasText("Szukaj wydatku")).performScrollTo().assertTextContains("nie istnieje")
+    }
     @Test fun mainScreensAndRealScreenshots() {
         screenshot("01-wyjazdy")
+        runBlocking {graph.prefs.setDark(true)}
+        compose.waitForIdle()
+        compose.runOnIdle {
+            val bars=androidx.core.view.WindowCompat.getInsetsController(compose.activity.window,compose.activity.window.decorView)
+            org.junit.Assert.assertFalse(bars.isAppearanceLightStatusBars)
+            org.junit.Assert.assertFalse(bars.isAppearanceLightNavigationBars)
+        }
+        screenshot("16-ciemny")
+        runBlocking {graph.prefs.setDark(false)}
         openTrip()
         screenshot("02-podsumowanie")
         compose.onNodeWithText("Plan",useUnmergedTree=true).performClick()
@@ -67,6 +146,18 @@ class TripSyncUiTest {
         val id=runBlocking {graph.repository.save(trip,"expense",pl.tripsync.domain.ExpenseData("Nierówny podział",1000,"demo-anna",expected,"2026-12-31"))}
         openTrip();compose.onNodeWithText("Koszty",useUnmergedTree=true).performClick()
         compose.onAllNodesWithContentDescription("Edytuj wydatek").onFirst().performScrollTo().performClick()
+        compose.onNodeWithText("Zapisz").performScrollTo().performClick()
+        compose.waitUntil(10000) {compose.onAllNodesWithText("Wspólne koszty").fetchSemanticsNodes().isNotEmpty()}
+        val actual=runBlocking {graph.repository.decode(graph.db.dao().record(id)!!,pl.tripsync.domain.ExpenseData::class.java)}
+        org.junit.Assert.assertEquals(expected,actual.shares)
+    }
+    @Test fun joiningMemberDoesNotReassignDraftExpenseShares() {
+        val expected=mapOf("demo-anna" to 100L,"demo-bartek" to 200L,"demo-celina" to 700L)
+        val id=runBlocking {graph.repository.save("demo-tatry","expense",pl.tripsync.domain.ExpenseData("Podział przed dołączeniem",1000,"demo-anna",expected,"2026-12-31"))}
+        openTrip();compose.onNodeWithText("Koszty",useUnmergedTree=true).performClick()
+        compose.onAllNodesWithContentDescription("Edytuj wydatek").onFirst().performScrollTo().performClick()
+        runBlocking {graph.repository.save("demo-tatry","member",pl.tripsync.domain.MemberData("demo-a-first","Aleks"),"demo-tatry:demo-a-first")}
+        compose.waitUntil(10000) {compose.onAllNodesWithText("Aleks").fetchSemanticsNodes().isNotEmpty()}
         compose.onNodeWithText("Zapisz").performScrollTo().performClick()
         compose.waitUntil(10000) {compose.onAllNodesWithText("Wspólne koszty").fetchSemanticsNodes().isNotEmpty()}
         val actual=runBlocking {graph.repository.decode(graph.db.dao().record(id)!!,pl.tripsync.domain.ExpenseData::class.java)}

@@ -12,6 +12,8 @@ import pl.tripsync.domain.*
 data class AppState(val session: Session? = null, val records: List<RecordEntity> = emptyList(), val pending: List<OperationEntity> = emptyList(), val conflicts: List<ConflictEntity> = emptyList(), val sync: String = "Dane dostępne offline", val loaded: Boolean = false)
 
 class TripViewModel(val graph: AppGraph) : ViewModel() {
+    val viewOptions=mutableMapOf<String,String>()
+    val scrollPositions=mutableMapOf<String,Int>()
     val repo = graph.repository
     private val travel = TravelRepository(graph.context)
     val locations = MutableStateFlow<List<GeoResult>>(emptyList())

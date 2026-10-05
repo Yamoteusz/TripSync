@@ -18,6 +18,7 @@ class SyncIntegrationTest {
     private lateinit var trip: String
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
     @Before fun setup() = runBlocking {
+        Preferences(context).setUrl("http://10.0.2.2:8080/")
         val id=UUID.randomUUID().toString()
         first=Repository(Room.inMemoryDatabaseBuilder(context,TripDatabase::class.java).build(),Preferences(context),SessionVault(context,"test-first-$id"))
         second=Repository(Room.inMemoryDatabaseBuilder(context,TripDatabase::class.java).build(),Preferences(context),SessionVault(context,"test-second-$id"))

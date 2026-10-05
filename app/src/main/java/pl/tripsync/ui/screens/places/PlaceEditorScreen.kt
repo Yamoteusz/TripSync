@@ -22,8 +22,8 @@ fun PlaceEditorScreen(vm:TripViewModel,state:AppState,nav:NavHostController,trip
     Page(if(existing==null) "Dodaj miejsce" else "Edytuj miejsce","Współrzędne dziesiętne, np. 49.1978 i 20.0700. Możesz je skopiować z map.") {
         Panel {
             Field("Nazwa miejsca",title,{title=it})
-            Field("Szerokość geograficzna",latitude,{latitude=it})
-            Field("Długość geograficzna",longitude,{longitude=it})
+            Field("Szerokość geograficzna",latitude,{latitude=it},keyboard=androidx.compose.ui.text.input.KeyboardType.Decimal)
+            Field("Długość geograficzna",longitude,{longitude=it},keyboard=androidx.compose.ui.text.input.KeyboardType.Decimal)
             Field("Opis miejsca",description,{description=it},multiline=true)
         }
         Button(onClick={vm.action {
