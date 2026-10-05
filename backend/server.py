@@ -44,8 +44,36 @@ def iso_date(value):
 CATEGORIES = {'transport', 'accommodation', 'food', 'activities', 'shopping', 'other'}
 
 
+class AuthRateLimiter:
+    def __init__(self, limit=30, window=300, max_clients=1024):
+        self.limit = limit
+        self.window = window
+        self.max_clients = max_clients
+        self.clients = {}
+        self.lock = threading.Lock()
+        self.last_cleanup = float('-inf')
+
+    def check(self, address, now=None):
+        now = time.monotonic() if now is None else now
+        with self.lock:
+            if now - self.last_cleanup >= 60 or (address not in self.clients and len(self.clients) >= self.max_clients):
+                expired = [key for key, values in self.clients.items() if not values or values[-1] <= now - self.window]
+                for key in expired:
+                    del self.clients[key]
+                self.last_cleanup = now
+            attempts = [value for value in self.clients.get(address, []) if now - value < self.window]
+            require(len(attempts) < self.limit, 'Zbyt wiele prób. Spróbuj za kilka minut.', 429)
+            require(address in self.clients or len(self.clients) < self.max_clients, 'Zbyt wiele prób logowania na serwerze. Spróbuj później.', 429)
+            attempts.append(now)
+            self.clients[address] = attempts
+
+
 class Store:
-    def __init__(self, path):
+    def __init__(self, path=None, database=None):
+        self.lock = threading.RLock()
+        if database is not None:
+            self.db = database
+            return
         self.db = sqlite3.connect(path, check_same_thread=False)
         self.db.row_factory = sqlite3.Row
         self.lock = threading.RLock()
@@ -360,19 +388,14 @@ class Handler(BaseHTTPRequestHandler):
             if method == 'GET' and path == '/health':
                 return self.respond(200, {'status': 'ok', 'version': '1.1.0'})
             if method == 'POST' and path in ['/auth/register', '/auth/login']:
-                with self.server.rate_lock:
-                    now = time.time()
-                    key = self.client_address[0]
-                    if key in self.server.trusted_proxies:
-                        forwarded = self.headers.get('X-Forwarded-For', '')
-                        try:
-                            key = str(ipaddress.ip_address(forwarded))
-                        except ValueError:
-                            raise ApiError(400, 'Nieprawidłowy adres klienta proxy.')
-                    attempts = [t for t in self.server.attempts.get(key, []) if now-t < 300]
-                    require(len(attempts) < 30, 'Zbyt wiele prób. Spróbuj za kilka minut.', 429)
-                    attempts.append(now)
-                    self.server.attempts[key] = attempts
+                key = self.client_address[0]
+                if key in self.server.trusted_proxies:
+                    forwarded = self.headers.get('X-Forwarded-For', '')
+                    try:
+                        key = str(ipaddress.ip_address(forwarded))
+                    except ValueError:
+                        raise ApiError(400, 'Nieprawidłowy adres klienta proxy.')
+                self.server.auth_limiter.check(key)
                 return self.respond(200, store.register(self.body()) if path.endswith('register') else store.login(self.body()))
             auth = self.headers.get('Authorization', '')
             require(auth.startswith('Bearer '), 'Zaloguj się, aby kontynuować.', 401)
@@ -416,8 +439,7 @@ def make_server(store, host='127.0.0.1', port=8080, trusted_proxies=()):
     server = ThreadingHTTPServer((host, port), Handler)
     server.store = store
     server.trusted_proxies = set(trusted_proxies)
-    server.attempts = {}
-    server.rate_lock = threading.Lock()
+    server.auth_limiter = AuthRateLimiter()
     return server
 
 

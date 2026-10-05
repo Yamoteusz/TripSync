@@ -1,10 +1,9 @@
 import json
 import os
-import threading
 from http import HTTPStatus
 from pathlib import Path
 from types import SimpleNamespace
-from server import Handler, Store
+from server import Handler, Store, AuthRateLimiter
 
 
 class WsgiHandler(Handler):
@@ -22,7 +21,7 @@ class WsgiHandler(Handler):
 
 
 def create_application(path):
-    service = SimpleNamespace(store=Store(path), trusted_proxies=set(), attempts={}, rate_lock=threading.Lock())
+    service = SimpleNamespace(store=Store(path), trusted_proxies=set(), auth_limiter=AuthRateLimiter())
     def application(environment, start_response):
         handler = WsgiHandler(environment, service)
         handler.route(environment.get('REQUEST_METHOD', 'GET'))

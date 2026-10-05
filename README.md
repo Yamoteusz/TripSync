@@ -149,3 +149,5 @@ APK jest załącznikiem prezentacyjnym; nie jest dodawane do historii Git. Po zm
 Po zatwierdzeniu zmian polecenie `python3 scripts/package_project.py` tworzy ZIP, Git bundle i sumy SHA-256. Nie publikuje projektu w zdalnym repozytorium.
 
 Aktualna dokumentacja wersji 1.1 to `output/pdf/TripSync_dokumentacja_projektu.pdf`. Plik `TripSync_zalozenia_projektu.pdf` zachowuje pierwotną propozycję sprzed rozbudowy.
+
+Konfiguracja płatnego Wispbyte, GitHub i opcjonalnego MySQL: [docs/wispbyte.md](docs/wispbyte.md).
