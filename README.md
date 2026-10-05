@@ -1,12 +1,24 @@
 # TripSync
 
-Aplikacja Android do organizacji wyjazdów grupowych: harmonogram, głosowanie, zadania, pakowanie, wydatki, kategorie, budżety, spłaty, historia zmian oraz mapa miejsc z prognozą pogody. Wersja 1.1.0. Działa offline i synchronizuje dane przez własne API REST. Projekt dla zespołu trzyosobowego.
+![TripSync](docs/brand/tripsync.svg)
+
+Aplikacja Android do organizacji wyjazdów grupowych: harmonogram, głosowanie, zadania, pakowanie, wydatki, kategorie, budżety, spłaty, historia zmian oraz mapa miejsc z prognozą pogody. Wersja 1.2.0. Działa offline i synchronizuje dane przez własne API REST. Projekt dla zespołu trzyosobowego.
+
+## Interfejs 1.2
+
+Odświeżony wygląd, kalendarze i zegar 24-godzinny, wyszukiwanie i sortowanie kosztów, aktywne i zakończone wyjazdy, plan według dni, ochrona niezapisanego formularza oraz stan ładowania i ponowienie mapy. Szczegóły i poprawione błędy: [docs/ui-1.2.md](docs/ui-1.2.md).
+
+<p>
+  <img src="docs/screenshots-1.2/01-wyjazdy.png" width="220" alt="Lista wyjazdów" />
+  <img src="docs/screenshots-1.2/14-kalendarz.png" width="220" alt="Wybór daty" />
+  <img src="docs/screenshots-1.2/15-zegar.png" width="220" alt="Zegar 24-godzinny" />
+</p>
 
 ## Szybki start
 
 1. Zbuduj APK zgodnie z instrukcją poniżej albo pobierz `TripSync-debug` z artefaktów GitHub Actions po udanym przebiegu. W lokalnej paczce prezentacyjnej dostępny jest także `output/apk/TripSync-debug.apk`. Zainstaluj na Androidzie 8.0 lub nowszym.
 2. Wybierz **Wypróbuj bez konta**. Przykładowy wyjazd jest w pełni edytowalny i nie wymaga serwera.
-3. Aby współpracować z innymi użytkownikami, uruchom backend, ustaw adres API przed zalogowaniem i utwórz konto.
+3. Aby współpracować z innymi użytkownikami, utwórz konto. Nowa instalacja ma domyślnie ustawiony serwer `https://tripsync.wisp.uno/`. Własny serwer można wybrać w ustawieniach przed zalogowaniem.
 
 Tryb demonstracyjny nie udaje synchronizacji z innymi urządzeniami. Zmiany w demo są przechowywane wyłącznie lokalnie. Ponowne wejście do demo po wylogowaniu odtwarza zestaw przykładowy.
 
@@ -32,7 +44,7 @@ APK wynikowy: `app/build/outputs/apk/debug/app-debug.apk`. Jest podpisany klucze
 
 ## GitHub Desktop i Wispbyte
 
-Instrukcja publikacji: [docs/github-desktop.md](docs/github-desktop.md). W GitHub Desktop użyj **File → Add Local Repository** i wskaż ten katalog projektu, następnie **Publish repository**. Zachowaj istniejącą historię i gałąź `main`.
+Instrukcja publikacji: [docs/github-desktop.md](docs/github-desktop.md). W GitHub Desktop użyj **File → Add Local Repository** i wskaż ten katalog projektu, następnie **Push origin**, aby wysłać zatwierdzone zmiany do istniejącego repozytorium. Zachowaj historię i gałąź `main`.
 
 Dla płatnego Wispbyte i MySQL: [docs/wispbyte.md](docs/wispbyte.md). Backend obsługuje MySQL przez PyMySQL; dane połączenia ustawia się w zmiennych środowiskowych, a hasło pozostaje w panelu hostingu. Konfiguracja nie przenosi automatycznie danych z lokalnej bazy SQLite.
 
@@ -40,7 +52,7 @@ Workflow `.github/workflows/checks.yml` wykonuje testy backendu, budowanie APK, 
 
 ## Alternatywny darmowy hosting i prawdziwe dane
 
-Gotowa instrukcja: [docs/hosting.md](docs/hosting.md). Polecany wariant to **PythonAnywhere Beginner Free** z trwałym plikiem SQLite oraz adapterem `backend/wsgi.py`. Wgraj trzy pliki backendu, ustaw WSGI i wpisz adres HTTPS hostingu w aplikacji przed rejestracją. Każdy uczestnik używa własnego konta i tego samego serwera. Demo nie trafia na backend. Nie utworzono jeszcze publicznego serwera; wymaga konta właściciela.
+Gotowa instrukcja: [docs/hosting.md](docs/hosting.md). Polecany wariant to **PythonAnywhere Beginner Free** z trwałym plikiem SQLite oraz adapterem `backend/wsgi.py`. Wgraj trzy pliki backendu, ustaw WSGI i wpisz adres HTTPS hostingu w aplikacji przed rejestracją. Każdy uczestnik używa własnego konta i tego samego serwera. Demo nie trafia na backend. Działający serwer projektu znajduje się pod adresem `https://tripsync.wisp.uno/`; ten rozdział opisuje alternatywny hosting.
 
 ## Nowe funkcje 1.1
 
@@ -62,7 +74,7 @@ python3 backend/server.py
 
 Baza SQLite powstanie w `backend/tripsync.sqlite`. Endpoint kontrolny: `http://127.0.0.1:8080/health`.
 
-W emulatorze Android ustaw w aplikacji: `http://10.0.2.2:8080/`. Ten adres jest domyślny w wersji debug. Współdzielenie można sprawdzić na dwóch emulatorach z dwoma oddzielnymi kontami.
+W emulatorze Android ustaw w aplikacji: `http://10.0.2.2:8080/`. Przed lokalnymi testami wpisz ten adres ręcznie; nowe instalacje korzystają domyślnie z publicznego serwera TripSync. Współdzielenie można sprawdzić na dwóch emulatorach z dwoma oddzielnymi kontami.
 
 Na telefonie podłączonym przez USB można użyć lokalnego tunelu:
 
@@ -96,7 +108,7 @@ python3 -m unittest discover -s backend -v
 ./gradlew :app:testDebugUnitTest
 ```
 
-Testy urządzeniowe obejmują interfejs oraz rzeczywistą komunikację dwóch niezależnych repozytoriów Android z API. Przed ich uruchomieniem włącz backend na porcie 8080, uruchom emulator i pozostaw domyślny adres API:
+Testy urządzeniowe obejmują interfejs oraz rzeczywistą komunikację dwóch niezależnych repozytoriów Android z API. Przed ich uruchomieniem włącz osobny backend testowy na porcie 8080 i uruchom emulator. Testy integracji ustawiają adres `http://10.0.2.2:8080/` i nie tworzą kont na publicznym serwerze:
 
 ```sh
 ./gradlew :app:connectedDebugAndroidTest
@@ -142,7 +154,7 @@ Backend jest rozwiązaniem dydaktycznym: pojedyncza instancja procesu, SQLite lu
 
 ## Repozytorium
 
-Projekt jest wersjonowany lokalnie przez Git. Nie skonfigurowano jeszcze zdalnego adresu repozytorium. Po wskazaniu repozytorium należy dodać jego URL do dokumentacji i opublikować historię zmian.
+Repozytorium: [Yamoteusz/TripSync](https://github.com/Yamoteusz/TripSync). Zmiany zapisane lokalnie można wysłać przez **Push origin** w GitHub Desktop.
 
 ## Odtworzenie historii i materiałów
 
@@ -156,6 +168,8 @@ APK jest załącznikiem prezentacyjnym; nie jest dodawane do historii Git. Po zm
 
 Po zatwierdzeniu zmian polecenie `python3 scripts/package_project.py` tworzy ZIP, Git bundle i sumy SHA-256. Nie publikuje projektu w zdalnym repozytorium.
 
-Aktualna dokumentacja wersji 1.1 to `output/pdf/TripSync_dokumentacja_projektu.pdf`. Plik `TripSync_zalozenia_projektu.pdf` zachowuje pierwotną propozycję sprzed rozbudowy.
+Dokumentacja PDF poprzedniego wydania 1.1 to `output/pdf/TripSync_dokumentacja_projektu.pdf`. Plik `TripSync_zalozenia_projektu.pdf` zachowuje pierwotną propozycję sprzed rozbudowy.
 
 Konfiguracja płatnego Wispbyte, GitHub i opcjonalnego MySQL: [docs/wispbyte.md](docs/wispbyte.md).
+
+Zmiany i wyniki aktualnego wydania: [UI 1.2](docs/ui-1.2.md), [wyniki testów 1.2](docs/test-results-1.2.json).

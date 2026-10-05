@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="88" viewBox="0 0 360 88">
+  <rect x="0" y="4" width="80" height="80" rx="24" fill="#122e38"/>
+  <path d="M16 58 32 25 50 59 66 29M53 29H66V42" fill="none" stroke="#b5e9ca" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#b5e9ca"><circle cx="16" cy="58" r="4"/><circle cx="32" cy="25" r="4"/><circle cx="50" cy="59" r="4"/></g>
+  <text x="98" y="58" fill="#122e38" font-family="Arial,sans-serif" font-size="42" font-weight="700" letter-spacing="-1.4">TripSync</text>
+</svg>

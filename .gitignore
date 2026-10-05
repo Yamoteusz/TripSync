@@ -38,3 +38,5 @@ venv/
 key.properties
 keystore.properties
 gradle/gradle-daemon-jvm.properties
+
+output/previews/

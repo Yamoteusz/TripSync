@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="pl.tripsync.MoneyTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-05T16:08:46.876Z" hostname="MacBook-Air-Brajan.local" time="0.046">
+  <properties/>
+  <testcase name="rejectsInvalidShares" classname="pl.tripsync.MoneyTest" time="0.001"/>
+  <testcase name="distributesRemainderWithoutLosingCents" classname="pl.tripsync.MoneyTest" time="0.0"/>
+  <testcase name="randomSettlementsConserveMoneyAndClearBalances" classname="pl.tripsync.MoneyTest" time="0.042"/>
+  <testcase name="decimalParsingIsExact" classname="pl.tripsync.MoneyTest" time="0.002"/>
+  <testcase name="rejectsUnsafeAmounts" classname="pl.tripsync.MoneyTest" time="0.0"/>
+  <testcase name="exampleTripHasCorrectBalancesAndTransfers" classname="pl.tripsync.MoneyTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
