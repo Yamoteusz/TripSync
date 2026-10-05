@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m unittest discover -s backend -v
-      - run: python -m py_compile backend/server.py backend/start_hosted.py backend/mysql_database.py backend/wsgi.py
+      - run: python -m py_compile main.py backend/server.py backend/start_hosted.py backend/mysql_database.py backend/wsgi.py
   android:
     runs-on: ubuntu-latest
     steps:

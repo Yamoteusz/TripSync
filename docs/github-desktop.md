@@ -30,7 +30,7 @@ Przykłady `*.env.example` są szablonami z pustym hasłem. Backend nie odczytuj
 Po podłączeniu repozytorium do serwera ustaw Python 3.10+ i komendę:
 
 ```sh
-python3 -m pip install -r backend/requirements-mysql.txt && python3 backend/start_hosted.py
+python3 -m pip install -r requirements.txt && python3 main.py
 ```
 
 Zmienne: `TRIPSYNC_DATABASE_ENGINE=mysql`, dane połączenia i hasło z panelu bazy, oraz `PORT` z przydziału serwera aplikacji. Port bazy `3306` nie jest portem API. Domenę HTTPS przypisz do API zgodnie z [instrukcją Wispbyte](wispbyte.md).

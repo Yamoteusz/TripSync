@@ -25,7 +25,7 @@ Obecny etap obejmuje darmową wersję aplikacji. Premium organizatora dla całej
 Wgraj także `backend/mysql_database.py` i `backend/requirements-mysql.txt`. Przy uruchamianiu z repozytorium zachowaj strukturę `backend/` i ustaw komendę:
 
 ```sh
-python3 -m pip install -r backend/requirements-mysql.txt && python3 backend/start_hosted.py
+python3 -m pip install -r requirements.txt && python3 main.py
 ```
 
 W panelu ustaw zmienne z `backend/wispbyte.env.example`. `TRIPSYNC_MYSQL_PASSWORD` uzupełnij wyłącznie w panelu, zapisując wcześniej hasło w menedżerze haseł. Plik `.env` nie jest automatycznie odczytywany przez backend. Port API `PORT` jest niezależny od portu MySQL `3306`.
@@ -39,3 +39,14 @@ Jeżeli hosting udostępnia certyfikat CA bazy, ustaw `TRIPSYNC_MYSQL_SSL_CA` na
 Po konfiguracji wykonaj rejestrację i zapis wyjazdu, następnie restart i ponowny odczyt. `/health` potwierdza dostępność procesu API, a operacja zapisu i odczytu potwierdza działanie bazy. Nie uruchamiaj jednocześnie kilku procesów backendu: obecna kontrola synchronizacji opiera się na blokadzie jednego procesu.
 
 Adapter zweryfikowano testami jednostkowymi; rzeczywiste połączenie z MySQL Wispbyte wymaga hasła ustawionego w panelu i nie zostało jeszcze wykonane.
+
+
+## Domyślna komenda startowa panelu Wispbyte
+
+Jeśli panel uruchamia `/usr/local/bin/python /home/container/main.py`, zachowaj tę komendę. Repozytorium zawiera teraz `main.py` i `requirements.txt` w katalogu głównym. Ustaw `REQUIREMENTS_FILE=requirements.txt`. W katalogu `/home/container` powinny znajdować się `main.py`, `requirements.txt` i katalog `backend`, bez dodatkowego nadrzędnego folderu `TripSync`.
+
+Startup panelu pobiera aktualizacje przez `git pull`, instaluje zależności z `REQUIREMENTS_FILE`, a następnie uruchamia backend. Aby aktualizacje działały, katalog główny serwera musi być checkoutem repozytorium z `.git` i dostępem do prywatnego repozytorium. Token dostępu ustaw przez konfigurację hostingu, nie w kodzie lub komendzie publikowanej w Git.
+
+Ustaw także `TRIPSYNC_DATABASE_ENGINE=mysql` i wszystkie zmienne MySQL ze wzoru `backend/wispbyte.env.example`; sam `REQUIREMENTS_FILE` nie wybiera bazy. Hasło wpisz w panelu jako `TRIPSYNC_MYSQL_PASSWORD`. Zachowaj port API przydzielony przez hosting. Po restarcie sprawdź log konsoli i endpoint `/health`, następnie zapis i odczyt wyjazdu.
+
+W przedstawionej komendzie kroki są rozdzielone średnikami, więc nieudany `git pull` lub instalacja pakietów nie zatrzyma automatycznie kolejnego kroku. Po każdym wdrożeniu sprawdź log, czy pobranie kodu i instalacja zakończyły się powodzeniem.
