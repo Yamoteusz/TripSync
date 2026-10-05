@@ -18,7 +18,7 @@ class HostingConfigTests(unittest.TestCase):
     def test_invalid_line_never_discloses_secret_or_partially_applies(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / '.env'
-            path.write_text('TRIPSYNC_MYSQL_HOST=localhost\nSECRET_PASSWORD=private-value\n', encoding='utf-8')
+            path.write_text('TRIPSYNC_MYSQL_HOST=localhost\nINVALID KEY=private-value\n', encoding='utf-8')
             environment = {}
             with self.assertRaises(ValueError) as error:
                 load_hosting_config(path, environment)
@@ -30,3 +30,20 @@ class HostingConfigTests(unittest.TestCase):
             environment = {'PORT': '8000'}
             load_hosting_config(Path(directory) / '.env', environment)
             self.assertEqual({'PORT': '8000'}, environment)
+
+    def test_hosting_variables_bom_and_export_do_not_block_config(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / '.env'
+            path.write_text('\ufeffREQUIREMENTS_FILE=requirements.txt\nexport TRIPSYNC_MYSQL_HOST=database\nPYTHONPATH=/private/hosting\n', encoding='utf-8')
+            environment = {}
+            load_hosting_config(path, environment)
+            self.assertEqual({'TRIPSYNC_MYSQL_HOST': 'database'}, environment)
+
+    def test_complete_mysql_environment_ignores_invalid_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / '.env'
+            path.write_text('invalid private configuration\n', encoding='utf-8')
+            environment = {'TRIPSYNC_DATABASE_ENGINE': 'mysql', 'TRIPSYNC_MYSQL_HOST': 'host', 'TRIPSYNC_MYSQL_DATABASE': 'database', 'TRIPSYNC_MYSQL_USER': 'user', 'TRIPSYNC_MYSQL_PASSWORD': 'private'}
+            expected = dict(environment)
+            load_hosting_config(path, environment)
+            self.assertEqual(expected, environment)
