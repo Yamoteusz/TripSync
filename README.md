@@ -38,9 +38,9 @@ sdk.dir=/sciezka/do/Android/sdk
 ./gradlew :app:lintDebug
 ```
 
-Jeżeli katalog projektu jest synchronizowany przez usługę chmurową, pliki budowania można umieścić poza nim: `./gradlew -PtripsyncBuildRoot=/tmp/tripsync-build :app:assembleDebug`. Wtedy APK powstaje w `/tmp/tripsync-build/app/outputs/apk/debug/`.
+Na macOS pliki budowania są automatycznie zapisywane poza projektem, w `~/.gradle/tripsync-builds/<identyfikator-katalogu>/app/`. Chroni to kompilację przed kopiami konfliktowymi tworzonymi przy synchronizacji Dokumentów. Po zmianie konfiguracji wybierz **Sync Project with Gradle Files**, a następnie **Run**. Na pozostałych systemach pozostaje standardowy katalog `app/build`. Katalog można także wskazać jawnie: `./gradlew -PtripsyncBuildRoot=/tmp/tripsync-build :app:assembleDebug`. Wtedy APK powstaje w `/tmp/tripsync-build/app/outputs/apk/debug/`.
 
-APK wynikowy: `app/build/outputs/apk/debug/app-debug.apk`. Jest podpisany kluczem debug i służy do prezentacji. Wersja release wymaga własnego podpisu. Przy pierwszym budowaniu potrzebne jest połączenie z repozytoriami Google Maven i Maven Central.
+APK wynikowy na macOS: `~/.gradle/tripsync-builds/<identyfikator-katalogu>/app/outputs/apk/debug/app-debug.apk`; na pozostałych systemach: `app/build/outputs/apk/debug/app-debug.apk`. Skrypt `scripts/build.sh` korzysta z katalogu tymczasowego i kopiuje APK do `output/apk/TripSync-debug.apk`. Jest podpisany kluczem debug i służy do prezentacji. Wersja release wymaga własnego podpisu. Przy pierwszym budowaniu potrzebne jest połączenie z repozytoriami Google Maven i Maven Central.
 
 ## GitHub Desktop i Wispbyte
 

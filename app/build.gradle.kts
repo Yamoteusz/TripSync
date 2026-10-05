@@ -3,7 +3,11 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
 }
-providers.gradleProperty("tripsyncBuildRoot").orNull?.let {
+val tripsyncBuildRoot = providers.gradleProperty("tripsyncBuildRoot").orNull
+    ?: if (System.getProperty("os.name").startsWith("Mac")) {
+        gradle.gradleUserHomeDir.resolve("tripsync-builds/${Integer.toHexString(rootDir.absolutePath.hashCode())}").absolutePath
+    } else null
+tripsyncBuildRoot?.let {
     layout.buildDirectory.set(file("$it/app"))
 }
 android {
