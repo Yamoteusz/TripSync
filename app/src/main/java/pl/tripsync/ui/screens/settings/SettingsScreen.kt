@@ -34,7 +34,7 @@ fun SettingsScreen(vm: TripViewModel,state: AppState) {
     val busy by vm.busy.collectAsStateWithLifecycle()
     var url by rememberSaveable(savedUrl) {mutableStateOf(savedUrl)}
     var logout by rememberSaveable {mutableStateOf(false)}
-    Page("Ustawienia","TripSync · wersja 1.0.0") {
+    Page("Ustawienia","TripSync · wersja ${pl.tripsync.BuildConfig.VERSION_NAME}") {
         Panel {
             Text("Wygląd",style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold)
             Row(verticalAlignment=Alignment.CenterVertically) {Text("Ciemny motyw",Modifier.weight(1f));Switch(dark,onCheckedChange={vm.action {vm.graph.prefs.setDark(it)}})}

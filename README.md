@@ -4,7 +4,7 @@ Aplikacja Android do organizacji wyjazdów grupowych: harmonogram, głosowanie, 
 
 ## Szybki start
 
-1. Zainstaluj `output/apk/TripSync-debug.apk` na Androidzie 8.0 lub nowszym.
+1. Zbuduj APK zgodnie z instrukcją poniżej albo pobierz `TripSync-debug` z artefaktów GitHub Actions po udanym przebiegu. W lokalnej paczce prezentacyjnej dostępny jest także `output/apk/TripSync-debug.apk`. Zainstaluj na Androidzie 8.0 lub nowszym.
 2. Wybierz **Wypróbuj bez konta**. Przykładowy wyjazd jest w pełni edytowalny i nie wymaga serwera.
 3. Aby współpracować z innymi użytkownikami, uruchom backend, ustaw adres API przed zalogowaniem i utwórz konto.
 
@@ -30,7 +30,15 @@ Jeżeli katalog projektu jest synchronizowany przez usługę chmurową, pliki bu
 
 APK wynikowy: `app/build/outputs/apk/debug/app-debug.apk`. Jest podpisany kluczem debug i służy do prezentacji. Wersja release wymaga własnego podpisu. Przy pierwszym budowaniu potrzebne jest połączenie z repozytoriami Google Maven i Maven Central.
 
-## Darmowy hosting i prawdziwe dane
+## GitHub Desktop i Wispbyte
+
+Instrukcja publikacji: [docs/github-desktop.md](docs/github-desktop.md). W GitHub Desktop użyj **File → Add Local Repository** i wskaż ten katalog projektu, następnie **Publish repository**. Zachowaj istniejącą historię i gałąź `main`.
+
+Dla płatnego Wispbyte i MySQL: [docs/wispbyte.md](docs/wispbyte.md). Backend obsługuje MySQL przez PyMySQL; dane połączenia ustawia się w zmiennych środowiskowych, a hasło pozostaje w panelu hostingu. Konfiguracja nie przenosi automatycznie danych z lokalnej bazy SQLite.
+
+Workflow `.github/workflows/checks.yml` wykonuje testy backendu, budowanie APK, testy jednostkowe Android i lint. Pierwszy przebieg w GitHub Actions wymaga publikacji repozytorium.
+
+## Alternatywny darmowy hosting i prawdziwe dane
 
 Gotowa instrukcja: [docs/hosting.md](docs/hosting.md). Polecany wariant to **PythonAnywhere Beginner Free** z trwałym plikiem SQLite oraz adapterem `backend/wsgi.py`. Wgraj trzy pliki backendu, ustaw WSGI i wpisz adres HTTPS hostingu w aplikacji przed rejestracją. Każdy uczestnik używa własnego konta i tego samego serwera. Demo nie trafia na backend. Nie utworzono jeszcze publicznego serwera; wymaga konta właściciela.
 
@@ -46,7 +54,7 @@ Mapa potrzebuje internetu do kafelków; zapisane miejsca i ostatnia prognoza poz
 
 ## Uruchomienie backendu
 
-Python 3.10 lub nowszy, wyłącznie biblioteka standardowa, bez instalowania pakietów.
+Wariant lokalny SQLite: Python 3.10 lub nowszy, wyłącznie biblioteka standardowa, bez instalowania pakietów. Wariant MySQL wymaga `backend/requirements-mysql.txt`.
 
 ```sh
 python3 backend/server.py
@@ -109,7 +117,7 @@ Zrzuty ekranów z testu `mainScreensAndRealScreenshots` trafiają do `Android/da
 | `app/src/main/java/pl/tripsync/ui` | Ekrany Compose, formularze, motyw i ViewModel |
 | `app/src/main/java/pl/tripsync/domain` | Modele, walidacja, dokładne obliczenia pieniężne |
 | `app/src/main/java/pl/tripsync/data` | Room, API Retrofit, repozytorium, sesja i ustawienia |
-| `backend` | API REST, baza SQLite i testy backendu |
+| `backend` | API REST, SQLite lub MySQL, konfiguracja hostingu i testy |
 | `docs` | Dokumentacja funkcjonalna, diagramy i zrzuty ekranu |
 | `output` | APK, PDF i paczka do przekazania |
 
@@ -121,7 +129,7 @@ Synchronizacja jest oparta na pełnym pobraniu dostępnych wyjazdów, a nie na t
 
 Powiadomienia są lokalne, wymagają zgody od Androida 13 i mogą być opóźnione przez system. Nie używają alarmów dokładnych. Wylogowanie usuwa lokalną bazę i niewysłane zmiany. Dane aplikacji znajdują się w prywatnym katalogu Android, sesja jest szyfrowana AES-GCM kluczem Keystore, a kopie zapasowe aplikacji są wyłączone. Sama baza Room nie jest dodatkowo szyfrowana SQLCipher.
 
-Backend jest rozwiązaniem dydaktycznym: pojedyncza instancja procesu, SQLite i serializowane operacje zapisu. Nie zawiera odzyskiwania hasła, weryfikacji e-mail ani infrastruktury monitoringu produkcyjnego. Nie ma czatu, rezerwacji, map offline ani automatycznego wykrywania atrakcji.
+Backend jest rozwiązaniem dydaktycznym: pojedyncza instancja procesu, SQLite lub MySQL i serializowane operacje zapisu. Nie zawiera odzyskiwania hasła, weryfikacji e-mail ani infrastruktury monitoringu produkcyjnego. Nie ma czatu, rezerwacji, map offline ani automatycznego wykrywania atrakcji.
 
 ## Dokumentacja bibliotek
 
