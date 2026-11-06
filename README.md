@@ -11,7 +11,7 @@ TripSync to aplikacja Android do organizacji podróży w grupie. Łączy harmono
 
 **Wersja Android: 1.2.1** · **Android 8.0+** · **Projekt zespołowy**
 
-**Wykonawcy:** Brajan Sieroń, Damian Panońko, Patryk Dawczak.
+**Wykonawcy:** Brajan S., Damian P., Patryk D.
 
 [Materiały do oddania](docs/oddanie.md) · [Dokumentacja](docs/README.md) · [Instrukcja uruchomienia](docs/uruchomienie.md) · [PDF do oddania](output/pdf/TripSync_dokumentacja_do_oddania.pdf) · [Wyniki testów](docs/testy.md) · [Znane ograniczenia](docs/ograniczenia.md)
 
