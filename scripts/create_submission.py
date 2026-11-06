@@ -11,6 +11,7 @@ from package_project import PDF, package_submission
 
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS = json.loads((ROOT / 'docs/test-results-1.2.1.json').read_text())
+DIAGNOSTICS = json.loads((ROOT / 'output/reports/api-diagnostics/results.json').read_text())
 
 
 def requirements(section):
@@ -48,6 +49,7 @@ def main():
     story = [Logo(), Spacer(1, 20), paragraph('Dokumentacja projektu Android', 'h1')]
     story += [paragraph('**Wykonawcy:** Brajan Sieroń, Damian Panońko, Patryk Dawczak.'),
               paragraph('**Wersja aplikacji:** 1.2.1 (kod 4) | **Backend:** API 1.2.0 | **Data:** 06.11.2026.', 'small'),
+              paragraph('Wydanie do oddania uwzględnia poprawkę komunikatów połączenia z API (commit 1b4c1a9).', 'small'),
               paragraph('1. Cel i zakres aplikacji', 'h2'),
               paragraph('TripSync wspiera organizację wyjazdów niewielkich grup znajomych. Łączy wspólny harmonogram, zadania i pakowanie, propozycje z głosowaniem oraz koszty i rozliczenia. Celem jest zebranie informacji o podróży w jednym miejscu i umożliwienie pracy także podczas utraty połączenia.'),
               paragraph('Zakres obejmuje konta i role, zaproszenia, CRUD wyjazdów i ich elementów, budżety, kategorie wydatków, zapis spłat, historię zmian, mapę miejsc, wyszukiwanie miejscowości i prognozę na 7 dni. Zmiany zapisują się lokalnie i synchronizują z serwerem; konflikty można rozstrzygnąć w aplikacji.'),
@@ -119,7 +121,7 @@ def main():
     story += [paragraph('Instalacja załączonego APK', 'h2'),
               paragraph('1. Rozpakuj ZIP i przenieś `TripSync.apk` na telefon z Androidem 8.0+ albo przeciągnij plik do uruchomionego emulatora. Na telefonie zezwól użytej aplikacji na instalowanie APK. Pakiet pl.tripsync ma wersję 1.2.1 i jest podpisany kluczem debug.'),
               paragraph('2. Otwórz TripSync i wybierz **Wypróbuj bez konta**. Przykładowy wyjazd trzech osób pozwala pokazać edycję planu, zadania, głosy, koszty i budżet bez uruchamiania backendu.'),
-              paragraph('3. Do współpracy ustaw adres API ikoną ustawień przed logowaniem. Wszyscy używają tego samego serwera i własnych kont; dołączają kodem lub linkiem. Adres domyślny: `https://tripsync.wisp.uno/`. Wymagany backend API 1.2.0. Dostępność publicznego hostingu nie była częścią testów tej paczki.'),
+              paragraph('3. Do współpracy ustaw adres API ikoną ustawień przed logowaniem. Wszyscy używają tego samego serwera i własnych kont; dołączają kodem lub linkiem. Adres: `https://tripsync.wisp.uno/`, **bez :9853**. Port 9853 jest portem backendu w panelu; domena HTTPS obsługuje połączenia przez port 443. Wymagany backend API 1.2.0.'),
               paragraph('Uruchomienie ze źródeł', 'h2'),
               paragraph('Pobierz [repozytorium Git](https://github.com/Yamoteusz/TripSync) i otwórz cały katalog w Android Studio. Wymagane: JDK 17 lub 21, SDK 36.1, Build Tools 36.0.0. Zsynchronizuj Gradle, wybierz telefon lub emulator API 26+ i kliknij Run. Budowanie z terminala w katalogu projektu:'),
               paragraph('./gradlew -PtripsyncBuildRoot=/tmp/tripsync-build :app:assembleDebug', 'code'),
@@ -128,25 +130,30 @@ def main():
               paragraph('Lokalny backend SQLite wymaga Pythona 3.10+; nie wymaga dodatkowych pakietów. W drugim terminalu, w katalogu repozytorium, uruchom:'),
               paragraph('python3 backend/server.py --db /tmp/tripsync-local.sqlite', 'code'),
               paragraph('W emulatorze ustaw `http://10.0.2.2:8080/`. Dla telefonu po USB uruchom `adb reverse tcp:8080 tcp:8080` i ustaw `http://127.0.0.1:8080/`. Lokalne HTTP jest dozwolone w wariancie debug; serwer zdalny wymaga HTTPS.'),
-              paragraph('Jeśli używany jest obecny Wispbyte, przed nowym APK opublikuj kod API 1.2.0 przez GitHub Desktop (commit i Push origin), a następnie zrestartuj serwer pobierający zmiany. Dane MySQL przechowuj w Environment lub .env na serwerze. Szczegóły konfiguracji są w repozytorium: docs/wispbyte.md.', 'small')]
+              paragraph('Błąd DNS emulatora przy logowaniu', 'h2'),
+              paragraph('Jeśli Mac łączy się z API, a Android zgłasza błąd DNS, zamknij emulator i uruchom go ponownie z katalogu repozytorium. Poniższy przykład dotyczy AVD Medium_Phone; użyj nazwy swojego urządzenia. Dane pozostają zachowane.', 'small'),
+              paragraph('sh scripts/start_emulator.sh Medium_Phone', 'code'),
+              paragraph('Skrypt ustawia DNS 1.1.1.1 i 8.8.8.8 oraz wykonuje zimny start. Aplikacja rozróżnia błędy DNS, HTTPS, timeout i odmowę połączenia. Nie wyłączaj sprawdzania certyfikatów. Konfiguracja własnego hostingu i MySQL: docs/wispbyte.md w repozytorium.', 'small')]
     story += heading('9. Przeprowadzone testy i wyniki')
-    story += [paragraph('Weryfikacja z **06.11.2026**: Android 1.2.1, backend API 1.2.0. Poniżej końcowe wyniki wykonanych przebiegów, bez doliczania powtórzeń.'),
+    story += [paragraph('Weryfikacja z **06.11.2026**: Android 1.2.1, backend API 1.2.0. Pełny przebieg bazowy przed poprawką komunikatów sieciowych:'),
               table([['Grupa', 'Testy zaliczone', 'Niepowodzenia'],
                      ['Backend Python', str(RESULTS['backend']['tests']), '0'],
                      ['Jednostkowe Android / Kotlin', str(RESULTS['android_unit']['tests']), '0'],
                      ['Android: interfejs i integracja', str(RESULTS['android_device']['tests']), '0'],
                      ['Łącznie', str(RESULTS['unique_tests_passed']), '0']], widths=[285, 107, 107]), Spacer(1, 10),
-              paragraph('**Budowanie APK:** zakończone powodzeniem. **Lint offline:** 0 błędów i 1 ostrzeżenie GradleDependency dotyczące aktualizacji Lifecycle.'),
-              paragraph('Zakres testów', 'h2'),
-              paragraph('**Kotlin:** kwoty, precyzja i przepełnienia, podział kosztów, salda, spłaty, budżety, walidacja współrzędnych oraz dat i godzin. Zerowy limit kategorii jest poprawny; wydatek pozostaje dodatni.'),
-              paragraph('**Backend:** konta, sesje, role, zaproszenia, walidacja, synchronizacja, idempotencja, konflikty, historia, usunięcia i konwersja propozycji. Sprawdzono wyścig dwóch użytkowników, rollback po błędzie i ponowienie operacji bez duplikatu punktu planu.'),
-              paragraph('**Urządzenie:** CRUD, nawigacja, formularze, budżet i spłaty, głosy, mapa miejsc, historia, kalendarz i zegar, odtworzenie aktywności, dwa konta z REST, konflikty, działanie offline i cache pogody. Sprawdzono ochronę niezapisanych formularzy, potwierdzenie usuwania budżetu i obsługę przypomnienia przy konwersji.'),
+              paragraph('Zakres bazowy: walidacja i obliczenia kosztów, konta i role, CRUD, nawigacja, formularze, odtworzenie aktywności, praca dwóch kont, synchronizacja, konflikty, konwersja bez duplikatów, przypomnienia i cache pogody.'),
+              paragraph('Weryfikacja po poprawce połączenia', 'h2'),
+              table([['Grupa', 'Testy zaliczone', 'Niepowodzenia'],
+                     ['Jednostkowe Android (w tym 7 nowych)', str(DIAGNOSTICS['android_unit']['passed']), str(DIAGNOSTICS['android_unit']['failed'])],
+                     ['Połączenie z publicznym API z Androida', str(DIAGNOSTICS['android_api']['passed']), str(DIAGNOSTICS['android_api']['failed'])]], widths=[285, 107, 107]), Spacer(1, 8),
+              paragraph('Nowe testy jednostkowe rozróżniają DNS, TLS, timeout, odmowę połączenia i odpowiedzi błędów serwera. Na emulatorze odtworzono UnknownHostException; po poprawieniu DNS sprawdzono /health (200), /sync bez sesji (401) i logowanie z celowo błędnymi danymi (401). Nie tworzono kont i nie zmieniano danych użytkowników.'),
+              paragraph('Zestawy częściowo się pokrywają: 30 testów jednostkowych zawiera wcześniejsze 23. Nie sumujemy obu przebiegów. **Budowanie poprawionego APK:** powodzenie. **Lint offline:** 0 błędów, 1 ostrzeżenie GradleDependency.', 'small'),
               paragraph('Środowisko i granice weryfikacji', 'h2'),
-              paragraph('Android 10 / API 29, emulator ARM64, 1080 x 2400 px, 420 dpi. Dodatkowa próba daty i godziny: szerokość 320 dp i skala czcionki 1.3. SDK 36.1, JDK 21, Python 3.13.5; izolowane lokalne API i SQLite. Adapter MySQL testowano ze sterownikiem zastępczym. Nie badano rzeczywistego MySQL hostingu, nowszych Androidów, fizycznych urządzeń, TalkBack ani obciążenia. Przypomnienia podlegają ograniczeniom systemu.'),
+              paragraph('Android 10 / API 29, ARM64; SDK 36.1, JDK 21, Python 3.13.5. Bazowe testy używały lokalnej SQLite; pickery sprawdzono też przy 320 dp i czcionce 1.3. Po poprawce wykonano powyższe testy celowane; nie powtarzano pełnej sesji UI. Brak pełnej regresji rzeczywistego MySQL, testów nowszych Androidów, fizycznych urządzeń, TalkBack i obciążenia. Próba z błędnym hasłem nie weryfikuje logowania konkretnym kontem.', 'small'),
               paragraph('Powtórzenie i dowody', 'h2'),
               paragraph('python3 -m unittest discover -s backend -v', 'code'),
               paragraph('./gradlew :app:testDebugUnitTest :app:lintDebug :app:connectedDebugAndroidTest', 'code'),
-              paragraph('Testy urządzeniowe wymagają osobnego emulatora oraz lokalnego API pod http://10.0.2.2:8080/. Logi i raporty w repozytorium: [output/reports/1.2.1](https://github.com/Yamoteusz/TripSync/tree/main/output/reports/1.2.1); [zestawienie wyników](https://github.com/Yamoteusz/TripSync/blob/main/docs/test-results-1.2.1.json).', 'small')]
+              paragraph('Pełne testy urządzeniowe wymagają osobnego emulatora i lokalnego API pod http://10.0.2.2:8080/. Raporty: [przebieg bazowy](https://github.com/Yamoteusz/TripSync/tree/main/output/reports/1.2.1) oraz [poprawka połączenia](https://github.com/Yamoteusz/TripSync/tree/main/output/reports/api-diagnostics).', 'small')]
     story += gallery(1, [('02-podsumowanie.png', 'Podsumowanie wyjazdu'), ('03-harmonogram.png', 'Harmonogram'), ('04-zadania.png', 'Zadania i pakowanie'), ('05-glosowanie.png', 'Propozycje i głosowanie')])
     story += gallery(2, [('06-rozliczenia.png', 'Wydatki i rozliczenia'), ('08-budzet.png', 'Budżet i kategorie'), ('10-mapa.png', 'Mapa miejsc'), ('11-historia.png', 'Historia zmian')])
     PDF.parent.mkdir(parents=True, exist_ok=True)

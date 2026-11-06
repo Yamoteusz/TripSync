@@ -16,7 +16,7 @@ Stan dokumentacji: 06.11.2026. Wersja aplikacji: 1.2.1. Wykonawcy: **Brajan Sier
 | [Technologie](technologie.md) | Biblioteki, zadania i źródła dokumentacji |
 | [Instalacja i uruchomienie](uruchomienie.md) | Android Studio, Mac, APK, lokalne API i emulator |
 | [Wispbyte i MySQL](wispbyte.md) | Environment, `.env`, domyślny startup i diagnostyka |
-| [Testy i wyniki](testy.md) | 99 testów, odtworzenie przebiegów, raporty i ograniczenia |
+| [Testy i wyniki](testy.md) | Bazowe 99 testów, dodatkowe testy poprawki połączenia, raporty i ograniczenia |
 | [Bezpieczeństwo](bezpieczenstwo.md) | Kontrola dostępu, sesje, TLS, walidacja i granice ochrony |
 | [Zgodność z wytycznymi](zgodnosc.md) | Powiązanie wymagań oraz kryteriów oceny z dowodami |
 | [Prezentacja i obrona](prezentacja.md) | Scenariusz pokazu i pytania techniczne |
@@ -30,7 +30,7 @@ Stan dokumentacji: 06.11.2026. Wersja aplikacji: 1.2.1. Wykonawcy: **Brajan Sier
 
 Architektura i bazy mają edytowalne źródła Mermaid w dokumentach. Wszystkie diagramy mają samodzielne pliki SVG w [diagrams/](diagrams/). [UML przypadków użycia](diagrams/przypadki-uzycia.svg) zawiera aktorów, granicę systemu, asocjacje i generalizację roli organizatora.
 
-Aktualne wyniki: [test-results-1.2.1.json](test-results-1.2.1.json), raporty [output/reports/1.2.1/](../output/reports/1.2.1/). `test-results.json`, `test-results-1.2.json`, starsze raporty oraz `screenshots/` są materiałem archiwalnym poprzednich przebiegów. Obecny interfejs pokazuje `screenshots-1.2.1/`; starszy screen pogody ma osobno opisane pochodzenie.
+Wyniki bazowe: [test-results-1.2.1.json](test-results-1.2.1.json), raporty [output/reports/1.2.1/](../output/reports/1.2.1/). Wyniki poprawki połączenia: [api-diagnostics/results.json](../output/reports/api-diagnostics/results.json). `test-results.json`, `test-results-1.2.json`, starsze raporty oraz `screenshots/` są materiałem archiwalnym poprzednich przebiegów. Obecny interfejs pokazuje `screenshots-1.2.1/`; starszy screen pogody ma osobno opisane pochodzenie.
 
 ## Odtworzenie diagramów i PDF
 
