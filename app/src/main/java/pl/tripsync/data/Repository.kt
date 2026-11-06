@@ -11,10 +11,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import pl.tripsync.domain.*
-import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.io.IOException
 import java.time.LocalDate
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -238,9 +236,5 @@ class Repository(val db: TripDatabase, private val prefs: Preferences, private v
     }
     fun <T> decode(record: RecordEntity, clazz: Class<T>): T = gson.fromJson(record.json, clazz)
     private fun RemoteRecord.local() = RecordEntity(id, tripId, kind, gson.toJson(payload), version, deleted, false)
-    fun errorMessage(e: Exception): String = when (e) {
-        is HttpException -> runCatching { gson.fromJson(e.response()?.errorBody()?.string(), JsonObject::class.java).get("message").asString }.getOrDefault("Błąd serwera (${e.code()}). Spróbuj ponownie.")
-        is IOException -> "Brak połączenia z serwerem. Dane są dostępne offline."
-        else -> e.message ?: "Nie udało się wykonać operacji."
-    }
+    fun errorMessage(e: Exception): String = apiErrorMessage(e)
 }

@@ -2,7 +2,7 @@
 
 Data wykonania: **06.11.2026**. Android: **1.2.1**, versionCode **4**. Backend: **API 1.2.0**.
 
-## Wyniki końcowe
+## Pełny przebieg bazowy
 
 | Grupa | Liczba testów | Niepowodzenia |
 |---|---:|---:|
@@ -61,3 +61,17 @@ Testy wylogowują aplikację i odtwarzają demo, dlatego wymagają oddzielnego u
 ## Granice weryfikacji
 
 Nie wykonano pełnej macierzy nowszych wersji Androida, testów fizycznego telefonu i tabletu, audytu TalkBack ani testów obciążenia i bezpieczeństwa. Test odtworzenia aktywności nie jest testem utraty procesu. WorkManager podlega ograniczeniom systemu; sprawdzenie przekazania przypomnienia nie gwarantuje dokładnej godziny jego dostarczenia.
+
+## Dodatkowa diagnostyka połączenia - 06.11.2026
+
+Na emulatorze Medium Phone / API 29 odtworzono błąd logowania: `UnknownHostException` dla `tripsync.wisp.uno`. Po zimnym starcie tego samego AVD z DNS `1.1.1.1,8.8.8.8` połączenie HTTPS zadziałało. Dane emulatora i aplikacji zachowano. Instrukcja: [uruchomienie.md](uruchomienie.md#emulator-błąd-dns-przy-logowaniu).
+
+Po zmianie komunikatów aplikacji wykonano:
+
+- **30/30 testów jednostkowych**, w tym 7 nowych: DNS, błąd zagnieżdżony, TLS, timeout i odmowa połączenia, komunikat API, nieprawidłowa odpowiedź serwera i zwykła walidacja.
+- **2/2 testów połączenia z publicznym API z Androida**: `/health` zwraca 200, `/sync` bez sesji 401, a celowo nieprawidłowe dane logowania zwracają 401 z komunikatem walidacji. Nie tworzono kont ani nie modyfikowano danych użytkowników.
+- Budowanie APK i testowego APK: powodzenie. Lint offline: 0 błędów, 1 ostrzeżenie GradleDependency.
+
+To dodatkowa weryfikacja względem powyższego pełnego przebiegu 99 testów. Nie sumujemy 30 testów jednostkowych z wcześniejszymi 23, ponieważ zestawy się pokrywają. Nie powtarzano całej wcześniejszej sesji urządzeniowej ani regresji MySQL. Test odrzucenia błędnego hasła nie potwierdza logowania konkretnym kontem użytkownika.
+
+Dowody: [raporty diagnostyki](../output/reports/api-diagnostics/). Test `ApiConnectionTest` domyślnie używa lokalnego API `http://10.0.2.2:8080/`. Inny serwer można wskazać argumentem instrumentacji `apiUrl`; test wykonuje odczyty i jedną próbę logowania z losowym nieistniejącym adresem `example.invalid`.

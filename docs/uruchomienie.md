@@ -77,6 +77,20 @@ Wtedy adres aplikacji to `http://127.0.0.1:8080/`. Lokalny HTTP jest dopuszczony
 
 ## Diagnoza najczęstszych problemów
 
+### Emulator: błąd DNS przy logowaniu
+
+Jeżeli serwer odpowiada z Maca, ale Android zgłasza brak połączenia lub `UnknownHostException`, sprawdź DNS emulatora. Zamknij działający emulator, a następnie uruchom ten sam AVD z katalogu projektu:
+
+```sh
+sh scripts/start_emulator.sh Medium_Phone
+```
+
+Skrypt używa DNS `1.1.1.1,8.8.8.8` i wykonuje zimny start bez czyszczenia danych. Nazwę AVD można sprawdzić przez `emulator -list-avds`; na innym komputerze ustaw `ANDROID_SDK_ROOT`, jeśli SDK jest w innej lokalizacji. Własne serwery można wskazać przez `TRIPSYNC_DNS_SERVERS`. W aplikacji pozostaw `https://tripsync.wisp.uno/` bez portu. Port `9853` w panelu hostingu jest portem backendu, a domena HTTPS obsługuje połączenie przez port 443.
+
+Komunikaty aplikacji rozróżniają błąd DNS, weryfikację HTTPS, timeout i odmowę połączenia. Nie wyłączaj kontroli certyfikatów i nie zastępuj domeny adresem IP.
+
+### Pozostałe problemy
+
 | Objaw | Sprawdzenie |
 |---|---|
 | Nie ma konta po wejściu do demo | Demo jest odrębne i lokalne; użyj rejestracji na wybranym API |

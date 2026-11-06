@@ -16,7 +16,7 @@ output/checksums.sha256
 deploy/.env
 backend/backups/
 
-data/
+/data/
 
 .kotlin/
 .venv/

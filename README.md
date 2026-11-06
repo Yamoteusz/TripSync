@@ -74,7 +74,7 @@ Na macOS pliki kompilacji powstają automatycznie poza repozytorium w `~/.gradle
 
 APK powstanie wtedy w `/tmp/tripsync-build/app/outputs/apk/debug/app-debug.apk`. `sh scripts/build.sh` wykonuje budowanie, lint, testy jednostkowe i backendu oraz kopiuje APK do `output/apk/`.
 
-Ostatnia udokumentowana weryfikacja z **06.11.2026**:
+Pełny udokumentowany przebieg bazowy z **06.11.2026**:
 
 | Grupa | Wynik |
 |---|---:|
@@ -85,6 +85,8 @@ Ostatnia udokumentowana weryfikacja z **06.11.2026**:
 | Lint | 0 błędów, 1 ostrzeżenie GradleDependency w przebiegu offline |
 
 Testy urządzeniowe wykonano na API 29; wybór daty i godziny dodatkowo sprawdzono przy szerokości 320 dp oraz skali czcionki 1.3. Instrukcja uruchomienia i granice weryfikacji: [testy.md](docs/testy.md).
+
+Dodatkowa poprawka połączenia z 06.11.2026 rozróżnia błędy DNS, HTTPS, timeout i odmowę połączenia. Weryfikacja: **30/30 testów jednostkowych** i **2/2 testów publicznego API z Androida**, po naprawie DNS emulatora. Przy `UnknownHostException` uruchom zamknięty wcześniej emulator poleceniem `sh scripts/start_emulator.sh Medium_Phone`. [Diagnostyka połączenia](docs/uruchomienie.md#emulator-błąd-dns-przy-logowaniu).
 
 ## Architektura
 

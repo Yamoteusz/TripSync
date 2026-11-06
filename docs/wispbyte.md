@@ -55,6 +55,8 @@ Nie ma automatycznej migracji SQLite do MySQL. Nie uruchamiaj kilku procesów ba
 
 Health potwierdza działający proces. Zapis, odczyt i restart weryfikują dodatkowo pracę bazy. Zwracanie 404 dla `/` nie oznacza błędu: backend jest API, nie stroną internetową. Nie wyłączaj sprawdzania certyfikatów, aby korzystać z adresu IP zamiast domeny.
 
+W aplikacji używaj `https://tripsync.wisp.uno/`, bez `:9853`. Adres `tripsync.wisp.uno:9853` pokazywany przez panel wskazuje port aplikacji; zewnętrzny HTTPS działa przez proxy domeny na porcie 443. Jeśli logowanie z Androida zwraca błąd DNS, a domena działa na Macu, skorzystaj z [instrukcji emulatora](uruchomienie.md#emulator-błąd-dns-przy-logowaniu).
+
 ## Aktualizacje, kopie i błędy
 
 Domyślny startup robi git pull, instaluje requirements i uruchamia main.py. Kroki w pokazanej komendzie są rozdzielone średnikami: błąd pull/pip nie musi zatrzymać dalszego startu, dlatego sprawdzaj cały log. Aktualizacja kodu nie powinna zastępować `.env` ani kasować bazy.

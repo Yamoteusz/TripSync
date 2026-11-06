@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="pl.tripsync.NetworkErrorsTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-06T17:12:36.562Z" hostname="MacBook-Air-Brajan.local" time="0.035">
+  <properties/>
+  <testcase name="malformedAndEmptyServerErrorsFallBackToStatusCode" classname="pl.tripsync.NetworkErrorsTest" time="0.025"/>
+  <testcase name="wrappedDnsFailureIsRecognized" classname="pl.tripsync.NetworkErrorsTest" time="0.008"/>
+  <testcase name="serverValidationMessageIsPreserved" classname="pl.tripsync.NetworkErrorsTest" time="0.001"/>
+  <testcase name="validationAndUnknownIoErrorsRemainReadable" classname="pl.tripsync.NetworkErrorsTest" time="0.001"/>
+  <testcase name="certificateFailureIsDistinguishedFromOffline" classname="pl.tripsync.NetworkErrorsTest" time="0.0"/>
+  <testcase name="timeoutAndConnectionRefusalHaveSpecificMessages" classname="pl.tripsync.NetworkErrorsTest" time="0.0"/>
+  <testcase name="dnsFailureIsDistinguishedWithoutExposingExceptionDetails" classname="pl.tripsync.NetworkErrorsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

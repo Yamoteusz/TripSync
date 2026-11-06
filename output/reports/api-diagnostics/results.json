@@ -1,0 +1,33 @@
+{
+  "date": "2026-11-06",
+  "android_version": "1.2.1",
+  "scope": "DNS diagnosis and network error messages; supplementary to the 99-test baseline",
+  "root_cause": "UnknownHostException on Medium_Phone API 29 with emulator DNS alias 10.0.2.3",
+  "remedy": "Cold boot same AVD with -dns-server 1.1.1.1,8.8.8.8; no data wipe",
+  "android_unit": {
+    "passed": 30,
+    "failed": 0,
+    "new_tests": 7
+  },
+  "android_api": {
+    "passed": 2,
+    "failed": 0,
+    "api": 29,
+    "server": "https://tripsync.wisp.uno/",
+    "health": 200,
+    "sync_without_session": 401,
+    "invalid_credentials_login": 401,
+    "users_created": 0
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 1,
+    "offline": true
+  },
+  "build": "passed",
+  "apk_sha256": "c2a84ce78da80cddf7ada8198db5a6a1815691beb38e3cccd7421a989322ced2",
+  "limits": [
+    "No successful authentication with a real user account was attempted.",
+    "Previous full UI and backend regression suites were not rerun."
+  ]
+}
