@@ -8,13 +8,13 @@ W GitHub Desktop wybierz File → Add Local Repository i katalog zawierający RE
 
 ## Praca trzech osób
 
-Przed pracą Fetch origin i Pull origin. Przy równoległym rozwijaniu używajcie osobnych gałęzi i pull requestów. Przykład nazwy: `codex/plan-kalendarz`. Włączcie dostęp pozostałych osób oraz prowadzącego, jeśli repozytorium jest prywatne. Podział odpowiedzialności opisuje `organizacja-pracy.md`, a faktyczny wkład należy wpisać do `AUTHORS.md`.
+Przed pracą Fetch origin i Pull origin. Przy równoległym rozwijaniu używajcie osobnych gałęzi i pull requestów. Przykład nazwy: `codex/plan-kalendarz`. Włączcie dostęp pozostałych osób oraz prowadzącego, jeśli repozytorium jest prywatne. Strukturę kodu opisuje `organizacja-pracy.md`, a wykonawców wymienia `AUTHORS.md`.
 
-Commit zapisuje stan lokalnie, push publikuje go na GitHubie, a aktualizacja Wispbyte pobiera zdalny kod. Nie tworzymy fikcyjnej historii przez rozłożone w czasie wysyłanie gotowych folderów.
+Commit zapisuje stan lokalnie, push publikuje go na GitHubie, a aktualizacja Wispbyte pobiera zdalny kod.
 
 ## GitHub Actions
 
-Workflow `.github/workflows/checks.yml` wykonuje testy backendu, kontrolę składni Python, debug APK, testy jednostkowe Android oraz lint. Publikuje artefakty TripSync-debug i android-reports. Nie uruchamia testów emulatora i nie wdraża automatycznie backendu. Wyniki lokalne dokumentacji nie są dowodem udanego przebiegu Actions; jego stan należy sprawdzić na GitHubie.
+Workflow `.github/workflows/checks.yml` wykonuje testy backendu, kontrolę składni Python, debug APK, testy jednostkowe Android oraz lint. Publikuje artefakty **TripSync-debug**, **TripSync-do-oddania** i **android-reports**. Paczka do oddania łączy wersjonowany PDF z APK zbudowanym w tym przebiegu; wewnętrzny ZIP ma dokładnie dwa pliki. Nie uruchamia testów emulatora i nie wdraża automatycznie backendu. Wyniki workflow i pliki do pobrania są dostępne w zakładce Actions na GitHubie po zakończeniu przebiegu.
 
 ## Co nie trafia do historii
 

@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.tripsync.domain.*
 import pl.tripsync.ui.*
 
@@ -19,6 +20,8 @@ fun PlaceEditorScreen(vm:TripViewModel,state:AppState,nav:NavHostController,trip
     var longitude by rememberSaveable(recordId) {mutableStateOf(if(existing==null) "" else old.longitude.toString())}
     var description by rememberSaveable(recordId) {mutableStateOf(old.description)}
     var deleting by rememberSaveable {mutableStateOf(false)}
+    val busy by vm.busy.collectAsStateWithLifecycle()
+    FormBackGuard("place:$tripId:$recordId", listOf(title, latitude, longitude, description), busy) { nav.popBackStack() }
     Page(if(existing==null) "Dodaj miejsce" else "Edytuj miejsce","Współrzędne dziesiętne, np. 49.1978 i 20.0700. Możesz je skopiować z map.") {
         Panel {
             Field("Nazwa miejsca",title,{title=it})
@@ -32,7 +35,7 @@ fun PlaceEditorScreen(vm:TripViewModel,state:AppState,nav:NavHostController,trip
             val data=PlaceData(title.trim(),lat,lon,description.trim());Validation.place(data)
             if(existing==null) vm.repo.save(tripId,"place",data) else vm.repo.save(tripId,"place",data,existing.id)
             nav.popBackStack()
-        }},modifier=Modifier.fillMaxWidth()) {Text("Zapisz miejsce")}
+        }},enabled=!busy,modifier=Modifier.fillMaxWidth()) {Text("Zapisz miejsce")}
         if(existing!=null) TextButton(onClick={deleting=true},modifier=Modifier.fillMaxWidth()) {Text("Usuń miejsce",color=MaterialTheme.colorScheme.error)}
     }
     if(deleting) AlertDialog(onDismissRequest={deleting=false},title={Text("Usunąć miejsce?")},text={Text("Miejsce zostanie usunięte ze wspólnej mapy.")},confirmButton={TextButton(onClick={vm.action {vm.repo.save(tripId,"place",old,existing!!.id,true);nav.popBackStack()}}) {Text("Usuń")}},dismissButton={TextButton(onClick={deleting=false}) {Text("Anuluj")}})

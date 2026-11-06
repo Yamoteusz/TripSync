@@ -113,3 +113,19 @@ fun TimeField(label: String, value: String, onChange: (String) -> Unit) {
         AlertDialog(onDismissRequest={open=false},title={Text("Wybierz godzinę")},text={Column(Modifier.fillMaxWidth(),horizontalAlignment=Alignment.CenterHorizontally) {if(keyboard || compact) TimeInput(picker) else TimePicker(picker);if(!compact) TextButton(onClick={keyboard=!keyboard}) {Icon(if(keyboard) Icons.Default.Schedule else Icons.Default.Keyboard,null);Spacer(Modifier.width(8.dp));Text(if(keyboard) "Wybierz na zegarze" else "Wpisz godzinę")}}},confirmButton={TextButton(onClick={onChange(Dates.time(picker.hour,picker.minute));open=false}) {Text("Ustaw godzinę")}},dismissButton={TextButton(onClick={open=false}) {Text("Anuluj")}})
     }
 }
+
+@Composable
+fun FormBackGuard(formKey: String, draft: List<String>, busy: Boolean, onDiscard: () -> Unit) {
+    val original by rememberSaveable(formKey) { mutableStateOf(draft) }
+    var discard by rememberSaveable(formKey) { mutableStateOf(false) }
+    androidx.activity.compose.BackHandler(enabled = busy || draft != original) {
+        if (!busy) discard = true
+    }
+    if (discard) AlertDialog(
+        onDismissRequest = { if (!busy) discard = false },
+        title = { Text("Odrzucić zmiany?") },
+        text = { Text("Ten formularz ma niezapisane zmiany.") },
+        confirmButton = { TextButton(enabled = !busy, onClick = { discard = false; onDiscard() }) { Text("Odrzuć zmiany") } },
+        dismissButton = { TextButton(enabled = !busy, onClick = { discard = false }) { Text("Zostań") } }
+    )
+}

@@ -94,4 +94,74 @@ class SyncIntegrationTest {
         first.resolve(id,false)
     }
 
+    @Test fun simultaneousConversionsKeepOneEventAfterConflictResolution() = runBlocking {
+        val id = first.save(trip, "proposal", ProposalData("Wspólny pomysł"))
+        assertTrue(first.sync()); assertTrue(second.sync())
+        val a = first.dao.record(id)!!
+        val b = second.dao.record(id)!!
+        assertEquals(id, first.convertProposal(a, EventData("Plan Anny", "2026-10-11", "10:00")))
+        assertEquals(id, second.convertProposal(b, EventData("Plan Bartka", "2026-10-11", "11:00")))
+        assertTrue(first.sync()); assertTrue(second.sync())
+        assertNotNull(second.dao.conflict(id))
+        second.resolve(id, true)
+        assertTrue(second.sync()); assertTrue(first.sync())
+        val events = first.dao.records().filter { it.kind == "event" && !it.deleted }
+        assertEquals(1, events.size)
+        assertEquals("Plan Bartka", first.decode(events.single(), EventData::class.java).title)
+    }
+    @Test fun conversionCanBeRetriedAgainstNewerProposal() = runBlocking {
+        val id = first.save(trip, "proposal", ProposalData("Pomysł"))
+        first.sync(); second.sync()
+        val stale = second.dao.record(id)!!
+        first.save(trip, "proposal", ProposalData("Nowszy pomysł"), id); first.sync()
+        second.convertProposal(stale, EventData("Plan", "2026-10-11", "10:00"))
+        second.sync()
+        assertNotNull(second.dao.conflict(id))
+        second.resolve(id, true)
+        assertEquals("convert", second.dao.operation(id)!!.kind)
+        assertTrue(second.sync()); assertTrue(first.sync())
+        assertEquals("event", first.dao.record(id)!!.kind)
+        assertNull(second.dao.conflict(id))
+    }
+    @Test fun offlineConversionAndFurtherEditingRemainAtomic() = runBlocking {
+        val id = first.save(trip, "proposal", ProposalData("Lokalny pomysł"))
+        first.convertProposal(first.dao.record(id)!!, EventData("Plan", "2026-10-11", "10:00"))
+        first.save(trip, "event", EventData("Plan po edycji", "2026-10-11", "11:00"), id)
+        assertEquals("convert", first.dao.operation(id)!!.kind)
+        assertEquals(1, first.dao.operations().size)
+        assertTrue(first.sync()); assertTrue(second.sync())
+        assertEquals("event", second.dao.record(id)!!.kind)
+        assertEquals("Plan po edycji", second.decode(second.dao.record(id)!!, EventData::class.java).title)
+    }
+    @Test fun deletingPendingConversionRemovesOriginalProposal() = runBlocking {
+        val id = first.save(trip, "proposal", ProposalData("Pomysł")); first.sync()
+        val event = EventData("Plan", "2026-10-11", "10:00")
+        first.convertProposal(first.dao.record(id)!!, event)
+        first.save(trip, "event", event, id, true)
+        assertEquals("proposal", first.dao.operation(id)!!.kind)
+        assertTrue(first.sync()); assertTrue(second.sync())
+        assertTrue(second.dao.record(id)!!.deleted)
+    }
+    @Test fun acceptingServerProposalCancelsLocalConversionReminder() = runBlocking {
+        val id = first.save(trip, "proposal", ProposalData("Pomysł")); first.sync(); second.sync()
+        val cancelled = mutableListOf<RecordEntity>()
+        second.reminder = { cancelled += it }
+        second.convertProposal(second.dao.record(id)!!, EventData("Plan", "2026-10-11", "10:00", reminder = true))
+        first.save(trip, "proposal", ProposalData("Nowszy pomysł"), id); first.sync(); second.sync()
+        second.resolve(id, false)
+        assertEquals("proposal", second.dao.record(id)!!.kind)
+        assertTrue(cancelled.any { it.id == id && it.kind == "event" && it.deleted })
+    }
+    @Test fun demoConversionSchedulesReminderWithoutNetwork() = runBlocking {
+        first.logout(); first.demo()
+        val reminders = mutableListOf<RecordEntity>()
+        first.reminder = { reminders += it }
+        val idea = first.dao.record("demo-proposal")!!
+        val date = first.decode(first.dao.record("demo-tatry")!!, TripData::class.java).startDate
+        val id = first.convertProposal(idea, EventData("Przypomnienie", date, "10:00", reminder = true))
+        assertEquals(idea.id, id)
+        assertTrue(first.dao.operations().isEmpty())
+        assertEquals(1, reminders.size)
+        assertTrue(first.decode(reminders.single(), EventData::class.java).reminder)
+    }
 }

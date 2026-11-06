@@ -1,6 +1,6 @@
 # Biblioteki i technologie
 
-Wersje poniżej są deklarowane w konfiguracji Gradle bieżącego projektu. Gradle może podnieść wersje przechodnich zależności podczas rozwiązywania grafu; deklaracja BOM nie oznacza, że każdy artefakt Compose ma dokładnie wersję z tego BOM. Konfiguracja źródłowa jest punktem odniesienia.
+Poniższa tabela przedstawia technologie i wersje deklarowane w konfiguracji projektu. Wersje zależności przechodnich są rozwiązywane przez Gradle.
 
 | Technologia | Deklaracja / wersja | Zastosowanie |
 |---|---|---|
@@ -48,5 +48,3 @@ Leaflet ma licencję BSD-2-Clause dołączoną w `app/src/main/assets/leaflet/LI
 - [Leaflet](https://leafletjs.com/)
 - [Open-Meteo](https://open-meteo.com/en/docs)
 - [Polityka kafelków OSM](https://operations.osmfoundation.org/policies/tiles/)
-
-Aktualizacja bibliotek i SDK jest odrębną zmianą kodu. Dokumentacja nie deklaruje, że wszystkie zależności są najnowsze.

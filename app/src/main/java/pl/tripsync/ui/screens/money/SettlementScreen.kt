@@ -7,6 +7,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.navigation.NavHostController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.tripsync.domain.*
 import pl.tripsync.ui.*
 import java.time.LocalDate
@@ -24,6 +25,8 @@ fun SettlementScreen(vm: TripViewModel, state: AppState, nav: NavHostController,
     var date by rememberSaveable(recordId) { mutableStateOf(old.date) }
     var note by rememberSaveable(recordId) { mutableStateOf(old.note) }
     var deleting by rememberSaveable { mutableStateOf(false) }
+    val busy by vm.busy.collectAsStateWithLifecycle()
+    FormBackGuard("settlement:$tripId:$recordId", listOf(to, amount, date, note), busy) { nav.popBackStack() }
     Page(if (existing == null) "Zapisz spłatę" else "Edytuj spłatę", "Zapisujesz własną deklarację oddania pieniędzy. Aplikacja nie wykonuje przelewów.") {
         Panel {
             Text("Od: ${members.find { it.userId == old.from }?.name ?: "Były uczestnik"}")
@@ -40,7 +43,7 @@ fun SettlementScreen(vm: TripViewModel, state: AppState, nav: NavHostController,
                 val data = SettlementData(old.from, to, Money.parse(amount), date, note.trim())
                 if (existing == null) vm.repo.save(tripId, "settlement", data) else vm.repo.save(tripId, "settlement", data, existing.id)
                 nav.popBackStack()
-            } }, modifier = Modifier.fillMaxWidth()) { Text("Zapisz spłatę") }
+            } }, enabled = !busy, modifier = Modifier.fillMaxWidth()) { Text("Zapisz spłatę") }
             if (existing != null) TextButton(onClick = { deleting = true }, modifier = Modifier.fillMaxWidth()) { Text("Usuń spłatę", color = MaterialTheme.colorScheme.error) }
         } else Text("Tylko osoba, która zapisała własną spłatę, może ją edytować.")
     }

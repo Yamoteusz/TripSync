@@ -20,7 +20,7 @@ TEAL = colors.HexColor('#006B62')
 MINT = colors.HexColor('#C4E8C9')
 GRAY = colors.HexColor('#54645E')
 PALE = colors.HexColor('#F2F6F0')
-DATE = '05.10.2026'
+DATE = '06.11.2026'
 REPOSITORY = 'https://github.com/Yamoteusz/TripSync'
 
 for name, candidates in [('TS', ['/System/Library/Fonts/Supplemental/Arial.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf']), ('TSB', ['/System/Library/Fonts/Supplemental/Arial Bold.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'])]:
@@ -190,7 +190,7 @@ def frame(canvas, document):
     canvas.line(48, 43, 547, 43)
     canvas.setFillColor(GRAY)
     canvas.setFont('TS', 8)
-    canvas.drawString(48, 29, 'TripSync 1.2.0 | Dokumentacja projektu Android | ' + DATE)
+    canvas.drawString(48, 29, 'TripSync 1.2.1 | Dokumentacja projektu Android | ' + DATE)
     canvas.drawRightString(547, 29, str(document.page))
     canvas.setFillColor(TEAL)
     canvas.setFont('TSB', 8)
@@ -260,9 +260,9 @@ def markdown_section(filename, diagrams=()):
     if filename in ('docs/funkcje.md', 'docs/api.md'):
         for item in items:
             if isinstance(item, Paragraph) and item.style.name in ('body', 'bullet'):
-                item.style = ParagraphStyle(item.style.name + '-compact', parent=item.style, fontSize=9.3, leading=12.6, spaceAfter=6)
+                item.style = ParagraphStyle(item.style.name + '-compact', parent=item.style, fontSize=9.3, leading=12.4 if filename == "docs/funkcje.md" else 12.6, spaceAfter=4 if filename == "docs/funkcje.md" else 6)
             elif isinstance(item, Paragraph) and item.style.name == 'h2':
-                item.style = ParagraphStyle('h2compact', parent=item.style, leading=16, spaceBefore=8, spaceAfter=5)
+                item.style = ParagraphStyle('h2compact', parent=item.style, leading=16, spaceBefore=6 if filename == 'docs/funkcje.md' else 8, spaceAfter=5)
     return items
 
 
@@ -272,19 +272,23 @@ def screenshots():
         [('05-glosowanie.png', 'Głosowanie'), ('06-rozliczenia.png', 'Koszty i rozliczenia'), ('07-formularz.png', 'Formularz wydatku'), ('08-budzet.png', 'Budżet i kategorie')],
         [('09-splata.png', 'Spłata'), ('10-mapa.png', 'Mapa miejsc'), ('11-historia.png', 'Historia zmian'), ('16-ciemny.png', 'Motyw ciemny')],
         [('14-kalendarz.png', 'Wybór daty'), ('15-zegar.png', 'Wybór godziny'), ('17-kalendarz-kompakt.png', 'Kalendarz: mały ekran'), ('18-godzina-kompakt.png', 'Zegar: mały ekran')],
+        [('19-ochrona-formularza.png', 'Ochrona niezapisanego formularza'), ('20-usuwanie-budzetu.png', 'Potwierdzenie usunięcia budżetu')],
     ]
     items = []
     for number, batch in enumerate(batches, 1):
-        items.extend([PageBreak(), paragraph(f'Widoki aplikacji / {number}', 'h1')])
+        heading = paragraph(f'Widoki aplikacji / {number}', 'h1')
         if number == 1:
-            items.append(paragraph('Rzeczywiste zrzuty z testów wersji 1.2.0, 05.10.2026. Dane pochodzą z demo i izolowanego środowiska testowego.', 'small'))
+            heading.bookmark = 'screenshots'
+        items.extend([PageBreak(), heading])
+        if number == 1:
+            items.append(paragraph('Rzeczywiste zrzuty z testów wersji 1.2.1, 06.11.2026. Dane pochodzą z demo i izolowanego środowiska testowego.', 'small'))
         rows = []
-        for offset in (0, 2):
+        for offset in range(0, len(batch), 2):
             row = []
             for filename, caption in batch[offset:offset + 2]:
-                path = ROOT / 'docs/screenshots-1.2' / filename
+                path = ROOT / 'docs/screenshots-1.2.1' / filename
                 width, height = PILImage.open(path).size
-                target_height = 263
+                target_height = 450 if len(batch) == 2 else 263
                 target_width = target_height * width / height
                 image = Image(str(path), width=target_width, height=target_height)
                 row.append([image, paragraph(caption, 'caption')])
@@ -297,29 +301,55 @@ def screenshots():
 
 def main():
     runpy.run_path(str(ROOT / 'scripts/create_diagrams.py'), run_name='__main__')
-    results = json.loads((ROOT / 'docs/test-results-1.2.json').read_text())
+    results = json.loads((ROOT / 'docs/test-results-1.2.1.json').read_text())
     sections = [
-        ('docs/wymagania.md', ()), ('docs/funkcje.md', ()),
+        ('docs/wymagania.md', ()), ('docs/funkcje.md', ()), ('docs/zmiany-1.2.1.md', ()),
         ('docs/architektura.md', ('architektura.svg',)),
         ('docs/przypadki-uzycia.md', ()),
         ('docs/baza-danych.md', ('baza-lokalna.svg', 'baza-backendu.svg')),
         ('docs/technologie.md', ()), ('docs/api.md', ()),
-        ('docs/uruchomienie.md', ()), ('docs/wispbyte.md', ()),
-        ('docs/bezpieczenstwo.md', ()), ('docs/testy.md', ()),
-        ('docs/zgodnosc.md', ()), ('docs/organizacja-pracy.md', ()),
-        ('docs/github-desktop.md', ()), ('docs/prezentacja.md', ()),
-        ('docs/ograniczenia.md', ()),
+        ('docs/uruchomienie.md', ()), ('docs/bezpieczenstwo.md', ()),
+        ('docs/testy.md', ()), ('docs/ograniczenia.md', ()),
+        ('docs/oddanie.md', ()),
     ]
-    story = [Spacer(1, 24), Logo(), Spacer(1, 23), paragraph('Dokumentacja projektu', 'h1'), paragraph('Aplikacja Android do wspólnego planowania i rozliczania wyjazdów.', 'h2'), paragraph('Wersja Android 1.2.0 / kod wersji 3. Backend API 1.1.0. Stan dokumentacji: ' + DATE + '.'), paragraph('Projekt dla zespołu trzyosobowego. W obecnym zakresie wszystkie funkcje są bezpłatne; aplikacja nie realizuje płatności ani subskrypcji.'), table([['Obszar', 'Stan projektu'], ['Platforma', 'Kotlin, Compose / Material 3, MVVM, Android 8.0+'], ['Dane i integracje', 'Room, REST, MySQL lub SQLite, Open-Meteo i OpenStreetMap'], ['Testy z 05.10.2026', f"{results['unique_tests_passed']} różnych testów zaliczonych; lint: 0 błędów, 16 ostrzeżeń"], ['Repozytorium', REPOSITORY]]), Spacer(1, 10), paragraph('Autorzy i zakres oddania', 'h2')]
     author_lines = (ROOT / 'AUTHORS.md').read_text().splitlines()
     author_rows = [[cell.strip() for cell in line.strip('|').split('|')] for line in author_lines if line.startswith('|')]
     author_rows = [row for row in author_rows if not all(re.fullmatch(r'-+', cell) for cell in row)]
-    story.append(table(author_rows, widths=[40, 180, WIDTH - 220]))
-    story.extend([Spacer(1, 10), paragraph('Dane autorów wymagają uzupełnienia przed oddaniem. Dokument opisuje rzeczywisty zakres oraz ograniczenia; nie stanowi deklaracji uzyskania konkretnej oceny.', 'small'), paragraph('APK debug: output/apk/TripSync-debug.apk. Instrukcje i dokumenty źródłowe znajdują się w repozytorium. SDK 36.1 / target 36: aktualizacja do stabilnego API 37 pozostaje do wykonania.', 'small'), PageBreak(), paragraph('Spis dokumentacji', 'h1')])
+    author_names = [row[1] for row in author_rows[1:]]
+    if len(author_names) != 3 or any(not name for name in author_names):
+        raise ValueError('AUTHORS.md musi zawierać trzech wykonawców.')
+    test_date = '.'.join(reversed(results['date'].split('-')))
+    lint = results['lint']
+    story = [
+        Spacer(1, 24), Logo(), Spacer(1, 23),
+        paragraph('Dokumentacja projektu', 'h1'),
+        paragraph('Aplikacja Android do wspólnego planowania i rozliczania wyjazdów.', 'h2'),
+        paragraph('Wersja aplikacji: 1.2.1 / kod wersji 4. Backend API: 1.2.0.'),
+        paragraph('Data dokumentacji: ' + DATE + '.'),
+        Spacer(1, 10), paragraph('Wykonawcy', 'h2'),
+        table(author_rows, widths=[40, WIDTH - 40]), Spacer(1, 18),
+        table([
+            ['Obszar', 'Rozwiązanie'],
+            ['Platforma', 'Kotlin, Compose / Material 3, MVVM, Android 8.0+'],
+            ['Dane i integracje', 'Room, REST, MySQL lub SQLite, Open-Meteo i OpenStreetMap'],
+            ['Testy z ' + test_date, f"{results['unique_tests_passed']} testów zaliczonych; lint: {lint['errors']} błędów, {lint['warnings']} ostrzeżeń"],
+            ['Repozytorium', f'[{REPOSITORY}]({REPOSITORY})'],
+            ['Aplikacja', 'TripSync.apk w paczce TripSync_do_oddania.zip'],
+        ]),
+        Spacer(1, 16),
+        paragraph('Dokument obejmuje cel i zakres, wymagania, architekturę, przypadki użycia, model danych, technologie, instalację, wyniki testów oraz najważniejsze widoki aplikacji.'),
+        PageBreak(), paragraph('Spis treści', 'h1'),
+    ]
     for index, (filename, _) in enumerate(sections, 1):
         title = (ROOT / filename).read_text().splitlines()[0].removeprefix('# ')
         story.append(paragraph(f'{index:02d}. [{title}](#section-{index})'))
-    story.extend([paragraph('17. Najważniejsze widoki aplikacji: cztery strony rzeczywistych zrzutów ekranu.'), Spacer(1, 14), paragraph('Jak korzystać z dokumentacji', 'h2'), paragraph('PDF zawiera treść dokumentów źródłowych Markdown. Nawigacja po rozdziałach jest dostępna w zakładkach PDF. Spis treści prowadzi do rozdziałów PDF. Pozostałe odnośniki otwierają pliki w repozytorium; dostęp zależy od jego widoczności i uprawnień.'), paragraph('README na GitHubie stanowi skrócony opis i punkt wejścia. Dokumenty w docs/ opisują wymagania, implementację, instalację, wyniki testów oraz scenariusz obrony. AUTHORS.md służy do uzupełnienia autorów i ich faktycznego wkładu.'), paragraph('Wyniki testów pochodzą z zapisanych raportów wersji 1.2.0. Starsze dokumenty i zrzuty wersji 1.1 pozostają materiałami archiwalnymi; nie są dowodem aktualnego wyglądu aplikacji.', 'small')])
+    story.extend([
+        paragraph(f'{len(sections) + 1:02d}. [Zrzuty najważniejszych widoków](#screenshots)'),
+        Spacer(1, 20), paragraph('Informacje o wydaniu', 'h2'),
+        paragraph('Aplikacja: Android 1.2.1. Backend: API 1.2.0. Minimalna wersja systemu: Android 8.0 / API 26. Projekt używa compile SDK 36.1 i target SDK 36.'),
+        paragraph('Data testów i zrzutów ekranu: ' + test_date + '. Środowisko urządzeniowe: emulator Android 10 / API 29. Szczegółowy zakres, wyniki oraz ograniczenia testów opisuje rozdział testowania.'),
+        paragraph(f'Repozytorium kodu źródłowego: [{REPOSITORY}]({REPOSITORY}).'),
+    ])
     for index, (filename, diagrams) in enumerate(sections, 1):
         story.append(PageBreak())
         section = markdown_section(filename, diagrams)
@@ -327,7 +357,7 @@ def main():
         story.extend(section)
     story.extend(screenshots())
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    document = Documentation(str(OUTPUT), pagesize=A4, leftMargin=48, rightMargin=48, topMargin=57, bottomMargin=57, title='TripSync 1.2.0 - dokumentacja projektu Android', author='Zespół TripSync - autorzy do uzupełnienia', subject='Wymagania, architektura, baza danych, instalacja, testy i prezentacja')
+    document = Documentation(str(OUTPUT), pagesize=A4, leftMargin=48, rightMargin=48, topMargin=57, bottomMargin=57, title='TripSync 1.2.1 - dokumentacja projektu Android', author=', '.join(author_names), subject='Cel, wymagania, architektura, przypadki użycia, bazy danych, technologie, instalacja i testy')
     document.build(story, onFirstPage=frame, onLaterPages=frame)
     print(OUTPUT)
 

@@ -37,6 +37,82 @@ class BackendTests(unittest.TestCase):
     def event(self, title='Spacer'):
         return {'title': title, 'date': '2026-10-11', 'time': '09:30', 'place': '', 'description': '', 'rank': 0, 'done': False, 'reminder': False}
 
+    def conversion_setup(self):
+        self.join()
+        idea = {'title': 'Spacer', 'place': '', 'description': ''}
+        self.store.apply(self.owner['user']['id'], self.op('idea', 'proposal', idea))
+        uid = self.member['user']['id']
+        self.store.apply(uid, self.op('idea:'+uid, 'vote', {'proposalId': 'idea', 'userId': uid}))
+        return idea
+
+    def test_conversion_is_atomic_and_removes_votes(self):
+        self.conversion_setup()
+        user = self.owner['user']['id']
+        result = self.store.apply(user, self.op('idea', 'convert', self.event(), 1))
+        self.assertEqual(('idea', 'event', 2), (result['record']['id'], result['record']['kind'], result['record']['version']))
+        records = self.store.snapshot(user)['records']
+        self.assertFalse(any(r['kind'] in ('proposal', 'vote') and not r['deleted'] for r in records))
+        self.assertTrue(any(r['kind'] == 'activity' and r['payload']['action'] == 'convert' for r in records))
+
+    def test_concurrent_conversion_creates_only_one_event(self):
+        from concurrent.futures import ThreadPoolExecutor
+        self.conversion_setup()
+        operations = [self.op('idea', 'convert', self.event('Anna'), 1), self.op('idea', 'convert', self.event('Bartek'), 1)]
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            futures = [pool.submit(self.store.apply, u['user']['id'], op) for u, op in zip([self.owner, self.member], operations)]
+            results = [future.result() for future in futures]
+        self.assertEqual(['applied', 'conflict'], sorted(r['status'] for r in results))
+        self.assertEqual(1, len([r for r in self.store.snapshot(self.owner['user']['id'])['records'] if r['kind'] == 'event' and not r['deleted']]))
+
+    def test_invalid_conversion_keeps_proposal_and_votes(self):
+        self.conversion_setup()
+        with self.assertRaises(ApiError):
+            self.store.apply(self.owner['user']['id'], self.op('idea', 'convert', dict(self.event(), date='2026-11-01'), 1))
+        records = self.store.snapshot(self.owner['user']['id'])['records']
+        self.assertTrue(any(r['id'] == 'idea' and r['kind'] == 'proposal' and r['version'] == 1 for r in records))
+        self.assertTrue(any(r['kind'] == 'vote' and not r['deleted'] for r in records))
+        self.assertFalse(any(r['kind'] == 'event' for r in records))
+
+    def test_conversion_rolls_back_on_database_failure(self):
+        from unittest.mock import patch
+        import sqlite3
+        self.conversion_setup()
+        with patch.object(self.store, 'activity', side_effect=sqlite3.OperationalError('test rollback')):
+            with self.assertRaises(sqlite3.OperationalError):
+                self.store.apply(self.owner['user']['id'], self.op('idea', 'convert', self.event(), 1))
+        records = self.store.snapshot(self.owner['user']['id'])['records']
+        self.assertEqual('proposal', next(r for r in records if r['id'] == 'idea')['kind'])
+        self.assertTrue(any(r['kind'] == 'vote' and not r['deleted'] for r in records))
+
+    def test_conversion_retry_is_idempotent(self):
+        self.conversion_setup()
+        operation = self.op('idea', 'convert', self.event(), 1)
+        first = self.store.apply(self.owner['user']['id'], operation)
+        self.assertEqual(first, self.store.apply(self.owner['user']['id'], operation))
+        history = [r for r in self.store.snapshot(self.owner['user']['id'])['records'] if r['kind'] == 'activity' and r['payload']['action'] == 'convert']
+        self.assertEqual(1, len(history))
+
+    def test_conversion_conflict_preserves_newer_proposal(self):
+        idea = self.conversion_setup()
+        self.store.apply(self.owner['user']['id'], self.op('idea', 'proposal', dict(idea, title='Nowy pomysł'), 1))
+        result = self.store.apply(self.member['user']['id'], self.op('idea', 'convert', self.event(), 1))
+        self.assertEqual('conflict', result['status'])
+        self.assertEqual('proposal', result['record']['kind'])
+        self.assertEqual('Nowy pomysł', result['record']['payload']['title'])
+
+    def test_unsynced_conversion_creates_single_event(self):
+        result = self.store.apply(self.owner['user']['id'], self.op('local-idea', 'convert', self.event()))
+        self.assertEqual(('event', 1), (result['record']['kind'], result['record']['version']))
+
+    def test_conversion_requires_access_and_rejects_deleted_source(self):
+        idea = self.conversion_setup()
+        with self.assertRaises(ApiError) as error:
+            self.store.apply(self.stranger['user']['id'], self.op('idea', 'convert', self.event(), 1))
+        self.assertEqual(403, error.exception.status)
+        self.store.apply(self.owner['user']['id'], self.op('idea', 'proposal', idea, 1, True))
+        with self.assertRaises(ApiError):
+            self.store.apply(self.owner['user']['id'], self.op('idea', 'convert', self.event(), 2))
+
     def test_password_is_hashed_and_session_can_be_revoked(self):
         stored = self.store.db.execute('SELECT password,salt FROM users').fetchone()
         self.assertNotEqual('Secret123!', stored['password'])

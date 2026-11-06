@@ -1,0 +1,53 @@
+test_complete_mysql_environment_ignores_invalid_file (test_hosting_config.HostingConfigTests.test_complete_mysql_environment_ignores_invalid_file) ... ok
+test_hosting_variables_bom_and_export_do_not_block_config (test_hosting_config.HostingConfigTests.test_hosting_variables_bom_and_export_do_not_block_config) ... ok
+test_invalid_line_never_discloses_secret_or_partially_applies (test_hosting_config.HostingConfigTests.test_invalid_line_never_discloses_secret_or_partially_applies) ... ok
+test_missing_file_leaves_environment_unchanged (test_hosting_config.HostingConfigTests.test_missing_file_leaves_environment_unchanged) ... ok
+test_password_symbols_are_literal_and_environment_wins (test_hosting_config.HostingConfigTests.test_password_symbols_are_literal_and_environment_wins) ... ok
+test_connection_recovers_only_outside_transaction (test_mysql_database.MySQLDatabaseTests.test_connection_recovers_only_outside_transaction) ... ok
+test_integrity_error_preserves_existing_registration_handler (test_mysql_database.MySQLDatabaseTests.test_integrity_error_preserves_existing_registration_handler) ... ok
+test_missing_password_fails_without_connection_or_secret_output (test_mysql_database.MySQLDatabaseTests.test_missing_password_fails_without_connection_or_secret_output) ... ok
+test_no_retry_of_failed_write_in_transaction (test_mysql_database.MySQLDatabaseTests.test_no_retry_of_failed_write_in_transaction) ... ok
+test_snapshot_supports_named_and_positional_row_access (test_mysql_database.MySQLDatabaseTests.test_snapshot_supports_named_and_positional_row_access) ... ok
+test_transaction_commits_success_and_rolls_back_failure (test_mysql_database.MySQLDatabaseTests.test_transaction_commits_success_and_rolls_back_failure) ... ok
+test_upsert_updates_record_without_replace_delete_semantics (test_mysql_database.MySQLDatabaseTests.test_upsert_updates_record_without_replace_delete_semantics) ... ok
+test_caps_clients_and_keeps_active_rate_limits (test_rate_limiter.RateLimiterTests.test_caps_clients_and_keeps_active_rate_limits) ... ok
+test_expired_clients_are_removed_and_capacity_is_reused (test_rate_limiter.RateLimiterTests.test_expired_clients_are_removed_and_capacity_is_reused) ... ok
+test_rejects_excess_attempts_without_growing_history (test_rate_limiter.RateLimiterTests.test_rejects_excess_attempts_without_growing_history) ... ok
+test_access_control_is_enforced_on_server (test_server.BackendTests.test_access_control_is_enforced_on_server) ... ok
+test_activity_server_authority_idempotency_and_conflict (test_server.BackendTests.test_activity_server_authority_idempotency_and_conflict) ... ok
+test_budget_singleton_owner_limits_and_recreation (test_server.BackendTests.test_budget_singleton_owner_limits_and_recreation) ... ok
+test_concurrent_conversion_creates_only_one_event (test_server.BackendTests.test_concurrent_conversion_creates_only_one_event) ... ok
+test_conflict_detected_and_can_be_resolved (test_server.BackendTests.test_conflict_detected_and_can_be_resolved) ... ok
+test_conversion_conflict_preserves_newer_proposal (test_server.BackendTests.test_conversion_conflict_preserves_newer_proposal) ... ok
+test_conversion_is_atomic_and_removes_votes (test_server.BackendTests.test_conversion_is_atomic_and_removes_votes) ... ok
+test_conversion_requires_access_and_rejects_deleted_source (test_server.BackendTests.test_conversion_requires_access_and_rejects_deleted_source) ... ok
+test_conversion_retry_is_idempotent (test_server.BackendTests.test_conversion_retry_is_idempotent) ... ok
+test_conversion_rolls_back_on_database_failure (test_server.BackendTests.test_conversion_rolls_back_on_database_failure) ... ok
+test_database_persists_after_reopen (test_server.BackendTests.test_database_persists_after_reopen) ... ok
+test_deleted_record_is_tombstone_and_cannot_be_resurrected (test_server.BackendTests.test_deleted_record_is_tombstone_and_cannot_be_resurrected) ... ok
+test_expense_validation_currency_and_removed_members (test_server.BackendTests.test_expense_validation_currency_and_removed_members) ... ok
+test_http_auth_sync_and_error_contract (test_server.BackendTests.test_http_auth_sync_and_error_contract) ... ok
+test_idempotent_retry_does_not_duplicate_or_increment_version (test_server.BackendTests.test_idempotent_retry_does_not_duplicate_or_increment_version) ... ok
+test_invalid_conversion_keeps_proposal_and_votes (test_server.BackendTests.test_invalid_conversion_keeps_proposal_and_votes) ... ok
+test_invalid_event_and_date_range_change (test_server.BackendTests.test_invalid_event_and_date_range_change) ... ok
+test_invalid_login_and_duplicate_email (test_server.BackendTests.test_invalid_login_and_duplicate_email) ... ok
+test_invite_join_rotation_and_owner_role (test_server.BackendTests.test_invite_join_rotation_and_owner_role) ... ok
+test_member_removal_revokes_access_and_clears_assignee (test_server.BackendTests.test_member_removal_revokes_access_and_clears_assignee) ... ok
+test_online_backup_and_nonoverwrite (test_server.BackendTests.test_online_backup_and_nonoverwrite) ... ok
+test_only_trusted_proxy_can_change_rate_limit_ip (test_server.BackendTests.test_only_trusted_proxy_can_change_rate_limit_ip) ... ok
+test_password_is_hashed_and_session_can_be_revoked (test_server.BackendTests.test_password_is_hashed_and_session_can_be_revoked) ... ok
+test_place_coordinates_and_category_validation (test_server.BackendTests.test_place_coordinates_and_category_validation) ... ok
+test_repayment_ownership_edit_delete_and_member_removal (test_server.BackendTests.test_repayment_ownership_edit_delete_and_member_removal) ... ok
+test_trip_delete_revokes_invitation_and_visibility (test_server.BackendTests.test_trip_delete_revokes_invitation_and_visibility) ... ok
+test_unsynced_conversion_creates_single_event (test_server.BackendTests.test_unsynced_conversion_creates_single_event) ... ok
+test_votes_are_unique_and_can_be_toggled (test_server.BackendTests.test_votes_are_unique_and_can_be_toggled) ... ok
+test_wsgi_invalid_body_and_unauthorized (test_wsgi.WsgiTests.test_wsgi_invalid_body_and_unauthorized) ... ok
+test_wsgi_real_http_accounts_sync_and_persistence (test_wsgi.WsgiTests.test_wsgi_real_http_accounts_sync_and_persistence) ... 127.0.0.1 - - [06/Nov/2026 17:11:58] "GET /health HTTP/1.1" 200 36
+127.0.0.1 - - [06/Nov/2026 17:11:58] "POST /auth/register HTTP/1.1" 200 180
+127.0.0.1 - - [06/Nov/2026 17:11:58] "GET /sync HTTP/1.1" 200 30
+ok
+
+----------------------------------------------------------------------
+Ran 45 tests in 15.431s
+
+OK

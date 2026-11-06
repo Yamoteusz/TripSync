@@ -43,18 +43,8 @@ git add app/src/main/java/pl/tripsync/ui/screens/plan
 git commit -m "fix(plan): popraw wyświetlanie kolejności punktów"
 ```
 
-Jeżeli poprawka wymaga zmiany repozytorium albo testu, dodaj je w tym samym commicie. Repozytorium origin jest skonfigurowane jako https://github.com/Yamoteusz/TripSync. Zatwierdzone zmiany wysyłaj przez Push origin w GitHub Desktop. Faktyczny wkład trzech osób uzupełnij w AUTHORS.md.
+Jeżeli poprawka wymaga zmiany repozytorium albo testu, dodaj je w tym samym commicie. Repozytorium origin jest skonfigurowane jako https://github.com/Yamoteusz/TripSync. Zatwierdzone zmiany wysyłaj przez Push origin w GitHub Desktop. Wykonawcy: Brajan Sieroń, Damian Panońko, Patryk Dawczak.
 
 ## Zawartość paczki
 
-Paczka do oddania obejmuje źródła, Gradle Wrapper, backend, dokumentację, screeny, APK i raporty. Nie zawiera prywatnych sesji, baz testowych, lokalnych ścieżek SDK ani cache narzędzi. Git bundle pozwala odtworzyć lokalną historię również bez zdalnego serwera.
-
-## Zakres dla trzech osób po rozbudowie
-
-| Osoba | Główne moduły | Weryfikacja |
-|---|---|---|
-| 1 | Konta, uprawnienia, API, WSGI/hosting, historia i kopie bazy | Testy backendu, idempotencja, trwałość i instrukcja wdrożenia |
-| 2 | Plan, zadania, pomysły, mapa wspólnych miejsc, Open-Meteo i cache prognozy | Formularze, błędy API, UI i dokumentacja map/pogody |
-| 3 | Wydatki i kategorie, budżety, spłaty, algorytm sald, Room/synchronizacja | Testy domeny i integracja między kontami |
-
-To propozycja odpowiedzialności do dalszej pracy i obrony. Każda osoba powinna rozumieć swój zakres oraz wspólną architekturę.
+Paczka `output/TripSync_do_oddania.zip` zawiera tylko `TripSync_Dokumentacja.pdf` i `TripSync.apk`. PDF obejmuje wszystkie wymagane opisy, diagramy, screeny, wyniki testów, wykonawców i link do repozytorium. Źródła, Gradle Wrapper, backend i szczegółowe raporty pozostają w repozytorium Git. Paczkę z istniejącego PDF i APK odtwarza `python3 scripts/package_project.py`; po udanym budowaniu publikuje ją również GitHub Actions jako artefakt TripSync-do-oddania.

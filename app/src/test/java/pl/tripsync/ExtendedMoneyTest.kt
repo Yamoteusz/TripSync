@@ -38,4 +38,16 @@ class ExtendedMoneyTest {
         assertThrows(IllegalArgumentException::class.java) {Validation.place(PlaceData("Szlak",Double.NaN,20.1))}
         assertThrows(IllegalArgumentException::class.java) {Validation.place(PlaceData("Szlak",49.2,181.0))}
     }
+    @Test fun zeroCategoryLimitsAreValidButExpensesRemainPositive() {
+        assertEquals(0L, Money.parse("0", allowZero = true))
+        assertEquals(0L, Money.parse("0,00", allowZero = true))
+        Validation.budget(BudgetData(10000, mapOf("food" to Money.parse("0.00", allowZero = true))))
+        assertThrows(IllegalArgumentException::class.java) { Money.parse("0") }
+    }
+    @Test fun categoryAmountsRejectNegativeValuesOverflowAndExcessPrecision() {
+        for (value in listOf("-1", "0.001", "1000000.01", "999999999999999999999999")) {
+            assertThrows(IllegalArgumentException::class.java) { Money.parse(value, allowZero = true) }
+        }
+        assertEquals(100_000_000L, Money.parse("1000000", allowZero = true))
+    }
 }

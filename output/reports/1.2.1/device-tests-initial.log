@@ -1,0 +1,31 @@
+
+pl.tripsync.FormRegressionTest:
+Error in placeDraftSurvivesCancelledSystemBack(pl.tripsync.FormRegressionTest):
+java.lang.AssertionError: Assert failed: The component with Text + InputText + EditableText contains 'Odrzucić zmiany?' (ignoreCase: false) is not displayed!
+	at androidx.compose.ui.test.AssertionsKt.assertIsDisplayed(Assertions.kt:34)
+	at pl.tripsync.FormRegressionTest.placeDraftSurvivesCancelledSystemBack(FormRegressionTest.kt:57)
+...
+Error in repaymentDraftRequiresConfirmationBeforeDiscarding(pl.tripsync.FormRegressionTest):
+java.lang.AssertionError: Assert failed: The component with Text + InputText + EditableText contains 'Wspólne koszty' (ignoreCase: false) is not displayed!
+	at androidx.compose.ui.test.AssertionsKt.assertIsDisplayed(Assertions.kt:34)
+	at pl.tripsync.FormRegressionTest.repaymentDraftRequiresConfirmationBeforeDiscarding(FormRegressionTest.kt:69)
+
+pl.tripsync.SyncIntegrationTest:...........
+pl.tripsync.TripSyncUiTest:..............
+pl.tripsync.WeatherCacheTest:.
+
+Time: 32,342
+There were 2 failures:
+1) placeDraftSurvivesCancelledSystemBack(pl.tripsync.FormRegressionTest)
+java.lang.AssertionError: Assert failed: The component with Text + InputText + EditableText contains 'Odrzucić zmiany?' (ignoreCase: false) is not displayed!
+	at androidx.compose.ui.test.AssertionsKt.assertIsDisplayed(Assertions.kt:34)
+	at pl.tripsync.FormRegressionTest.placeDraftSurvivesCancelledSystemBack(FormRegressionTest.kt:57)
+2) repaymentDraftRequiresConfirmationBeforeDiscarding(pl.tripsync.FormRegressionTest)
+java.lang.AssertionError: Assert failed: The component with Text + InputText + EditableText contains 'Wspólne koszty' (ignoreCase: false) is not displayed!
+	at androidx.compose.ui.test.AssertionsKt.assertIsDisplayed(Assertions.kt:34)
+	at pl.tripsync.FormRegressionTest.repaymentDraftRequiresConfirmationBeforeDiscarding(FormRegressionTest.kt:69)
+
+FAILURES!!!
+Tests run: 31,  Failures: 2
+
+

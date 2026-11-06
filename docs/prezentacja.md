@@ -30,6 +30,6 @@ Anna płaci 720 PLN za nocleg, Bartek 180 PLN za bilety; oba koszty dotyczą Ann
 - Które testy są jednostkowe, a które wymagają emulatora oraz backendu?
 - Co zostało zweryfikowane, a czego nie obejmuje obecny raport?
 
-## Oddanie przez każdego studenta
+## Wykonawcy
 
-Uzgodnijcie z prowadzącym sposób przekazania wspólnego repozytorium i dokumentacji przez trzy osoby. Uzupełnijcie `AUTHORS.md` na podstawie faktycznej pracy. Materiały nie są gwarancją punktacji; ocena obejmuje samodzielny pokaz i znajomość rozwiązań.
+Brajan Sieroń, Damian Panońko, Patryk Dawczak. Materiały prezentacyjne obejmują dokumentację PDF, APK i repozytorium [Yamoteusz/TripSync](https://github.com/Yamoteusz/TripSync).

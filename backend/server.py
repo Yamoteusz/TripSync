@@ -253,7 +253,7 @@ CREATE TABLE IF NOT EXISTS operations(user_id TEXT NOT NULL, id TEXT NOT NULL, d
         rid = text(op.get('recordId'), 'Identyfikator rekordu', 150)
         trip = text(op.get('tripId'), 'Identyfikator wyjazdu', 100)
         kind = op.get('kind')
-        require(kind in ['trip', 'event', 'task', 'proposal', 'vote', 'expense', 'member', 'budget', 'settlement', 'place'], 'Nieznany rodzaj rekordu.')
+        require(kind in ['trip', 'event', 'task', 'proposal', 'convert', 'vote', 'expense', 'member', 'budget', 'settlement', 'place'], 'Nieznany rodzaj rekordu.')
         base = op.get('baseVersion')
         deleted = op.get('deleted', False)
         require(type(base) is int and base >= 0 and type(deleted) is bool, 'Nieprawidłowa wersja.')
@@ -265,7 +265,7 @@ CREATE TABLE IF NOT EXISTS operations(user_id TEXT NOT NULL, id TEXT NOT NULL, d
                 return json.loads(known['result'])
             current = self.db.execute('SELECT * FROM records WHERE id=?', (rid,)).fetchone()
             if current:
-                require(current['trip_id'] == trip and current['kind'] == kind, 'Nie można zmienić tożsamości rekordu.')
+                require(current['trip_id'] == trip and (current['kind'] == kind or kind == 'convert' and current['kind'] in ('proposal', 'event')), 'Nie można zmienić tożsamości rekordu.')
             role = self.role(user, trip)
             creating = kind == 'trip' and not current and base == 0 and not deleted and rid == trip
             parent = self.db.execute('SELECT deleted FROM records WHERE id=?', (trip,)).fetchone()
@@ -273,7 +273,7 @@ CREATE TABLE IF NOT EXISTS operations(user_id TEXT NOT NULL, id TEXT NOT NULL, d
                 require(role is not None and parent is not None and not parent['deleted'], 'Brak dostępu do wyjazdu.', 403)
                 if kind in ['trip', 'member', 'budget']:
                     require(role == 'owner', 'Ta operacja wymaga roli organizatora.', 403)
-            if (current['version'] if current else 0) != base:
+            if (current['version'] if current else 0) != base or kind == 'convert' and current and current['kind'] == 'event':
                 return {'id': oid, 'status': 'conflict', 'record': self.record(current) if current else None}
             if current and current['deleted'] and not deleted and kind not in ('vote', 'budget'):
                 raise ApiError(409, 'Usuniętego rekordu nie można przywrócić.')
@@ -302,13 +302,15 @@ CREATE TABLE IF NOT EXISTS operations(user_id TEXT NOT NULL, id TEXT NOT NULL, d
                         self.save_record(row['id'], trip, 'task', data, row['version'] + 1)
                     elif row['kind'] == 'vote' and data.get('userId') == target:
                         self.save_record(row['id'], trip, 'vote', data, row['version'] + 1, True)
+            target_kind = 'event' if kind == 'convert' else kind
+            require(kind != 'convert' or not deleted, 'Konwersja musi utworzyć punkt planu.')
             if not deleted:
-                self.validate_payload(kind, payload, trip, user)
-            record = self.save_record(rid, trip, kind, payload, base + 1, deleted)
+                self.validate_payload(target_kind, payload, trip, user)
+            record = self.save_record(rid, trip, target_kind, payload, base + 1, deleted)
             if creating:
                 self.db.execute('INSERT INTO members VALUES(?,?,?)', (trip, user, 'owner'))
                 self.member_record(trip, user, 'owner')
-            if deleted and kind == 'proposal':
+            if deleted and kind == 'proposal' or kind == 'convert':
                 for vote in self.db.execute("SELECT * FROM records WHERE trip_id=? AND kind='vote' AND deleted=0", (trip,)).fetchall():
                     if json.loads(vote['payload'])['proposalId'] == rid:
                         self.save_record(vote['id'], trip, 'vote', json.loads(vote['payload']), vote['version'] + 1, True)
@@ -317,7 +319,7 @@ CREATE TABLE IF NOT EXISTS operations(user_id TEXT NOT NULL, id TEXT NOT NULL, d
                 self.db.execute('UPDATE records SET deleted=1,version=version+1 WHERE trip_id=? AND id<>?', (trip, rid))
             if not (kind == 'trip' and deleted):
                 original = json.loads(current['payload']) if current else payload
-                self.activity(trip, user, 'delete' if deleted else 'update' if current else 'create', kind, (original if deleted else payload).get('title', '') or kind)
+                self.activity(trip, user, 'convert' if kind == 'convert' else 'delete' if deleted else 'update' if current else 'create', target_kind, (original if deleted else payload).get('title', '') or target_kind)
             result = {'id': oid, 'status': 'applied', 'record': record}
             self.db.execute('INSERT INTO operations VALUES(?,?,?,?)', (user, oid, digest, json.dumps(result)))
             return result
@@ -352,7 +354,7 @@ CREATE TABLE IF NOT EXISTS operations(user_id TEXT NOT NULL, id TEXT NOT NULL, d
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = 'TripSync/1.1'
+    server_version = 'TripSync/1.2'
 
     def setup(self):
         super().setup()
@@ -386,7 +388,7 @@ class Handler(BaseHTTPRequestHandler):
             path = urlparse(self.path).path.rstrip('/')
             store = self.server.store
             if method == 'GET' and path == '/health':
-                return self.respond(200, {'status': 'ok', 'version': '1.1.0'})
+                return self.respond(200, {'status': 'ok', 'version': '1.2.0'})
             if method == 'POST' and path in ['/auth/register', '/auth/login']:
                 key = self.client_address[0]
                 if key in self.server.trusted_proxies:

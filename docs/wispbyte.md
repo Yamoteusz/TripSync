@@ -1,6 +1,6 @@
 # Wispbyte + MySQL: aktualna konfiguracja
 
-To główna instrukcja hostowanego backendu TripSync. Obecny serwer projektu używa domeny `https://tripsync.wisp.uno/`, portu API 9853, Pythona 3.11 i MySQL. Zrzut panelu wskazywał 1 GiB RAM i 10 GiB dysku. Użytkownik potwierdził działanie aplikacji po poprawieniu konfiguracji bazy; nie przedstawiamy tego jako automatycznego testu obciążenia czy audytu hostingu.
+Backend TripSync jest skonfigurowany do pracy pod domeną `https://tripsync.wisp.uno/`, na porcie API 9853, z Pythonem 3.11 i bazą MySQL. Konfiguracja hostingu obejmuje 1 GiB RAM i 10 GiB dysku.
 
 ## Startup: zachowaj domyślną komendę
 
@@ -50,7 +50,7 @@ Nie ma automatycznej migracji SQLite do MySQL. Nie uruchamiaj kilku procesów ba
 2. Sprawdź połączenie Wispbyte z repozytorium i gałęzią main. Dostęp do repozytorium prywatnego ustaw w panelu.
 3. Zapisz konfigurację startupu i Environment; sprawdź pełną nazwę użytkownika bazy.
 4. Uruchom serwer. Oczekiwany log: `TripSync API na porcie 9853`.
-5. Sprawdź `https://tripsync.wisp.uno/health`; aktualne API raportuje `version: 1.1.0`, Android ma 1.2.0.
+5. Sprawdź `https://tripsync.wisp.uno/health`; aktualne API raportuje `version: 1.2.0`, Android ma 1.2.1.
 6. Utwórz konto prezentacyjne i wyjazd, odczytaj na drugim koncie po zaproszeniu, zrestartuj backend i sprawdź trwałość.
 
 Health potwierdza działający proces. Zapis, odczyt i restart weryfikują dodatkowo pracę bazy. Zwracanie 404 dla `/` nie oznacza błędu: backend jest API, nie stroną internetową. Nie wyłączaj sprawdzania certyfikatów, aby korzystać z adresu IP zamiast domeny.
@@ -60,3 +60,7 @@ Health potwierdza działający proces. Zapis, odczyt i restart weryfikują dodat
 Domyślny startup robi git pull, instaluje requirements i uruchamia main.py. Kroki w pokazanej komendzie są rozdzielone średnikami: błąd pull/pip nie musi zatrzymać dalszego startu, dlatego sprawdzaj cały log. Aktualizacja kodu nie powinna zastępować `.env` ani kasować bazy.
 
 MySQL kopiuj przez eksport panelu lub odpowiednio skonfigurowany mysqldump; `backend/backup.py` jest wyłącznie dla SQLite. Kopie przechowuj poza serwerem. Przy błędzie MySQL sprawdź kolejno host, port, pełny login, nazwę bazy, hasło i dopuszczenie połączenia z serwera API. Nie publikuj zrzutu z widocznym hasłem.
+
+## Aktualizacja do Android 1.2.1 i API 1.2.0
+
+Najpierw wyślij zmiany przez GitHub Desktop i zrestartuj Wispbyte, aby pobrał backend API 1.2.0. Sprawdź `/health`, następnie zainstaluj nowy APK u uczestników. Atomowe przenoszenie pomysłów używa nowej operacji `convert` i wymaga aktualnego backendu. Domyślna komenda startupu, zmienne Environment i schemat MySQL pozostają bez zmian; aktualizacja nie wymaga czyszczenia bazy.

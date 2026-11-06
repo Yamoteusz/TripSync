@@ -1,5 +1,6 @@
 # TripSync 1.2 — interfejs i formularze
 
+Archiwalny opis wersji 1.2.0. Aktualne zmiany: [wydanie 1.2.1](zmiany-1.2.1.md); wyniki: [testy.md](testy.md).
 Wydanie rozwija darmową wersję aplikacji. Motyw wykorzystuje zieleń, jasne tło, wyraźną typografię, jednolite karty, ilustrację podróży oraz odświeżony znak i ikonę adaptacyjną z warstwą monochromatyczną. Dostępny jest również motyw ciemny; logo oraz ikony pasków systemowych zmieniają kontrast zgodnie z wybranym motywem.
 
 ## Wprowadzone zmiany

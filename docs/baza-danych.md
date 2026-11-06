@@ -6,7 +6,7 @@ Wiele typów danych współdzieli identyfikator, wyjazd, wersję i znacznik usun
 
 ## Room na urządzeniu
 
-Schemat wersji 1 znajduje się w `app/schemas/pl.tripsync.data.TripDatabase/1.json`. Wersja Android 1.2 nie zmienia fizycznego schematu.
+Schemat wersji 1 znajduje się w `app/schemas/pl.tripsync.data.TripDatabase/1.json`. Wersja Android 1.2.1 nie zmienia fizycznego schematu. Operacja konwersji zachowuje ID i zmienia rodzaj rekordu proposal na event; zapis kolejki używa kind=convert.
 
 ```mermaid
 erDiagram

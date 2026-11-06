@@ -115,7 +115,8 @@ class Repository(val db: TripDatabase, private val prefs: Preferences, private v
             dao.put(RecordEntity(id, tripId, kind, json, previous?.version ?: 0, deleted, !demo))
             if (!demo) {
                 dao.deleteOperation(id)
-                dao.put(OperationEntity(UUID.randomUUID().toString(), id, tripId, kind, json, op?.baseVersion ?: previous?.version ?: 0, deleted))
+                val operationKind = if (op?.kind == "convert" && kind == "event") { if (deleted) "proposal" else "convert" } else kind
+                dao.put(OperationEntity(UUID.randomUUID().toString(), id, tripId, operationKind, json, op?.baseVersion ?: previous?.version ?: 0, deleted))
             }
         }
     }
@@ -148,12 +149,17 @@ class Repository(val db: TripDatabase, private val prefs: Preferences, private v
         schedule()
     }
     suspend fun convertProposal(proposal: RecordEntity, event: EventData): String = gate.withLock {
-        val id = UUID.randomUUID().toString()
+        val id = proposal.id
+        val current = dao.record(id) ?: error("Pomysł nie jest już dostępny.")
+        require(current.kind == "proposal" && !current.deleted) { "Ten pomysł został już przeniesiony lub usunięty." }
+        val trip = dao.record(proposal.tripId) ?: error("Wyjazd nie jest już dostępny.")
+        Validation.event(event, decode(trip, TripData::class.java))
         db.withTransaction {
             saveInternal(proposal.tripId, "event", event, id, false)
-            saveInternal(proposal.tripId, "proposal", gson.fromJson(proposal.json, JsonObject::class.java), proposal.id, true)
+            dao.operation(id)?.let { dao.put(it.copy(kind = "convert")) }
             dao.records().filter { it.kind == "vote" && gson.fromJson(it.json, VoteData::class.java).proposalId == proposal.id }.forEach { dao.deleteOperation(it.id); dao.deleteConflict(it.id); dao.put(it.copy(deleted=true, pending=false)) }
         }
+        dao.record(id)?.let { reminder(it) }
         schedule()
         id
     }
@@ -166,9 +172,11 @@ class Repository(val db: TripDatabase, private val prefs: Preferences, private v
             dao.deleteConflict(recordId); dao.deleteOperation(recordId)
             if (keepLocal) {
                 dao.put(local.copy(version=remote?.version ?: 0, pending=true))
-                dao.put(OperationEntity(UUID.randomUUID().toString(), recordId, local.tripId, local.kind, local.json, remote?.version ?: 0, local.deleted))
+                val kind = if (local.kind == "event" && remote?.kind == "proposal") "convert" else local.kind
+                dao.put(OperationEntity(UUID.randomUUID().toString(), recordId, local.tripId, kind, local.json, remote?.version ?: 0, local.deleted))
             } else if (remote != null) dao.put(remote.local()) else dao.deleteRecord(recordId)
         }
+        if (!keepLocal && remote?.kind != local.kind) reminder(local.copy(deleted=true))
         reminder(dao.record(recordId) ?: local.copy(deleted=true))
         schedule()
     }

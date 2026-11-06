@@ -1,6 +1,6 @@
-# Ograniczenia i dalsze prace
+# Ograniczenia aplikacji
 
-Stan: Android 1.2.0, backend API 1.1.0. Poniższe elementy nie są przedstawiane jako już ukończone funkcje.
+Wersja Android 1.2.1, backend API 1.2.0.
 
 ## Granice bieżącej aplikacji
 
@@ -16,15 +16,3 @@ Stan: Android 1.2.0, backend API 1.1.0. Poniższe elementy nie są przedstawiane
 - Backend działa jako jeden proces z serializowanymi zapisami; nie zweryfikowano wieloprocesowego wdrożenia ani obciążenia.
 - Brak odzyskiwania hasła, weryfikacji e-mail i samodzielnego usuwania konta. Brak czatu, załączników, skanowania paragonów, QR, szablonów oraz eksportu PDF/ICS z poziomu aplikacji. Udostępnianie tekstowego planu już działa.
 - Nie ma płatności, premium, donate ani reklam. Zakres pozostaje projektem na zajęcia Android.
-
-## Zadania przed oddaniem
-
-1. Uzupełnić nazwiska, numery albumów i rzeczywisty wkład w `AUTHORS.md` oraz ponownie wygenerować PDF.
-2. Zaktualizować SDK 36.1 do 37, jeśli prowadzący wymaga najnowszego stabilnego wydania; przetestować zachowanie po aktualizacji. Obecna dokumentacja celowo podaje używane SDK.
-3. Sprawdzić aplikację na nowszym Androidzie, fizycznym telefonie, tablecie, przy obrocie i z TalkBack. Test odtworzenia aktywności nie jest dowodem dla każdego scenariusza zmiany konfiguracji.
-4. Zweryfikować dostęp prowadzącego do repozytorium i aktualny APK, a także powtórzyć scenariusz dwóch kont na wybranym serwerze.
-5. Przejrzeć jakość kodu: granice odpowiedzialności ViewModel/repozytorium, powtarzalne formularze, formatowanie i logikę domenową. Podział na foldery nie zastępuje przeglądu architektury.
-
-## Kolejne funkcje bez płatności
-
-Szablony i kopiowanie wyjazdów, zaproszenia QR, eksport kalendarza, komentarze przy punktach planu i powiadomienia grupowe. To propozycje następnych wersji, bez obietnicy wykonania w 1.2.0.

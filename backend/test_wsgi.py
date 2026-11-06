@@ -31,7 +31,7 @@ class WsgiTests(unittest.TestCase):
         thread.start()
         base = f'http://127.0.0.1:{server.server_port}'
         try:
-            self.assertEqual('1.1.0', json.load(urlopen(base+'/health'))['version'])
+            self.assertEqual('1.2.0', json.load(urlopen(base+'/health'))['version'])
             request = Request(base+'/auth/register', data=json.dumps({'name': 'Tester', 'email': 'wsgi@example.org', 'password': 'Secret123!'}).encode(), headers={'Content-Type': 'application/json'})
             account = json.load(urlopen(request))
             snapshot = json.load(urlopen(Request(base+'/sync', headers={'Authorization': 'Bearer '+account['token']})))

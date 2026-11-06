@@ -1,6 +1,6 @@
-# API REST - kontrakt backendu 1.1.0
+# API REST - kontrakt backendu 1.2.0
 
-Android 1.2.0 zachowuje kontrakt API 1.1.0. Endpoint `/health` raportuje wersję backendu, a nie interfejsu.
+Android 1.2.1 wymaga API 1.2.0 do atomowego przenoszenia pomysłów. Dotychczasowe operacje pozostają obsługiwane. Endpoint `/health` raportuje wersję backendu, a nie interfejsu.
 
 JSON UTF-8; wszystkie endpointy poza health i uwierzytelnianiem wymagają `Authorization: Bearer TOKEN`. Odpowiedź błędu HTTP zawiera `message`. Limit treści żądania: 256 KiB. Żądania nie mają interfejsu CORS dla przeglądarki; klientem jest aplikacja Android.
 
@@ -40,6 +40,28 @@ Rodzaje rekordów: trip, member, event, task, proposal, vote, expense, budget, s
 
 `member` powstaje wyłącznie po utworzeniu wyjazdu lub dołączeniu przez zaproszenie. API operacji dopuszcza tylko usunięcie uczestnika przez organizatora. Nie ma endpointu zmiany właściciela.
 
+## Atomowe przeniesienie pomysłu do planu
+
+Operacja `kind=convert` ma `recordId` równy ID pomysłu, `baseVersion` jego wersji oraz payload EventData. W jednej transakcji serwer waliduje punkt planu, zmienia rodzaj rekordu z `proposal` na `event`, usuwa aktywne głosy i zapisuje historię. Identyfikator pozostaje ten sam. `convert` jest typem operacji, nie osobnym rodzajem rekordu bazy.
+
+```json
+{
+  "id": "uuid-operacji",
+  "recordId": "uuid-pomyslu",
+  "tripId": "uuid-wyjazdu",
+  "kind": "convert",
+  "payload": {
+    "title": "Spacer", "date": "2026-12-02", "time": "10:00",
+    "place": "", "description": "", "rank": 0,
+    "done": false, "reminder": false
+  },
+  "baseVersion": 1,
+  "deleted": false
+}
+```
+
+Równoczesna konwersja przez drugą osobę zwraca konflikt z istniejącym punktem zamiast tworzyć duplikat. Odrzucenie danych lub błąd transakcji pozostawia pomysł i głosy. Dla pomysłu utworzonego wyłącznie lokalnie `baseVersion=0` tworzy od razu punkt planu. Ponowienie przyjętej operacji jest idempotentne. Dalsza edycja przed synchronizacją zachowuje operację konwersji. Wybór lokalnej wersji wobec nowszego pomysłu ponawia `convert`; wobec istniejącego punktu jest zwykłą edycją `event`.
+
 ## Payloady obsługiwane przez Android 1.2
 
 - `expense`: dodatkowe opcjonalne `category`: transport, accommodation, food, activities, shopping, other. Starszy rekord bez pola traktowany jest jako other.
@@ -54,9 +76,9 @@ Waluta jest blokowana po dodaniu aktywnych wydatków, budżetu lub spłat. Usuni
 
 Android używa oddzielnych klientów Retrofit bez tokenu TripSync:
 
-- `https://geocoding-api.open-meteo.com/v1/search?name=...&count=8&language=pl` — miejscowości.
-- `https://api.open-meteo.com/v1/forecast?latitude=...&longitude=...&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=7` — prognoza.
-- `https://tile.openstreetmap.org/{z}/{x}/{y}.png` — kafelki, standardowy cache WebView, identyfikujący User-Agent TripSync/<wersja aplikacji>, widoczna atrybucja, brak masowego pobierania.
+- `https://geocoding-api.open-meteo.com/v1/search?name=...&count=8&language=pl` - miejscowości.
+- `https://api.open-meteo.com/v1/forecast?latitude=...&longitude=...&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=7` - prognoza.
+- `https://tile.openstreetmap.org/{z}/{x}/{y}.png` - kafelki, standardowy cache WebView, identyfikujący User-Agent TripSync/<wersja aplikacji>, widoczna atrybucja, brak masowego pobierania.
 
 Źródła: [Open-Meteo](https://open-meteo.com/en/docs), [geokodowanie](https://open-meteo.com/en/docs/geocoding-api), [polityka kafelków](https://operations.osmfoundation.org/policies/tiles/). Darmowe Open-Meteo jest przeznaczone do niekomercyjnego użycia i ma limity oraz brak SLA. Współrzędne wybranego miejsca są przekazywane tym dostawcom po użyciu mapy/prognozy; lokalizacja telefonu nie jest pobierana.
 

@@ -40,3 +40,5 @@ keystore.properties
 gradle/gradle-daemon-jvm.properties
 
 output/previews/
+output/TripSync/
+output/TripSync_do_oddania/

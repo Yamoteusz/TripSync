@@ -3,7 +3,7 @@
 ## Android Studio na Macu i pozostałych systemach
 
 1. Sklonuj [repozytorium](https://github.com/Yamoteusz/TripSync) przez GitHub Desktop lub Git. Otwórz cały katalog z `settings.gradle.kts`, nie sam folder `app`.
-2. W Android Studio zainstaluj platformę Android SDK 36.1 i Build Tools 36.0.0. Jest to konfiguracja obecnego kodu, nie deklaracja najnowszego stabilnego SDK.
+2. W Android Studio zainstaluj platformę Android SDK 36.1 i Build Tools 36.0.0.
 3. Ustaw Gradle JDK 17 lub 21; lokalnie zweryfikowano JDK 21 z Android Studio. Używaj dołączonego Gradle Wrapper 9.3.1.
 4. Android Studio utworzy lokalny `local.properties` z `sdk.dir`. Nie wysyłaj go do Git.
 5. Wybierz **File → Sync Project with Gradle Files**. Przy pierwszym pobraniu zależności potrzebny jest internet.
@@ -65,7 +65,7 @@ Domyślny port to 8080. W osobnym terminalu:
 curl http://127.0.0.1:8080/health
 ```
 
-Odpowiedź bieżącego backendu: `{"status":"ok","version":"1.1.0"}`. Numer wersji API nie jest numerem wersji interfejsu Android 1.2.0; kontrakt nie zmienił się przy przebudowie UI.
+Odpowiedź bieżącego backendu: `{"status":"ok","version":"1.2.0"}`. Numer wersji API nie jest numerem wersji interfejsu Android 1.2.1; API 1.2.0 dodaje atomową operację convert wymaganą przez aplikację 1.2.1.
 
 Ustaw w emulatorze debug `http://10.0.2.2:8080/`. Telefon przez USB może użyć:
 

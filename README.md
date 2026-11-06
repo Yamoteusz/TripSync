@@ -9,16 +9,18 @@
 
 TripSync to aplikacja Android do organizacji podróży w grupie. Łączy harmonogram, zadania, pakowanie, głosowanie, wspólne wydatki, budżety, spłaty oraz mapę miejsc i prognozę pogody. Dane są zapisywane lokalnie, a współpraca między kontami odbywa się przez własny backend REST.
 
-**Wersja Android: 1.2.0** · **Android 8.0+** · **Projekt akademicki dla trzech osób** · **Bez płatności i subskrypcji**
+**Wersja Android: 1.2.1** · **Android 8.0+** · **Projekt zespołowy**
 
-[Dokumentacja](docs/README.md) · [Instrukcja uruchomienia](docs/uruchomienie.md) · [PDF projektu](output/pdf/TripSync_dokumentacja_projektu.pdf) · [Wyniki testów](docs/testy.md) · [Znane ograniczenia](docs/ograniczenia.md)
+**Wykonawcy:** Brajan Sieroń, Damian Panońko, Patryk Dawczak.
+
+[Materiały do oddania](docs/oddanie.md) · [Dokumentacja](docs/README.md) · [Instrukcja uruchomienia](docs/uruchomienie.md) · [PDF do oddania](output/pdf/TripSync_dokumentacja_do_oddania.pdf) · [Wyniki testów](docs/testy.md) · [Znane ograniczenia](docs/ograniczenia.md)
 
 ## Zobacz aplikację
 
 <p>
-  <img src="docs/screenshots-1.2/02-podsumowanie.png" width="220" alt="Podsumowanie wyjazdu w TripSync" />
-  <img src="docs/screenshots-1.2/06-rozliczenia.png" width="220" alt="Wspólne koszty i kategorie wydatków" />
-  <img src="docs/screenshots-1.2/14-kalendarz.png" width="220" alt="Wybór daty w kalendarzu" />
+  <img src="docs/screenshots-1.2.1/02-podsumowanie.png" width="220" alt="Podsumowanie wyjazdu w TripSync" />
+  <img src="docs/screenshots-1.2.1/06-rozliczenia.png" width="220" alt="Wspólne koszty i kategorie wydatków" />
+  <img src="docs/screenshots-1.2.1/14-kalendarz.png" width="220" alt="Wybór daty w kalendarzu" />
 </p>
 
 Zrzuty pochodzą z działającej aplikacji na emulatorze. Pokazują dane demonstracyjne oraz izolowane środowisko testowe. [Pełna galeria](docs/funkcje.md#zrzuty-ekranu).
@@ -39,6 +41,10 @@ Zrzuty pochodzą z działającej aplikacji na emulatorze. Pokazują dane demonst
 
 Spłata jest zapisem deklaracji użytkownika. Aplikacja nie realizuje przelewów bankowych.
 
+## Poprawki 1.2.1
+
+Atomowe przenoszenie pomysłów bez duplikatów, ochrona formularzy budżetu/spłaty/miejsca, poprawione przypomnienia, potwierdzenie usuwania budżetu i zerowe limity kategorii. [Opis zmian](docs/zmiany-1.2.1.md). Przed instalacją APK zaktualizuj backend do API 1.2.0 przez push i restart Wispbyte.
+
 ## Szybki start
 
 1. Otwórz **cały katalog repozytorium** w Android Studio, zsynchronizuj Gradle i kliknij **Run**.
@@ -49,9 +55,11 @@ Pełna konfiguracja SDK, uruchomienie na Macu, emulatorze i telefonie: [uruchomi
 
 APK debug można pobrać z artefaktu **TripSync-debug** udanego przebiegu [GitHub Actions](https://github.com/Yamoteusz/TripSync/actions). Dostępny lokalnie APK jest w `output/apk/TripSync-debug.apk`; pliki APK są wyłączone z historii Git. Workflow tworzy artefakt dopiero po udanym zbudowaniu aplikacji.
 
+W tym samym przebiegu artefakt **TripSync-do-oddania** udostępnia paczkę PDF + APK. GitHub opakowuje artefakt własnym archiwum; właściwa paczka `TripSync_do_oddania.zip` znajduje się w środku.
+
 ## Budowanie i testy
 
-Wymagania obecnego projektu: **JDK 17 lub 21**, Android SDK **36.1**, Build Tools **36.0.0**. W lokalnej weryfikacji użyto JDK 21. SDK 36.1 jest faktyczną konfiguracją wersji 1.2; aktualizacja do SDK 37 pozostaje zadaniem przed oddaniem, jeśli prowadzący wymaga najnowszego stabilnego SDK.
+Wymagania obecnego projektu: **JDK 17 lub 21**, Android SDK **36.1**, Build Tools **36.0.0**. W lokalnej weryfikacji użyto JDK 21. Konfiguracja wersji 1.2: compile SDK 36.1, target SDK 36, min SDK 26.
 
 ```sh
 ./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
@@ -66,17 +74,17 @@ Na macOS pliki kompilacji powstają automatycznie poza repozytorium w `~/.gradle
 
 APK powstanie wtedy w `/tmp/tripsync-build/app/outputs/apk/debug/app-debug.apk`. `sh scripts/build.sh` wykonuje budowanie, lint, testy jednostkowe i backendu oraz kopiuje APK do `output/apk/`.
 
-Ostatnia udokumentowana weryfikacja z **05.10.2026**:
+Ostatnia udokumentowana weryfikacja z **06.11.2026**:
 
 | Grupa | Wynik |
 |---|---:|
-| Testy jednostkowe Android | 21 / 21 |
-| Testy urządzeniowe: UI i integracja | 20 / 20 |
-| Testy backendu | 37 / 37 |
-| Razem, bez powtórnych przebiegów | **78 / 78** |
-| Lint | 0 błędów, 16 ostrzeżeń o nowszych wersjach narzędzi i bibliotek |
+| Testy jednostkowe Android | 23 / 23 |
+| Testy urządzeniowe: UI i integracja | 31 / 31 |
+| Testy backendu | 45 / 45 |
+| Razem, bez powtórnych przebiegów | **99 / 99** |
+| Lint | 0 błędów, 1 ostrzeżenie GradleDependency w przebiegu offline |
 
-Testy urządzeniowe wykonano na API 29; wybór daty i godziny dodatkowo sprawdzono przy szerokości 320 dp oraz skali czcionki 1.3. Instrukcja uruchomienia i granice weryfikacji: [testy.md](docs/testy.md). Liczby opisują zapisany przebieg, a nie automatyczną gwarancję każdego przyszłego commita.
+Testy urządzeniowe wykonano na API 29; wybór daty i godziny dodatkowo sprawdzono przy szerokości 320 dp oraz skali czcionki 1.3. Instrukcja uruchomienia i granice weryfikacji: [testy.md](docs/testy.md).
 
 ## Architektura
 
@@ -132,7 +140,7 @@ Aktualny hosting projektu to **Wispbyte + MySQL**. Zachowujemy domyślny startup
 
 [Indeks dokumentacji](docs/README.md) obejmuje cel i zakres, wymagania, diagramy architektury i baz, przypadki użycia, technologie, instrukcję instalacji, testy, screeny i scenariusz prezentacji. [Zgodność z wytycznymi](docs/zgodnosc.md) wskazuje zarówno realizację wymagań, jak i pozostające zadania.
 
-Dane trzech autorów i rzeczywisty podział wkładu należy uzupełnić w [AUTHORS.md](AUTHORS.md). Dokumentacja nie przypisuje nikomu niepotwierdzonego autorstwa.
+Wykonawcy projektu: **Brajan Sieroń, Damian Panońko, Patryk Dawczak**. Lista znajduje się również w [AUTHORS.md](AUTHORS.md) i na stronie tytułowej dokumentacji PDF.
 
 ## Ograniczenia
 
@@ -142,7 +150,7 @@ Jedna waluta na wyjazd (PLN, EUR lub USD), maksymalnie 100 uczestników, okresow
 
 Repozytorium: [Yamoteusz/TripSync](https://github.com/Yamoteusz/TripSync). Do publikacji lokalnych commitów w GitHub Desktop użyj **Push origin**. Jeśli repozytorium jest prywatne, przyznaj dostęp prowadzącemu. [Praca zespołu i aktualizacje](docs/github-desktop.md).
 
-Po zatwierdzeniu dokumentacji `python3 scripts/package_project.py` tworzy ZIP, Git bundle i sumy SHA-256 w `output/`. Skrypt nie publikuje kodu ani nie wdraża backendu. Historia z paczki może być odtworzona przez `git clone TripSync-history.bundle TripSync`.
+`python3 scripts/create_submission.py` tworzy PDF do oddania oraz **output/TripSync_do_oddania.zip**. Archiwum zawiera dokładnie dwa pliki: **TripSync_Dokumentacja.pdf** i **TripSync.apk**. Wszystkie wymagane opisy, diagramy, screeny, wyniki testów i link do Git znajdują się w PDF. Generator wymaga zależności z `scripts/requirements-docs.txt` oraz gotowego APK w `output/apk/TripSync-debug.apk`. Samo ponowne spakowanie istniejących plików: `python3 scripts/package_project.py`.
 
 ## Biblioteki i licencje
 

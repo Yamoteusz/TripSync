@@ -2,7 +2,7 @@
 
 ## MVVM
 
-TripSync wykorzystuje MVVM z wydzielonymi folderami domeny i danych. Jest jedną aplikacją Gradle, z osobnym backendem Python. Nie deklarujemy pełnej Clean Architecture ani osobnych modułów Gradle dla każdej funkcji.
+TripSync wykorzystuje MVVM z wydzielonymi folderami domeny i danych. Kod Android jest zorganizowany w jednym module Gradle; backend Python stanowi osobny komponent.
 
 - UI: ekrany Compose, formularze, Theme i Navigation w `ui/`.
 - ViewModel: `TripViewModel` zbiera dane repozytorium i publikuje `AppState`, stan błędów, zajętości i pogody przez StateFlow.
@@ -58,3 +58,7 @@ SyncWorker ma warunek sieci; okresowe zadanie ma minimalny interwał 15 minut i 
 TravelRepository używa osobnego Retrofit bez tokenu TripSync. Prognoza jest cache'owana lokalnie, a zmiana miejsca anuluje poprzednie żądanie. Pogoda nie trafia do współdzielonej kolejki. Mapa jest własnym HTML w WebView, z lokalnym Leaflet i kafelkami HTTPS.
 
 WSGI oraz samodzielny serwer używają wspólnej logiki Store/Handler. Hostowana konfiguracja tworzy Store z adapterem MySQL albo SQLite. Operacje backendu są porządkowane przez blokadę jednego procesu; skalowanie na wiele procesów nie zostało zweryfikowane.
+
+## Konwersja pomysłu w wersji 1.2.1
+
+Przeniesienie zachowuje ID rekordu. Room zapisuje lokalny punkt planu i jedną operację `convert` transakcyjnie. Serwer zmienia pomysł w punkt i usuwa głosy w jednej transakcji. Wersjonowanie i stały ID zabezpieczają przed dwoma punktami przy równoczesnej konwersji. Schemat Room pozostaje w wersji 1. Przypomnienie jest planowane natychmiast po lokalnej konwersji, także w demo i offline. Przy przyjęciu wersji serwera wracającej do pomysłu przypomnienie lokalnego punktu jest anulowane.

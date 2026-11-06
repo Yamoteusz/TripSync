@@ -27,11 +27,11 @@ object Categories {
 }
 
 object Money {
-    fun parse(value: String): Long {
+    fun parse(value: String, allowZero: Boolean = false): Long {
         val cleaned = value.trim().replace(',', '.')
         require(Regex("[0-9]+(\\.[0-9]{1,2})?").matches(cleaned)) { "Podaj kwotę z maksymalnie dwoma miejscami po przecinku." }
         val amount = try { BigDecimal(cleaned).movePointRight(2).longValueExact() } catch (_: ArithmeticException) { throw IllegalArgumentException("Kwota jest zbyt duża.") }
-        require(amount in 1..100_000_000L) { "Kwota musi być dodatnia i nie większa niż 1 000 000." }
+        require(amount in (if (allowZero) 0 else 1)..100_000_000L) { if (allowZero) "Kwota nie może być ujemna ani większa niż 1 000 000." else "Kwota musi być dodatnia i nie większa niż 1 000 000." }
         return amount
     }
     fun format(amount: Long, currency: String = "PLN") = BigDecimal.valueOf(amount, 2).setScale(2, RoundingMode.UNNECESSARY).toPlainString().replace('.', ',') + " " + currency
